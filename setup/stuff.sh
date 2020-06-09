@@ -19,7 +19,7 @@ brew install findutils
 brew install tree
 
 # Manage compile and link flags for libraries
-brew install pkg-config
+brew install autoconf pkg-config
 
 # Git
 brew install git

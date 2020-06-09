@@ -8,12 +8,18 @@
 #   confirm [message]
 #
 
-read -r -p "${1:-Are you sure?} `color black bold [y/N]` " response
+# Exit on any failed command
+set -e
+
+BOLD="$(tput setaf 0 2>/dev/null)$(tput bold 2>/dev/null || echo '\e[1;30m')"
+RESET="$(tput sgr0)"
+
+read -r -p "${1:-Are you sure?} $BOLD[y/N]$RESET " response
 case $response in
-  [yY][eE][sS]|[yY])
-    true
-    ;;
-  *)
-    false
-    ;;
+[yY][eE][sS] | [yY])
+  true
+  ;;
+*)
+  false
+  ;;
 esac
