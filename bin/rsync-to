@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#
+# Upload current folder to remote using rsync
+#
+# Usage:
+#   rsync-to <remote>
+#
+
+sed -e
+
+if [[ "$(ls -ACF1 | wc -l | awk '{print $1}')" == "0" ]]; then
+    confirm "Current directory is empty. Are you sure you want to process? [y/N]" || exit 1
+fi
+
+rsync -rvazph --force --delete --progress $PWD $1

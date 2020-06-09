@@ -2,7 +2,7 @@
 
 """
 Dotfiles syncronization.
-Makes symlinks for all files: ~/dotfiles/shell/.bashrc => ~/.bashrc.
+Makes symlinks for all files: ~/.dotfiles/shell/.bashrc => ~/.bashrc.
 Based on https://gist.github.com/490016
 """
 
@@ -10,7 +10,7 @@ import os
 import glob
 import shutil
 
-SOURCE_DIR = '~/dotfiles/shell'
+SOURCE_DIR = '~/.dotfiles/shell'
 IGNORE = ['.DS_Store']
 
 def force_remove(path):

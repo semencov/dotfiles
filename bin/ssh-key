@@ -1,10 +1,21 @@
 #!/usr/bin/env bash
 
-# Print public SSH key, generate it if necessary
+# Print public SSH key to clipboard. Generate it if necessary
 
-file="$HOME/.ssh/id_rsa.pub"
-if [ ! -f "$file" ]; then
-	ssh-keygen -t rsa
+set -e
+
+identifier=$1
+
+if [ "$identifier" == "" ]; then
+  file="$HOME/.ssh/id_rsa"
+else
+  file="$HOME/.ssh/$identifier.id_rsa"
 fi
 
-cat "$file"
+file_pub="$file.pub"
+
+if [ ! -f "$file_pub" ]; then
+	ssh-keygen -f $file -t rsa -C "$USER@$HOSTNAME $(date +'%Y/%m/%d %H:%M:%S')"
+fi
+
+command cat "$file_pub"

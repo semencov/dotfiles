@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# Create an SSH key and uploads it to the given host
+# Based on https://gist.github.com/1761938
+
+unset username hostname port identifier key
+
+print_usage() {
+cat <<EOM
+Usage: $(basename ${0}) [-a alias] [-u username] [-p port] <host>
+
+Generates and uploads new RSA key to the specified remote SSH server
+and puts new record in ~/.ssh/config.
+
+Arguments:
+
+    host    ip or hostname to add and upload key to.
+
+
+Options:
+
+    -u      remote username (optional) e.g., root. If not provided, the current username is used.
+    -a      alias (optional).
+    -p      remote sshd port (optional). If not provided, 22 is used.
+
+Examples:
+    $(basename ${0}) example.com
+    $(basename ${0}) -u root -p 22 example.com
+    $(basename ${0}) -a example -p 22 example.com
+    $(basename ${0}) -a example -u someuser -p 22 example.com
+EOM
+}
+
+while getopts "u:a:p:" flag; do
+  case ${flag} in
+    u) username=${OPTARG} ;;
+    a) identifier=${OPTARG} ;;
+    p) port=${OPTARG} ;;
+    ?) print_usage; exit 1 ;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
+host=${1}
+
+if [[ -z $host ]]; then
+    print-error "No host specified!"
+    echo
+    print_usage
+    exit 1
+fi
+
+[ -z "${username}" ] && username="$USER"
+[ -z "${port}" ] && port="22"
+[ -z "${identifier}" ] && identifier="${host//./_}"
+
+key="~/.ssh/$identifier.id_rsa"
+
+print-header "Generating key $key..."
+ssh-key $identifier
+
+if ! grep -Fxiq "host $identifier $host" "$HOME/.ssh/config"; then
+	echo -e "Host $identifier $host\n\tHostName $host\n\tPort $port\n\tUser $username\n\tIdentityFile $key\n" >> ~/.ssh/config
+fi
+
+print-header "Uploading key to $host..."
+ssh $identifier 'umask 077; mkdir -p .ssh && cat >> ~/.ssh/authorized_keys' < ~/.ssh/$identifier.id_rsa.pub
+
+tput bold
+ssh -o PasswordAuthentication=no $identifier true && { tput setaf 2; echo "SSH key added."; } || { tput setaf 1; echo "Failure"; }
+tput sgr0
+
+_ssh_reload_autocomplete

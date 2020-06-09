@@ -1,5 +1,5 @@
 {
-  "extends": "tamia",
+  "extends": "@smcv/eslint-config",
   "parserOptions": {
     "sourceType": "script"
   },

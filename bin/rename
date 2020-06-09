@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+# Bulk file rename
+
+(($+functions[rename])) || function rename() {
+    for i in $1*; do
+        echo "$i → ${i/$1/$2}"
+        mv "$i" "${i/$1/$2}"
+    done
+}

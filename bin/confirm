@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#
+# Check if specific command is installed and exits with error message
+# (to use inside other scripts only)
+#
+# Usage:
+#   confirm [message]
+#
+
+read -r -p "${1:-Are you sure?} `color black bold [y/N]` " response
+case $response in
+  [yY][eE][sS]|[yY])
+    true
+    ;;
+  *)
+    false
+    ;;
+esac

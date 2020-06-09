@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+#
+# Generates self-signed certificates
+#
+# Usage:
+#   generate-pem
+#
+# Requires:
+# - OpenSSL
+#
+# Author: Yuri Sementsov, semencov.com
+# License: MIT
+# https://github.com/semencov/dotfiles
+#
+
+set -e
+
+CYAN="$(tput setaf 6 2>/dev/null)$(tput bold 2>/dev/null || echo '\e[1;36m')"
+RESET="$(tput sgr 0 2>/dev/null || echo '\e[0m')"
+
+echo
+echo "$CYAN** Generating self-signed certificates...$RESET";
+echo
+
+openssl genrsa -out ./key.pem -aes256 1024
+openssl req -new -key ./key.pem -out ./csr.pem
+openssl x509 -req -days 9999 -in ./csr.pem -signkey ./key.pem -out ./cert.pem
+
+rm ./csr.pem
+chmod 600 ./key.pem ./cert.pem

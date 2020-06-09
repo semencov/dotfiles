@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+#
+# Use this script to pipe in to the clbin.com
+#
+# Usage:
+#   <some output> | clbin     # Pipe someapp's output into clipboard
+#
+
+. colors.sh
+set -e
+
+cat | curl -sF 'clbin=<-' 'https://clbin.com' | cb
+url=$(pbpaste)
+echo $url
+echo $(chalk txtblk "URL was copied to clipboard!");

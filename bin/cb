@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+#
+# Use this script to pipe in/out of the clipboard
+#
+# Usage:
+#   someapp | cb     # Pipe someapp's output into clipboard
+#   cb | someapp     # Pipe clipboard's content into someapp
+#
+
+if [[ "$(uname)" == 'Darwin' ]]; then
+  if [[ -p /dev/stdin ]]; then
+    tee | pbcopy
+  else
+    pbpaste
+  fi
+elif command -v xclip 1>/dev/null; then
+  if [[ -p /dev/stdin ]]; then
+    tr -d '\n' | xclip -i -selection clipboard
+  else
+    xclip -o -selection clipboard
+  fi
+else
+  print-error "Remember to install xclip"
+fi

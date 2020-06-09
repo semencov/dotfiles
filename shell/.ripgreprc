@@ -1,3 +1,7 @@
+# Don't let ripgrep vomit really long lines to my terminal, and show a preview.
+--max-columns=120
+--max-columns-preview
+
 # Ignore case, unless the pattern includes capital letters
 --smart-case
 
@@ -5,13 +9,32 @@
 --hidden
 
 # Ignore npm/Yarn lock files, etc.
+--glob=!composer.lock
 --glob=!package-lock.json
 --glob=!yarn.lock
+--glob=!.vscode
+--glob=!.idea
 --glob=!.git
 
 # Custom colors
---colors=path:fg:cyan
+--colors=path:fg:magenta
 --colors=path:style:bold
 --colors=path:style:underline
---colors=line:fg:white
---colors=match:fg:magenta
+--colors=line:fg:black
+--colors=match:fg:yellow
+
+# Add 'web' type.
+--type-add
+web:*.{html,css,scss,sass,less,pcss,js,jsx,tsx,mjs,vue,pug,html,twig}
+
+# Add 'html' type.
+--type-add
+html:*.{twig,vue,pug}
+
+# Add 'css' type.
+--type-add
+css:*.sass, *.less, *.pcss, *.sss
+
+# Add 'js' type.
+--type-add
+js:*.mjs, *.esm, *.ts, *.jsx, *.tsx

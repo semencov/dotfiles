@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+#
+# Show / Set current Git repo user name and email
+#
+
+set_gituser() {
+    git config user.name "$1"
+    git config user.email "$2"
+}
+
+get_gituser() {
+    local name=$(git config user.name)
+    local email=$(git config user.email)
+    echo "$name <$email>"
+}
+
+if git rev-parse --git-dir >/dev/null 2>&1; then
+    while getopts "n:e:" flag; do
+        case $flag in
+        n) name=${OPTARG} ;;
+        e) email=${OPTARG} ;;
+        esac
+    done
+
+    if [[ -z "${name}" && -z "${email}" ]]; then
+        get_gituser
+    else
+        set_gituser "${name:-$(git config user.name)}" "${email:-$(git config user.email)}"
+    fi
+else
+    echo "Not a Git repository"
+fi

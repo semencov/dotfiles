@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+#
+# Compress archives of various types
+#
+# Usage:
+#   pk <arch_type> <arch_filename>
+#
+
+if [ $1 ] ; then
+  if [ $2 ] ; then
+    target=$2
+  else
+    target=`realpath -e $(pwd)`
+  fi
+
+  name=`basename ${target##*/}`
+  XZ_OPT=-9
+
+  case $1 in
+    tbz)    tar cjvf $name.tar.bz2 $target          ;;
+    tgz)    tar czvf $name.tar.gz  $target          ;;
+    txz)    tar cJvf $name.tar.xz  $target          ;;
+    tar)    tar cpvf $name.tar  $target             ;;
+    bz2)    bzip $target                            ;;
+    gz)     gzip -c -9 -n $target > $name.gz        ;;
+    zip)    zip -r $name.zip $target                ;;
+    7z)     7z a $name.7z $terget                   ;;
+    *)      abort "'$1' cannot be packed via pk()"  ;;
+  esac
+else
+  print-error "Archive format not specified. Supported formats:"
+  echo "-- tbz, tgz, txz, tar, bz2, gz, zip, 7z"
+fi

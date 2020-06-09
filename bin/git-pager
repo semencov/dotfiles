@@ -12,4 +12,4 @@
 # https://github.com/sapegin/dotfiles
 #
 
-~/dotfiles/node_modules/diff-so-fancy/diff-so-fancy | less --chop-long-lines --quit-if-one-screen --no-init --tabs=1,5 -R
+~/.dotfiles/node_modules/diff-so-fancy/diff-so-fancy | less --chop-long-lines --quit-if-one-screen --no-init --tabs=1,5 -R

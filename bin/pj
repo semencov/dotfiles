@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh
+
+# The `pj` plugin (short for `Project Jump`) allows you to define several
+# folders where you store your projects, so that you can jump there directly
+# by just using the name of the project directory.
+
+# Original idea and code by Jan De Poorter ([@DefV](https://github.com/DefV))
+# Source: https://gist.github.com/pjaspers/368394#gistcomment-1016
+
+(( $+functions[pj] )) || function pj() {
+    emulate -L zsh
+
+    cmd="cd"
+    project=$1
+
+    if [[ "open" == "$project" ]]; then
+        shift
+        project=$*
+        cmd=${=EDITOR}
+    else
+        project=$*
+    fi
+
+    for basedir ($PROJECT_PATHS); do
+        if [[ -d "$basedir/$project" ]]; then
+            $cmd "$basedir/$project"
+            return
+        fi
+    done
+
+    echo "No such project '${project}'."
+}
+
+_pj () {
+    emulate -L zsh
+
+    typeset -a projects
+    for basedir ($PROJECT_PATHS); do
+        projects+=(${basedir}/*(/N))
+    done
+
+    compadd ${projects:t}
+}
+
+compdef _pj pj

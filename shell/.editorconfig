@@ -1,0 +1,20 @@
+# editorconfig.org
+
+root = true
+
+[*]
+charset=utf-8
+end_of_line=lf
+ij_smart_tabs=false
+indent_size=4
+indent_style=space
+insert_final_newline=false
+tab_width=4
+
+[{*.applejs,*.js,*.jsx,*.ts,*.tsx,*.json}]
+indent_style=space
+indent_size=2
+
+[{*.sh,*.bash,*.zsh,*.fish}]
+indent_style=space
+indent_size=2

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+#
+# Download remote to the current folder using rsync
+#
+# Usage:
+#   rsync-from <remote>
+#
+
+if [[ "$(ls -ACF1 | wc -l | awk '{print $1}')" != "0" ]]; then
+    confirm "Current directory is not empty. Are you sure you want to process? [y/N]" || exit 1
+fi
+
+rsync -rvazph --force --delete --progress $1 $PWD

@@ -26,7 +26,7 @@
 CONFIG_FILE="$HOME/.backup"
 LOG_FILE="$HOME/backup.log"
 IGNORE_FILE=".backupignore"
-DEFAULT_IGNORES="--exclude='.git' --exclude='node_modules' --exclude='bower_components'"
+DEFAULT_IGNORES="--exclude='.git' --exclude='node_modules' --exclude='bower_components' --exclude='vendor'"
 
 # Common stuff
 RED="$(tput setaf 1)"

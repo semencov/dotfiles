@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+#
+# Retrieve the name of the active network interface
+#
+
+#ip route get 8.8.8.8 | awk -F"dev " 'NR==1 {split($2,a," ");print a[1]}'
+route -n | awk '($1 == "0.0.0.0") { print $NF ; exit }'

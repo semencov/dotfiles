@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+#
+# Show WAN IP
+#
+
+set -e
+echo $(dig +short myip.opendns.com @resolver1.opendns.com)

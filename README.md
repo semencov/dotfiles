@@ -26,8 +26,8 @@ Then run these commands in the terminal:
 brew install git
 brew install n
 n lts
-git clone git@github.com:sapegin/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone git@github.com:semencov/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
 ./sync.py
 npm install
 ```
