@@ -22,3 +22,5 @@ PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 [ -d ~/bin ] && _prepend_path "$HOME/bin"
 
 export PATH
+
+fpath=($HOME/.zfunctions $HOME/.dotfiles/zsh/functions $fpath)

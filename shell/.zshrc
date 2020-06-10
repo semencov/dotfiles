@@ -4,9 +4,12 @@ source ~/.dotfiles/zsh/aliases.zsh
 source ~/.dotfiles/zsh/completions.zsh
 source ~/.dotfiles/zsh/key-bindings.zsh
 source ~/.dotfiles/zsh/prompt/prompt.zsh
+source ~/.dotfiles/zsh/plugins.zsh
 
 # Do not overwrite files when redirecting using ">". Note that you can still override this with ">|"
 # set -o noclobber
+
+umask 002
 
 # Enable extended glob
 setopt extendedglob
@@ -64,7 +67,5 @@ _fzf_compgen_dir() {
 # Load extra (private) settings
 [ -f ~/.zshlocal ] && source ~/.zshlocal
 
-# Set Spaceship ZSH as a prompt
-autoload -U promptinit
-promptinit
-prompt spaceship
+# Set Starship as a prompt
+eval "$(starship init zsh)"

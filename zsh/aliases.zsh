@@ -14,7 +14,6 @@ alias o="open"
 alias oo="open ."
 alias e="$EDITOR"
 alias ee="$EDITOR ."
-alias pjo="pj open"
 
 # ls
 alias ls='ls -G'
@@ -65,7 +64,7 @@ alias gaa="git add --all && git status -sb"
 alias gst="git status -sb"
 alias gpo="git push origin"
 alias gm="git merge"
-alias gr='git rev-parse 2>/dev/null && cd "./$(git rev-parse --show-cdup)"'
+# alias gr='git rev-parse 2>/dev/null && cd "./$(git rev-parse --show-cdup)"'
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias nah='git reset --hard; git clean -df'
 

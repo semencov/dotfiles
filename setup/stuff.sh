@@ -36,7 +36,6 @@ echo -e "setenv PATH $HOME/.dotfiles/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:
 # Everything else
 brew install ripgrep
 brew install tldr
-brew install zsh-syntax-highlighting
 brew install fd
 brew install fzf && $(brew --prefix)/opt/fzf/install
 brew install -s bat

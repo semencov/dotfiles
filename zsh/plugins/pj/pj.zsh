@@ -1,13 +1,6 @@
-#!/usr/bin/env zsh
+alias pjo="pj open"
 
-# The `pj` plugin (short for `Project Jump`) allows you to define several
-# folders where you store your projects, so that you can jump there directly
-# by just using the name of the project directory.
-
-# Original idea and code by Jan De Poorter ([@DefV](https://github.com/DefV))
-# Source: https://gist.github.com/pjaspers/368394#gistcomment-1016
-
-(( $+functions[pj] )) || function pj() {
+pj () {
     emulate -L zsh
 
     cmd="cd"
