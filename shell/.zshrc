@@ -3,8 +3,8 @@ source ~/.dotfiles/zsh/path.zsh
 source ~/.dotfiles/zsh/aliases.zsh
 source ~/.dotfiles/zsh/completions.zsh
 source ~/.dotfiles/zsh/key-bindings.zsh
-source ~/.dotfiles/zsh/prompt/prompt.zsh
 source ~/.dotfiles/zsh/plugins.zsh
+source ~/.dotfiles/zsh/prompt/prompt.zsh
 
 # Do not overwrite files when redirecting using ">". Note that you can still override this with ">|"
 # set -o noclobber
@@ -45,9 +45,6 @@ ssh-add -A 2>/dev/null
 
 # PHPBrew
 [ -s "$HOME/.phpbrew/bashrc" ] && . "$HOME/.phpbrew/bashrc"
-
-# Enable zsh-syntax-highlighting: https://github.com/zsh-users/zsh-syntax-highlighting
-[ -f "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ] && source "$(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 # Enable fzf: https://github.com/junegunn/fzf
 # Use fd (https://github.com/sharkdp/fd) to respect .gitignore
