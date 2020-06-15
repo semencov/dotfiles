@@ -1,8 +1,10 @@
+fpath=($HOME/.zfunctions $HOME/.dotfiles/zsh/functions $fpath)
+
 # Prepend $PATH without duplicates
 function _prepend_path() {
-	if ! $( echo "$PATH" | tr ":" "\n" | grep -qx "$1" ) ; then
-		PATH="$1:$PATH"
-	fi
+    if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$1"); then
+        PATH="$1:$PATH"
+    fi
 }
 
 # Construct $PATH
@@ -22,5 +24,3 @@ PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 [ -d ~/bin ] && _prepend_path "$HOME/bin"
 
 export PATH
-
-fpath=($HOME/.zfunctions $HOME/.dotfiles/zsh/functions $fpath)

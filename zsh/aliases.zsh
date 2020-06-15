@@ -1,6 +1,9 @@
 # Enable aliases to be sudo’ed
 alias sudo="sudo "
 
+# Print $PATH as list
+alias path="echo $PATH | tr ':' '\n' | nl"
+
 # Navigation
 alias ~="cd ~"
 alias ..="cd .."
