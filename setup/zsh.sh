@@ -8,7 +8,8 @@ brew update
 
 # Installs zsh, registers zsh as a default shell
 brew install zsh
-brew install starship
+brew install zsh-syntax-highlighting
+brew install zsh-autosuggestions
 
 zsh_path=$(which zsh)
 grep -Fxq "$zsh_path" /etc/shells || sudo bash -c "echo $zsh_path >> /etc/shells"
