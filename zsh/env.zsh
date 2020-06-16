@@ -1,6 +1,8 @@
 # Hide username in prompt
 export DEFAULT_USER=$(whoami)
 
+[[ $COLORTERM =~ ^(truecolor|24bit)$ ]] || export COLORTERM="truecolor"
+
 # Locale
 export LC_ALL=en_US.UTF-8
 export LANG="en_US"
@@ -63,8 +65,8 @@ export LS_COLORS='no=00:fi=00:di=01;34:ln=00;36:pi=40;33:so=01;35:do=01;35:bd=40
 # Grep colors
 export GREP_COLOR='1;33'
 
-# Bat: https://github.com/sharkdp/bat
-export BAT_THEME="OneHalfDark"
+# Micro colors
+export MICRO_TRUECOLOR=1
 
 # git-friendly: disable bundle after pull
 export GIT_FRIENDLY_NO_BUNDLE=true
@@ -77,7 +79,3 @@ export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
 # pj
 export PROJECT_PATHS=(~/Projects)
-
-# Disable Gatsby telemetry
-# https://www.gatsbyjs.org/docs/telemetry/
-GATSBY_TELEMETRY_DISABLED=1
