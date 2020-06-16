@@ -1,11 +1,15 @@
 # Hide username in prompt
 export DEFAULT_USER=$(whoami)
 
-[[ $COLORTERM =~ ^(truecolor|24bit)$ ]] || export COLORTERM="truecolor"
-
 # Locale
 export LC_ALL=en_US.UTF-8
 export LANG="en_US"
+
+if [ -x "$(command -v brew)" ]; then
+    if [[ -z "$HOMEBREW_PREFIX" ]]; then
+        export HOMEBREW_PREFIX=$(brew --prefix)
+    fi
+fi
 
 # NVM
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"

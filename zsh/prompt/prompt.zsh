@@ -10,14 +10,14 @@
 source ~/.dotfiles/zsh/prompt/sections/git_simple.zsh
 
 SPACESHIP_PROMPT_ORDER=(
-  user          # Username section
-  dir           # Current directory section
-  host          # Hostname section
-  git_simple    # Custom Git section
-  line_sep      # Line break
-  jobs          # Background jobs indicator
-  exit_code     # Exit code section
-  char          # Prompt character
+  user       # Username section
+  dir        # Current directory section
+  host       # Hostname section
+  git_simple # Custom Git section
+  line_sep   # Line break
+  jobs       # Background jobs indicator
+  exit_code  # Exit code section
+  char       # Prompt character
 )
 # Hide prefixes before prompt sections
 SPACESHIP_PROMPT_PREFIXES_SHOW=false
