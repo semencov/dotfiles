@@ -65,4 +65,9 @@ _fzf_compgen_dir() {
 [ -f ~/.zshlocal ] && source ~/.zshlocal
 
 # Set Starship as a prompt
-eval "$(starship init zsh)"
+# eval "$(starship init zsh)"
+
+# Set Spaceship ZSH as a prompt
+autoload -U promptinit
+promptinit
+prompt spaceship
