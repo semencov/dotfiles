@@ -68,8 +68,8 @@ if [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]; then
 fi
 
 # Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
-NPM_PACKAGES="$HOME/.nvm/global"
-NPM_CONFIG_PREFIX=$NPM_PACKAGES
+# NPM_PACKAGES="$HOME/.nvm/global"
+# NPM_CONFIG_PREFIX=$NPM_PACKAGES
 
 npm config set loglevel warn
 

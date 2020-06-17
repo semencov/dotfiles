@@ -15,7 +15,7 @@ function _prepend_path() {
 PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 
 [ -d "/home/linuxbrew/.linuxbrew/bin" ] && _prepend_path "/home/linuxbrew/.linuxbrew/bin"
-[ -d "$NPM_CONFIG_PREFIX/bin" ] && _prepend_path "$NPM_CONFIG_PREFIX/bin"
+[ -d "$NPM_PACKAGES/bin" ] && _prepend_path "$NPM_PACKAGES/bin"
 [ -d /usr/local/bin ] && _prepend_path "/usr/local/bin"
 [ -d /usr/local/opt/ruby/bin ] && _prepend_path "/usr/local/opt/ruby/bin"
 [ -d /usr/local/opt/coreutils/libexec/gnubin ] && _prepend_path "/usr/local/opt/coreutils/libexec/gnubin"
