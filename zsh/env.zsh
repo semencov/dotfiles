@@ -80,4 +80,4 @@ export GIT_FRIENDLY_NO_COPY_URL_AFTER_PUSH=true
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
 # pj
-export PROJECT_PATHS=(~/Projects)
+export PROJECT_PATHS=(~/Projects/*)

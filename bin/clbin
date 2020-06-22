@@ -11,7 +11,6 @@ set -e
 BOLD="$(tput setaf 0 2>/dev/null)$(tput bold 2>/dev/null || echo '\e[1;30m')"
 RESET="$(tput sgr0)"
 
-cat | curl -sF 'clbin=<-' 'https://clbin.com' | cb
-url=$(pbpaste)
-echo $url
-echo $(chalk txtblk "URL was copied to clipboard!")
+cat | curl -sF 'clbin=<-' 'https://clbin.com'
+#echo $url #| cb 2>/dev/null
+#echo "${BOLD}URL was copied to clipboard!$RESET"
