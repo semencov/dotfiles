@@ -4,7 +4,7 @@
       "commandName": "bold, underline, cyan",
       "mainDescription": "",
       "exampleDescription": "white",
-      "exampleCode": "magenta",
+      "exampleCode": "bold,cyan",
       "exampleToken": "dim"
     }
   },

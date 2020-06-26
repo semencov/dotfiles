@@ -35,7 +35,6 @@ echo -e "setenv PATH $HOME/.dotfiles/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:
 
 # Everything else
 brew install ripgrep
-brew install tldr
 brew install fd
 brew install fzf && $(brew --prefix)/opt/fzf/install
 brew install -s bat
@@ -57,6 +56,9 @@ brew cask install font-inter
 # Node
 command -v node >/dev/null 2>&1 || brew install node
 
+npm i -g npm-upgrade
+npm i -g tldr
+
 # NVM
 brew install nvm
 if [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ]; then
@@ -73,11 +75,7 @@ fi
 
 npm config set loglevel warn
 
-# Npm
-npm i -g npm-upgrade
-npm i -g npm-check-updates
 npm i -g yarn@legacy
-
 npm i -g lerna
 npm i -g regexgen
 npm i -g @lhci/cli
