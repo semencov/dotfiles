@@ -8,26 +8,44 @@
 //
 
 const http = require('http');
-const args = process.argv.slice(2);
-const url = args[0] ? `http://ip-api.com/json/${args[0]}` : `http://ip-api.com/json`;
+const argv = require('yargs').argv;
+const { cyan, gray } = require('chalk');
+const open = require('open');
+
+const host = argv._.pop();
+const url = host ? `http://ip-api.com/json/${host}` : `http://ip-api.com/json`;
 
 http.get(url, (res) => {
-  res.on('data', (chunk) => {
+  res.on('data', async (chunk) => {
     try {
-      var data = JSON.parse(chunk);
+      const data = JSON.parse(chunk);
       if (data.status === "success") {
-        var location = [
-          data.city,
-          data.regionName,
-          data.country
-        ].filter((e, i, arr) => arr.lastIndexOf(e) === i);
+        const {
+          query, 
+          as, 
+          city, 
+          regionName, 
+          country, 
+          timezone, 
+          lat, 
+          lon, 
+          isp, 
+          org
+        } = data;
+        
+        const location = [city, regionName, country].filter((e, i, arr) => arr.lastIndexOf(e) === i);
 
-        console.log(`\u001b[2m      IP:\u001b[0m \u001b[1m${data.query}\u001b[0m`);
-        console.log(`\u001b[2m      AS:\u001b[0m ${data.as}`);
-        console.log(`\u001b[2m Address:\u001b[0m ${location.join(', ')}`);
-        console.log(`\u001b[2mTimezone:\u001b[0m ${data.timezone}`);
-        console.log(`\u001b[2mLocation:\u001b[0m ${data.lat}, ${data.lon}`);
-        console.log(`\u001b[2m ISP/Org:\u001b[0m ${data.isp}${(data.isp !== data.org ? ' / ' + data.org : '')}`);
+        console.log(gray(`      IP:`), cyan(query));
+        console.log(gray(`      AS:`), as);
+        console.log(gray(` Address:`), location.join(', '));
+        console.log(gray(`Timezone:`), timezone);
+        console.log(gray(`Location:`), `${lat}, ${lon}`);
+        console.log(gray(` ISP/Org:`), `${isp}${(isp !== org ? ' / ' + org : '')}`);
+
+
+        if (argv.m || argv.map) {
+            await open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`);
+        }
       }
       else {
         console.error(data.message);
