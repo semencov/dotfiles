@@ -30,6 +30,7 @@ brew "git-extras"
 brew "git-flow"
 brew "gist"
 brew "gh"
+brew "diff-so-fancy"
 
 brew "httpie"
 brew "mackup"

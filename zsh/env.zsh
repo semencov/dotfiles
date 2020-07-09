@@ -12,6 +12,9 @@ fi
 # NVM
 export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
 
+# n
+export N_PRESERVE_NPM=1
+
 # # Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
 # export NPM_PACKAGES="$NVM_DIR/global"
 # export NPM_CONFIG_PREFIX=$NPM_PACKAGES

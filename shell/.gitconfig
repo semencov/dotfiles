@@ -1,5 +1,5 @@
 [user]
-	name = Yuri Sementsov
+    name = Yuri Sementsov
     email = hello@smcv.dev
     signingkey = AAF13C9A
 [core]
@@ -13,16 +13,9 @@
 [http]
     sslVerify = false
 [credential]
-	helper = osxkeychain
+    helper = osxkeychain
 [gpg]
     program = gpg
-[log]
-    decorate = short
-[color]
-    diff   = auto
-    status = auto
-    branch = auto
-	ui = true
 [branch]
     autosetuprebase = always
 [push]
@@ -31,11 +24,30 @@
     gpgsign = false
 [fetch]
     prune = true
+[log]
+    decorate = short
+[color]
+    diff   = auto
+    status = auto
+    branch = auto
+    ui = true
+[color "diff-highlight"]
+    oldNormal = red bold
+    oldHighlight = red bold 52
+    newNormal = green bold
+    newHighlight = green bold 22
+[color "diff"]
+    meta = 11
+    frag = magenta bold
+    commit = yellow bold
+    old = red bold
+    new = green bold
+    whitespace = red reverse
 [filter "lfs"]
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
-	required = true
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
 [alias]
     a  = "!git add . && git st"
     ua = reset HEAD
@@ -71,15 +83,3 @@
     branches = for-each-ref --sort=-committerdate refs/heads/ --format='%(color:bold)%(refname:short)%(color:reset)\t%(committername), %(committerdate:relative)'
     # Cancel local commits in the branch: git fuck master
     fuck = "!f() { git reset --hard origin/$1; }; f"
-[color "diff-highlight"]
-	oldNormal = red bold
-	oldHighlight = red bold 52
-	newNormal = green bold
-	newHighlight = green bold 22
-[color "diff"]
-	meta = 11
-	frag = magenta bold
-	commit = yellow bold
-	old = red bold
-	new = green bold
-	whitespace = red reverse
