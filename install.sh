@@ -5,15 +5,10 @@ DOTFILES_DIR="${HOME}/.dotfiles"
 DOTFILES_ZIP="https://github.com/semencov/dotfiles/archive/master.zip"
 DOTFILES_REMOTE="git@github.com:semencov/dotfiles.git"
 
-
-# string formatters
-if [[ -t 1 ]]; then
-    tty_escape() { printf "\033[%sm" "$1"; }
-else
-    tty_escape() { :; }
-fi
+tty_escape() { printf "\033[%sm" "$1"; }
 tty_mkbold() { tty_escape "1;$1"; }
 tty_underline="$(tty_escape "4;39")"
+tty_gray="$(tty_mkbold 30)"
 tty_blue="$(tty_mkbold 34)"
 tty_red="$(tty_mkbold 31)"
 tty_bold="$(tty_mkbold 39)"
@@ -55,20 +50,26 @@ chomp() {
     printf "%s" "${1/"$'\n'"/}"
 }
 
-ohai() {
-    printf "${tty_blue}==>${tty_bold} %s${tty_reset}\n" "$(shell_join "$@")"
+log() {
+    printf "${tty_gray}==> %s${tty_reset}\n" "$(shell_join "$@")"
 }
 
 warn() {
-    printf "${tty_red}Warning${tty_reset}: %s\n" "$(chomp "$1")"
+    printf "${tty_red}WARN${tty_reset} %s\n" "$(chomp "$1")"
 }
 
 abort() {
-    printf "%s\n" "$1"
+    printf "${tty_red}ERROR${tty_reset} %s\n" "$(chomp "$1")"
     exit 1
 }
 
+# if [[ "$(uname)" = "Linux" ]]; then
+#     abort "This install script intended to be runned on macOS only. Please process installation manually."
+# fi
+
+
 execute() {
+    log "${args[@]}"
     if ! "$@"; then
         abort "$(printf "Failed during: %s" "$(shell_join "$@")")"
     fi
@@ -80,10 +81,8 @@ execute_sudo() {
         args=("-A" "${args[@]}")
     fi
     if have_sudo_access; then
-        ohai "/usr/bin/sudo" "${args[@]}"
         execute "/usr/bin/sudo" "${args[@]}"
     else
-        ohai "${args[@]}"
         execute "${args[@]}"
     fi
 }
@@ -131,7 +130,7 @@ should_install_command_line_tools() {
 
 install_command_line_tools() {
     if should_install_command_line_tools && version_ge "$macos_version" "10.13"; then
-        ohai "Searching online for the Command Line Tools"
+        log "Searching online for the Command Line Tools"
         # This temporary file prompts the 'softwareupdate' utility to list the Command Line Tools
         clt_placeholder="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
         execute_sudo "/usr/bin/touch" "$clt_placeholder"
@@ -145,7 +144,7 @@ install_command_line_tools() {
         clt_label="$(chomp "$(/bin/bash -c "$clt_label_command")")"
 
         if [[ -n "$clt_label" ]]; then
-            ohai "Installing $clt_label"
+            log "Installing $clt_label"
             execute_sudo "/usr/sbin/softwareupdate" "-i" "$clt_label"
             execute_sudo "/bin/rm" "-f" "$clt_placeholder"
             execute_sudo "/usr/bin/xcode-select" "--switch" "/Library/Developer/CommandLineTools"
@@ -154,7 +153,7 @@ install_command_line_tools() {
 
     # Headless install may have failed, so fallback to original 'xcode-select' method
     if should_install_command_line_tools && test -t 0; then
-        ohai "Installing the Command Line Tools (expect a GUI popup):"
+        log "Installing the Command Line Tools (expect a GUI popup):"
         execute_sudo "/usr/bin/xcode-select" "--install"
         echo "Press any key when the installation has completed."
         getc
@@ -163,11 +162,17 @@ install_command_line_tools() {
 }
 
 install_homebrew() {
-    execute "/bin/bash" "-c" "\"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\""
+    log "Installing the Homebrew:"
+    execute "/bin/bash" "-c" "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 }
 
 clone_dotfiles() {
-    execute "git" "clone" "${DOTFILES_REMOTE}" "${DOTFILES_DIR}"
+    if [[ -d $DOTFILES_DIR ]]; then
+        warn "Directory ${DOTFILES_DIR} already exists"
+    else
+        execute "git" "clone" "${DOTFILES_REMOTE}" "${DOTFILES_DIR}"
+    fi
+
     execute "cd" "${DOTFILES_DIR}"
 }
 
@@ -184,7 +189,7 @@ restore_mackup() {
 }
 
 (
-    install_command_line_tools
+    # install_command_line_tools
     install_homebrew
     clone_dotfiles
     sync_dotfiles
