@@ -24,6 +24,7 @@ npm i -g preact-cli
 npm i -g serverless
 npm i -g @maizzle/cli
 npm i -g @gridsome/cli
+npm i -g @11ty/eleventy
 npm i -g create-nuxt-app
 npm i -g create-react-app
 
