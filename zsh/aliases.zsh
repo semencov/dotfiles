@@ -19,14 +19,12 @@ alias e="$EDITOR"
 alias ee="$EDITOR ."
 
 # ls
-alias ls='ls -G'
-alias l='ls -lAh'
-[[ -n ${PAGER} ]] && alias lm="l | ${PAGER}"
-alias ll='ls -lh'
-alias lt='ll -tr'
-alias la='ll -A'
-alias lc='lt -c'
-alias lu='lt -u'
+alias ls='exa -G'
+alias l='exa -1 --group-directories-first'
+alias ll='exa -lh --git-ignore -I .git/ --group-directories-first'
+alias la='exa -la --git-ignore -I .git/ --group-directories-first'
+alias llm='ll -smodified'
+alias lls='ll -ssize'
 
 # rm
 alias rm="rm -i"
@@ -34,9 +32,6 @@ alias rmf="rm -rf"
 
 # Permissions
 alias -- +x="chmod +x"
-
-# GitHub Desktop
-alias gh="github"
 
 # Bat: https://github.com/sharkdp/bat
 command -v bat >/dev/null 2>&1 && alias cat="bat --style=numbers,changes"

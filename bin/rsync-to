@@ -14,3 +14,4 @@ if [[ "$(ls -ACF1 | wc -l | awk '{print $1}')" == "0" ]]; then
 fi
 
 rsync -rvazph --force --delete --progress $PWD $1
+
