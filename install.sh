@@ -63,11 +63,6 @@ abort() {
     exit 1
 }
 
-# if [[ "$(uname)" = "Linux" ]]; then
-#     abort "This install script intended to be runned on macOS only. Please process installation manually."
-# fi
-
-
 execute() {
     log "${args[@]}"
     if ! "$@"; then
@@ -176,6 +171,14 @@ clone_dotfiles() {
     execute "cd" "${DOTFILES_DIR}"
 }
 
+setup_osx() {
+    execute_sudo "bash" "-x" "${DOTFILES_DIR}/setup/osx.sh"
+}
+
+setup_ssd() {
+    execute_sudo "bash" "-x" "${DOTFILES_DIR}/setup/ssd.sh"
+}
+
 sync_dotfiles() {
     execute "python" "${DOTFILES_DIR}/sync.py"
 }
@@ -188,11 +191,25 @@ restore_mackup() {
     execute "mackup" "restore" "-f"
 }
 
+install_node() {
+    execute_sudo "chown" "-R" "$USER" "/usr/local"
+    execute "bash" "-x" "${DOTFILES_DIR}/setup/node.sh"
+}
+
 (
-    # install_command_line_tools
+    install_command_line_tools
     install_homebrew
     clone_dotfiles
-    sync_dotfiles
+
+    if [[ "$(uname)" = "Darwin" ]]; then
+        setup_ssd
+        setup_osx
+    fi
+
     bundle_homebrew
-    restore_mackup
+    install_node
+    sync_dotfiles
+    # restore_mackup
+
+    log "Setup complete. Please restart and continue manual setup."
 ) || exit 1
