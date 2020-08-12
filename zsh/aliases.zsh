@@ -21,10 +21,10 @@ alias ee="$EDITOR ."
 # ls
 alias ls='exa -G'
 alias l='exa -1 --group-directories-first'
-alias ll='exa -lh --git-ignore -I .git/ --group-directories-first'
+alias ll='exa -l --git-ignore -I .git/ --group-directories-first'
 alias la='exa -la --git-ignore -I .git/ --group-directories-first'
-alias llm='ll -smodified'
-alias lls='ll -ssize'
+alias llm='exa -la -smodified --git-ignore -I .git/'
+alias lls='exa -la -ssize --git-ignore -I .git/'
 
 # rm
 alias rm="rm -i"
