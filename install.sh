@@ -2,7 +2,6 @@
 set -u
 
 DOTFILES_DIR="${HOME}/.dotfiles"
-DOTFILES_ZIP="https://github.com/semencov/dotfiles/archive/master.zip"
 DOTFILES_REMOTE="git@github.com:semencov/dotfiles.git"
 
 tty_escape() { printf "\033[%sm" "$1"; }
