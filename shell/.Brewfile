@@ -6,7 +6,7 @@ tap "homebrew/cask"
 tap "homebrew/cask-fonts"
 tap "homebrew/core"
 
-cask_args appdir: "~/Applications"
+cask_args appdir: "/Applications"
 
 brew "zsh"
 brew "zsh-autosuggestions"
