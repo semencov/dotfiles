@@ -200,15 +200,15 @@ install_node() {
     install_command_line_tools
     install_homebrew
     clone_dotfiles
+    sync_dotfiles
+    bundle_homebrew
+    install_node
 
     if [[ "$(uname)" = "Darwin" ]]; then
         setup_ssd
         setup_osx
     fi
 
-    bundle_homebrew
-    install_node
-    sync_dotfiles
     # restore_mackup
 
     log "Setup complete. Please restart and continue manual setup."
