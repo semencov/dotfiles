@@ -63,6 +63,7 @@ abort() {
 }
 
 execute() {
+    local -a args=("$@")
     log "${args[@]}"
     if ! "$@"; then
         abort "$(printf "Failed during: %s" "$(shell_join "$@")")"
