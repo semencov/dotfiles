@@ -3,6 +3,7 @@ tap "mas-cli/tap"
 tap "github/gh"
 tap "homebrew/bundle"
 tap "homebrew/cask"
+tap "homebrew/cask-fonts"
 tap "homebrew/core"
 
 cask_args appdir: "~/Applications"
