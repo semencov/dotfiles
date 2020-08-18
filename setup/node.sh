@@ -17,6 +17,7 @@ npm i -g @lhci/cli
 npm i -g pageres-cli
 npm i -g broken-link-checker
 npm i -g @fabiospampinato/bump
+npm i -g @marp-team/marp-cli
 
 npm i -g @vue/cli
 npm i -g gatsby-cli
