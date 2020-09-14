@@ -6,25 +6,25 @@ export LC_ALL=en_US.UTF-8
 export LANG="en_US"
 
 
-SSH_ENV="$HOME/.ssh/agent-environment"
+#SSH_ENV="$HOME/.ssh/agent-environment"
 
-function start_agent {
-    ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
-    ssh-add
-}
+#function start_agent {
+#    ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
+#    chmod 600 "${SSH_ENV}"
+#    . "${SSH_ENV}" > /dev/null
+#    ssh-add
+#}
 
 # Source SSH settings, if applicable
-if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    #ps ${SSH_AGENT_PID} doesn't work under cywgin
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-        start_agent
-    }
-else
-    start_agent;
-fi
+#if [ -f "${SSH_ENV}" ]; then
+#    . "${SSH_ENV}" > /dev/null
+#    #ps ${SSH_AGENT_PID} doesn't work under cywgin
+#    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
+#        start_agent
+#    }
+#else
+#    start_agent;
+#fi
 
 if command -v brew 1>/dev/null; then
     export HOMEBREW_PREFIX=$(brew --prefix)
