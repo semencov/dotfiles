@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+/* eslint-disable security/detect-non-literal-regexp */
+
 // Magic project opener: opens repository using fuzzy search.
 //
 // Should be used via Bash alias like this:
@@ -15,10 +17,10 @@ const path = require('path');
 
 const PROJECTS_DIR = path.join(process.env.HOME, '_');
 
-const getDirs = d =>
-	fs.readdirSync(d).filter(f => fs.statSync(path.join(d, f)).isDirectory());
+const getDirs = (d) =>
+	fs.readdirSync(d).filter((f) => fs.statSync(path.join(d, f)).isDirectory());
 
-const length = r => path.basename(r).length;
+const length = (r) => path.basename(r).length;
 
 const args = process.argv.splice(2);
 if (args.length !== 1) {
@@ -27,11 +29,11 @@ if (args.length !== 1) {
 }
 
 const repo = find(getDirs(PROJECTS_DIR), args[0]);
-if (repo) {
+if (repo)  {
 	console.log(path.join(PROJECTS_DIR, repo));
 }
 
-function find(repos, name) {
+function find (repos, name) {
 	// Fuzzy search
 	const nameRegexp = new RegExp(
 		name
@@ -40,7 +42,7 @@ function find(repos, name) {
 			.join('.*'),
 		'i'
 	);
-	repos = repos.filter(r => nameRegexp.test(r));
+	repos = repos.filter((r) => nameRegexp.test(r));
 
 	// Found?
 	if (!repos.length) {

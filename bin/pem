@@ -4,7 +4,7 @@
 # Generates self-signed certificates
 #
 # Usage:
-#   generate-pem
+#   pem
 #
 # Requires:
 # - OpenSSL

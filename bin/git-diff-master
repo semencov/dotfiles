@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Get file list of changes compared to origin/master
+
+# Usage:
+#   git-diff-master
+#
+
+set -e
+
+function _list_files() {
+	if [ "$2" == "1" ]; then
+		echo "inline"
+		echo -ne $1
+	else
+		echo "not inline"
+		echo $1
+	fi
+}
+
+if git rev-parse --git-dir >/dev/null 2>&1; then
+	master_changed_diff=`git diff --diff-filter=ACMR --name-only $(git merge-base origin/master HEAD)`
+	inline=
+
+	# with mask
+	if [ "$1" != "" ] && [ "$1" != "--inline" ]; then
+		[ "$2" == "--inline" ] && inline=1 || inline=0
+		masked_file_list=$(echo "$master_changed_diff" | grep $1)
+		_list_files "$masked_file_list" $inline
+	else
+		# all files
+		[ "$1" == "--inline" ] && inline=1 || inline=0
+		_list_files "$master_changed_diff" $inline
+	fi
+else
+    echo "Not a Git repository"
+fi
