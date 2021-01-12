@@ -12,7 +12,7 @@ function _prepend_path() {
 # 2. ./node_modules/.bin - shorcut to run locally installed Node bins
 # 3. Custom bin folder for n, Ruby, CoreUtils, dotfiles, etc.
 
-PATH='/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
+PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 
 [ -d "/home/linuxbrew/.linuxbrew/bin" ] && _prepend_path "/home/linuxbrew/.linuxbrew/bin"
 [ -d "/home/linuxbrew/.linuxbrew/sbin" ] && _prepend_path "/home/linuxbrew/.linuxbrew/sbin"

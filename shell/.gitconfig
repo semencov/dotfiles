@@ -12,6 +12,7 @@
     editor = micro
     pager = delta
     include = ~/.gitlocal
+    excludesfile = ~/.gitignore
 [interactive]
     diffFilter = delta --color-only
 [delta]
@@ -63,3 +64,10 @@
     branches = for-each-ref --sort=-committerdate refs/heads/ --format='%(color:bold)%(refname:short)%(color:reset)\t%(committername), %(committerdate:relative)'
     # Cancel local commits in the branch: git fuck master
     fuck = "!f() { git reset --hard origin/$1; }; f"
+[pull]
+	rebase = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

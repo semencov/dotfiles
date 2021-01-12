@@ -44,7 +44,7 @@ ssh-add -A 2>/dev/null
 # [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
 # PHPBrew
-[ -s "$HOME/.phpbrew/bashrc" ] && . "$HOME/.phpbrew/bashrc"
+[[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc
 
 # Enable fzf: https://github.com/junegunn/fzf
 # Use fd (https://github.com/sharkdp/fd) to respect .gitignore

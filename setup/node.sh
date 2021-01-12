@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # n, Node version manager
-n latest
 n lts
 npm config set loglevel warn
 

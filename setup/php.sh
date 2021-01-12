@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-curl -L -O https://github.com/phpbrew/phpbrew/releases/latest/download/phpbrew.phar
-chmod +x phpbrew.phar
+#curl -L -O https://github.com/phpbrew/phpbrew/releases/latest/download/phpbrew.phar
+#chmod +x phpbrew.phar
 
 # Move the file to some directory within your $PATH
-sudo mv phpbrew.phar /usr/local/bin/phpbrew
+#sudo mv phpbrew.phar /usr/local/bin/phpbrew
 
-phpbrew init
-phpbrew lookup-prefix homebrew
+#phpbrew init
+#phpbrew lookup-prefix homebrew
 phpbrew update
 
 phpbrew --debug install 7.3 +default +opcache +fpm
