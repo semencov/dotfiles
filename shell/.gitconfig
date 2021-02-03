@@ -13,6 +13,7 @@
     pager = delta
     include = ~/.gitlocal
     excludesfile = ~/.gitignore
+	autocrlf = input
 [interactive]
     diffFilter = delta --color-only
 [delta]
