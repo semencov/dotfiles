@@ -6,6 +6,7 @@ npm config set loglevel warn
 
 # Npm
 npm i -g npm-upgrade
+npm i -g npm-check
 npm i -g npkill
 npm i -g tldr
 
