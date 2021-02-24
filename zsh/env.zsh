@@ -26,6 +26,8 @@ else
     start_agent;
 fi
 
+export GPG_TTY="$(tty)"
+
 if command -v brew 1>/dev/null; then
     export HOMEBREW_PREFIX=$(brew --prefix)
 fi
