@@ -39,12 +39,8 @@ SAVEHIST=$HISTSIZE
 # Import ssh keys in keychain
 ssh-add -A 2>/dev/null
 
-# NVM
-# [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-# [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
-
-# PHPBrew
-[[ -e ~/.phpbrew/bashrc ]] && source ~/.phpbrew/bashrc
+# fnm
+eval "$(fnm env)"
 
 # Enable fzf: https://github.com/junegunn/fzf
 # Use fd (https://github.com/sharkdp/fd) to respect .gitignore
