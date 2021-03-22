@@ -12,7 +12,6 @@ npm i -g tldr
 
 npm i -g yarn@legacy
 npm i -g lerna
-npm i -g regexgen
 npm i -g @lhci/cli
 npm i -g pageres-cli
 npm i -g broken-link-checker
