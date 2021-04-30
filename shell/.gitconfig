@@ -2,20 +2,26 @@
     name = Yuri Sementsov
     email = hello@smcv.dev
     signingkey = BA577CD2
-[color]
-    diff   = auto
-    status = auto
-    branch = auto
-[branch]
-    autosetuprebase = always
+[credential]
+    helper = osxkeychain
+[gpg]
+    program = gpg
 [core]
     editor = micro
     pager = delta
     include = ~/.gitlocal
     excludesfile = ~/.gitignore
 	autocrlf = input
+[color]
+    diff   = auto
+    status = auto
+    branch = auto
+[init]
+	defaultBranch = master
 [pull]
 	rebase = false
+[branch]
+    autosetuprebase = always
 [interactive]
     diffFilter = delta --color-only
 [delta]
@@ -33,10 +39,6 @@
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
-[credential]
-    helper = osxkeychain
-[gpg]
-    program = gpg
 [alias]
     a  = "!git add . && git st"
     ua = reset HEAD
