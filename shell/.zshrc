@@ -40,7 +40,7 @@ SAVEHIST=$HISTSIZE
 ssh-add -A 2>/dev/null
 
 # fnm
-eval "$(fnm env)"
+eval "$(fnm env --use-on-cd)"
 
 # Enable fzf: https://github.com/junegunn/fzf
 # Use fd (https://github.com/sharkdp/fd) to respect .gitignore
