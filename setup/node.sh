@@ -1,16 +1,18 @@
 #!/bin/bash
 
-# n, Node version manager
-n lts
+# fnm, Node version manager
+fnm install --lts
 npm config set loglevel warn
 
 # Npm
+npm i -g zx
 npm i -g npm-upgrade
 npm i -g npm-check
 npm i -g npkill
 npm i -g tldr
 
 npm i -g yarn@legacy
+npm i -g serve
 npm i -g lerna
 npm i -g @lhci/cli
 npm i -g pageres-cli
