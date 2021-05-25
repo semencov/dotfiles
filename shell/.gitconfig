@@ -29,6 +29,7 @@
     features = line-numbers decorations
     whitespace-error-style = 22 reverse
     colorMoved = default
+    zero-style = dim syntax
 [delta "decorations"]
     commit-decoration-style = yellow box ul
     file-style = yellow ul
