@@ -6,12 +6,12 @@
 # Configuration:
 # - Put projects’ folders list to ~/.backup, every path on a separate line.
 # - Put a list of folders to ignore to projectdir/.backupignore, every pattern on a separate line.
-# 
+#
 # Usage:
 #   backup
-# 
+#
 # Log can be found at ~/backup.log.
-# 
+#
 # Requires:
 # - mysqldump
 # - cloudapp - https://github.com/sapegin/dotfiles/blob/master/bin/cloudapp
@@ -26,6 +26,7 @@
 CONFIG_FILE="$HOME/.backup"
 LOG_FILE="$HOME/backup.log"
 IGNORE_FILE=".backupignore"
+ARCHIVE_PATH="$HOME/Projects/.archive"
 DEFAULT_IGNORES="--exclude='.git' --exclude='node_modules' --exclude='bower_components' --exclude='vendor'"
 
 # Common stuff
@@ -76,24 +77,8 @@ function detect_db_params() {
 		mysql_dbname=$(perl -nle 'print $1 if /DB_NAME.+?\x27(.*?)\x27.*?$/' < "$wp")
 		mysql_user=$(perl -nle 'print $1 if /DB_USER.+?\x27(.*?)\x27.*?$/' < "$wp")
 		mysql_password=$(perl -nle 'print $1 if /DB_PASSWORD.+?\x27(.*?)\x27.*?$/' < "$wp")
-		#echo "$mysql_host:$mysql_dbname:$mysql_user:$mysql_password"
+		echo "$mysql_host:$mysql_dbname:$mysql_user:$mysql_password"
 		return
-	fi
-
-	# Koken
-	local koken2=$(find . -maxdepth 5 -name "Koken.php" -print -quit)
-	local koken3=$(find . -maxdepth 5 -name "user_setup.php" -print -quit)
-	if [ -f "$koken2" ] && [ -f "$koken3" ]; then
-		local koken=$(dirname "$koken3")"/database.php"
-		if [ -f "$koken" ]; then
-			echo "Koken installation detected."
-			mysql_host=$(perl -nle 'print $1 if /hostname.*?=>.*?\x27(.*?)\x27.*?$/' < "$koken")
-			mysql_dbname=$(perl -nle 'print $1 if /database.*?=>.*?\x27(.*?)\x27.*?$/' < "$koken")
-			mysql_user=$(perl -nle 'print $1 if /username.*?=>.*?\x27(.*?)\x27.*?$/' < "$koken")
-			mysql_password=$(perl -nle 'print $1 if /password.*?=>.*?\x27(.*?)\x27.*?$/' < "$koken")
-			#echo "$mysql_host:$mysql_dbname:$mysql_user:$mysql_password"
-			return
-		fi
 	fi
 
 	# PhpBB
@@ -105,7 +90,7 @@ function detect_db_params() {
 		mysql_dbname=$(perl -nle 'print $1 if /\$dbname.*?=.*?\x27(.*?)\x27.*?$/' < "$phpbb")
 		mysql_user=$(perl -nle 'print $1 if /\$dbuser.*?=.*?\x27(.*?)\x27.*?$/' < "$phpbb")
 		mysql_password=$(perl -nle 'print $1 if /\$dbpasswd.*?=.*?\x27(.*?)\x27.*?$/' < "$phpbb")
-		#echo "$mysql_host:$mysql_dbname:$mysql_user:$mysql_password"
+		echo "$mysql_host:$mysql_dbname:$mysql_user:$mysql_password"
 		return
 	fi
 }

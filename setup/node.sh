@@ -10,6 +10,7 @@ npm i -g npm-upgrade
 npm i -g npm-check
 npm i -g npkill
 npm i -g tldr
+npm i -g quicktype
 
 npm i -g yarn@legacy
 npm i -g serve

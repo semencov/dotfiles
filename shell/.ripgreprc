@@ -25,16 +25,21 @@
 
 # Add 'web' type.
 --type-add
-web:*.{html,css,scss,sass,less,pcss,js,jsx,tsx,mjs,vue,pug,html,twig}
+web:*.{html,css,scss,sass,less,pcss,sss,styl,js,ts,coffee,jsx,tsx,mjs,esm,vue,svelte,pug,html,ejs,twig,blade\.php}
 
 # Add 'html' type.
 --type-add
-html:*.{twig,vue,pug}
+html:*.twig, *.pug, *.ejs, *.blade.php
 
 # Add 'css' type.
 --type-add
-css:*.sass, *.less, *.pcss, *.sss
+css:*.css, *.sass, *.less, *.pcss, *.sss, *.styl
 
 # Add 'js' type.
 --type-add
-js:*.mjs, *.esm, *.ts, *.jsx, *.tsx
+js:*.js, *.mjs, *.esm, *.ts, *.jsx, *.tsx
+
+# Add 'pkg' type.
+--type-add
+pkg:package.json
+

@@ -90,10 +90,17 @@ alias brokenlinks='find . -type l -exec sh -c "file -b {} | grep -q ^broken" \; 
 alias cleanup="find . -type f -name '*.DS_Store' -ls -delete"
 
 # Edit configs
+alias zs="source ~/.zshrc"
 alias zshrc="$EDITOR $HOME/.zshrc"
 alias sshconfig="$EDITOR $HOME/.ssh/config"
 alias hostfile="sudo $EDITOR /etc/hosts"
 alias dotfiles="$EDITOR $HOME/.dotfiles"
+
+t() {
+  # Defaults to 3 levels deep, do more with `t 5` or `t 1`
+  # pass additional args after
+  tree -I '.git|node_modules|bower_components|.DS_Store' --dirsfirst --filelimit 15 -L ${1:-3} -aC $2
+}
 
 # Make a directory and cd to it
 take() {

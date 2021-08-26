@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Creates new empty branch detached from the parent
+#
+# Usage:
+#   git-orphan <branch-name>
+#
+#
+# Author: Yuri Sementsov, smcv.dev
+# License: MIT
+# https://github.com/semencov/dotfiles
+
+# Exit on any failed command
+set -e
+
+branch=$1
+
+git checkout --orphan $branch
+git rm --cached -rf .
+

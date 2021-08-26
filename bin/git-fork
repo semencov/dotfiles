@@ -7,6 +7,7 @@
 #
 
 user=$1
+
 if [[ "$user" == "" ]]; then
 	echo "Usage: git-fork <original-author>"
 else

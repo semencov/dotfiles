@@ -39,6 +39,10 @@ SAVEHIST=$HISTSIZE
 # Import ssh keys in keychain
 ssh-add -A 2>/dev/null
 
+# Integrate iTerm features
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+
+
 # fnm
 eval "$(fnm env --use-on-cd)"
 
@@ -64,3 +68,4 @@ _fzf_compgen_dir() {
 autoload -U promptinit
 promptinit
 prompt spaceship
+

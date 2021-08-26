@@ -16,4 +16,4 @@ function yesterworkday() {
 	fi
 }
 
-git log --branches=develop --no-merges --pretty=format:'%C(bold)%s%C(reset)  %cd, %h' --date=local --since="$(yesterworkday)" --author="$(git config user.name)"
+git log --no-merges --pretty=format:'%C(bold)%s%C(reset)  %cd, %h' --date=local --since="$(yesterworkday)" --author="$(git config user.name)"
