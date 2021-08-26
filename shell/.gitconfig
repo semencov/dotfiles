@@ -64,7 +64,7 @@
     patch = "!git --no-pager diff --no-color"
     master = "!git checkout master && git pull origin master --rebase"
     new = checkout -b
-    done = "!git add . && git commit -a && git git push -u origin $(git current)"
+    done = "!git add . && git commit -a && git push -u origin $(git current)"
     purge = "!git push --delete origin $1 && git branch -D $1"
     # Merge fresh master into the current branch
     mmm = "!git fetch origin master && git merge origin/master --no-edit"
