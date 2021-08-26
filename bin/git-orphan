@@ -16,5 +16,5 @@ set -e
 branch=$1
 
 git checkout --orphan $branch
-git rm --cached -rf .  2>/dev/null
-git clean -fdx  2>/dev/null
+git rm --cached -rf .
+git clean -fdx
