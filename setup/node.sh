@@ -2,7 +2,16 @@
 
 # fnm, Node version manager
 fnm install --lts
-npm config set loglevel warn
+
+# Setup NPM initial settings
+npm config set loglevel error
+npm config set init-author-name "Yuri Sementsov"
+npm config set init-author-email "hello@smcv.dev"
+npm config set init-author-url "https://smcv.dev"
+npm config set init-license "MIT"
+npm config set init-version "0.0.1"
+npm config set fund false
+npm config set audit false
 
 # Npm
 npm i -g zx
