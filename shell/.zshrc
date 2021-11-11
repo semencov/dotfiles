@@ -1,3 +1,5 @@
+[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
+[ -s ~/.iterm2_shell_integration.zsh ] && source ~/.iterm2_shell_integration.zsh
 
 source ~/.dotfiles/zsh/path.zsh
 source ~/.dotfiles/zsh/env.zsh
@@ -37,16 +39,8 @@ HISTFILE=$HOME/.zsh_history
 HISTSIZE=100000
 SAVEHIST=$HISTSIZE
 
-#### FIG ENV VARIABLES ####
-# Please make sure this block is at the start of this file.
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
-#### END FIG ENV VARIABLES ####
-
 # Import ssh keys in keychain
 ssh-add -A 2>/dev/null
-
-# Integrate iTerm features
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
 
 # fnm
 eval "$(fnm env --use-on-cd)"
