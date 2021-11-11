@@ -67,3 +67,5 @@ _fzf_compgen_dir() {
 autoload -U promptinit
 promptinit
 prompt spaceship
+
+[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
