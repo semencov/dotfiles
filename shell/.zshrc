@@ -1,4 +1,3 @@
-[ -s ~/.fig/shell/pre.sh ] && source ~/.fig/shell/pre.sh
 [ -s ~/.iterm2_shell_integration.zsh ] && source ~/.iterm2_shell_integration.zsh
 
 source ~/.dotfiles/zsh/path.zsh
@@ -67,5 +66,3 @@ _fzf_compgen_dir() {
 autoload -U promptinit
 promptinit
 prompt spaceship
-
-[ -s ~/.fig/fig.sh ] && source ~/.fig/fig.sh
