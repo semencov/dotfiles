@@ -58,14 +58,15 @@
     l = log --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
     ll = log --stat --abbrev-commit
     wtf = diff --name-only --diff-filter=U
-    pl = "!git pull origin $(git current) --rebase"
-    ph  = "!git push origin $(git current)"
+    br = "!br $@"
+    pl = "!pull"
+    ph  = "!push"
     yolo = "!git commit -am \"$(curl -s whatthecommit.com/index.txt)\""
     patch = "!git --no-pager diff --no-color"
     master = "!git checkout master && git pull origin master --rebase"
     new = checkout -b
     done = "!git add . && git commit -a && git push -u origin $(git current)"
-    purge = "!git push --delete origin $1 && git branch -D $1"
+    purge = "!git push --delete origin $1 && branch -D $1"
     # Merge fresh master into the current branch
     mmm = "!git fetch origin master && git merge origin/master --no-edit"
     up = "!git fetch; git rebase --autostash FETCH_HEAD"

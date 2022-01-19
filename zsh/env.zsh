@@ -1,35 +1,35 @@
 # Hide username in prompt
 export DEFAULT_USER=$(whoami)
+export GITHUB_USER="semencov"
 
 # Locale
 export LC_ALL=en_US.UTF-8
 export LANG="en_US"
 
-
 SSH_ENV="$HOME/.ssh/agent-environment"
 
 function start_agent {
-    ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
-    chmod 600 "${SSH_ENV}"
-    . "${SSH_ENV}" > /dev/null
-    ssh-add
+  ssh-agent | sed 's/^echo/#echo/' >"${SSH_ENV}"
+  chmod 600 "${SSH_ENV}"
+  . "${SSH_ENV}" >/dev/null
+  ssh-add
 }
 
 # Source SSH settings, if applicable
 if [ -f "${SSH_ENV}" ]; then
-    . "${SSH_ENV}" > /dev/null
-    #ps ${SSH_AGENT_PID} doesn't work under cywgin
-    ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ > /dev/null || {
-        start_agent
-    }
+  . "${SSH_ENV}" >/dev/null
+  #ps ${SSH_AGENT_PID} doesn't work under cywgin
+  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ >/dev/null || {
+    start_agent
+  }
 else
-    start_agent;
+  start_agent
 fi
 
 export GPG_TTY="$(tty)"
 
 if command -v brew 1>/dev/null; then
-    export HOMEBREW_PREFIX=$(brew --prefix)
+  export HOMEBREW_PREFIX=$(brew --prefix)
 fi
 
 # NVM
@@ -44,9 +44,9 @@ export N_PRESERVE_NPM=1
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then
-    export EDITOR='nano'
+  export EDITOR='nano'
 else
-    export EDITOR='micro'
+  export EDITOR='micro'
 fi
 
 # Don't clear the screen after quitting a manual page
