@@ -1,9 +1,0 @@
-{
-  "extends": "@smcv/eslint-config",
-  "parserOptions": {
-    "sourceType": "script"
-  },
-  "rules": {
-    "no-console": 0
-  }
-}

@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env zx
 
 //
 // Show Geo information by IP
@@ -7,51 +7,47 @@
 //   ip-geo [ip_addr]
 //
 
-const http = require('http');
-const argv = require('yargs').argv;
-const { cyan, gray } = require('chalk');
-const open = require('open');
+$.verbose = false
 
-const host = argv._.pop();
-const url = host ? `http://ip-api.com/json/${host}` : `http://ip-api.com/json`;
+const {
+	_: [, host = ''],
+} = argv
 
-http.get(url, (res) => {
-  res.on('data', async (chunk) => {
-    try {
-      const data = JSON.parse(chunk);
-      if (data.status === "success") {
-        const {
-          query, 
-          as, 
-          city, 
-          regionName, 
-          country, 
-          timezone, 
-          lat, 
-          lon, 
-          isp, 
-          org
-        } = data;
-        
-        const location = [city, regionName, country].filter((e, i, arr) => arr.lastIndexOf(e) === i);
+const resp = await fetch(`http://ip-api.com/json/${host}`)
 
-        console.log(gray(`      IP:`), cyan(query));
-        console.log(gray(`      AS:`), as);
-        console.log(gray(` Address:`), location.join(', '));
-        console.log(gray(`Timezone:`), timezone);
-        console.log(gray(`Location:`), `${lat}, ${lon}`);
-        console.log(gray(` ISP/Org:`), `${isp}${(isp !== org ? ' / ' + org : '')}`);
+if (resp.ok) {
+	const data = await resp.json()
 
+	if (!('success' in data) || data?.status === 'success') {
+		const result = {
+			ip: data?.query ?? data?.ip,
+			as: data?.as,
+			isp: `${data?.isp ?? 'N/A'}${
+				data?.isp !== data?.org ? ' / ' + data?.org : ''
+			}`,
+			address: [
+				data?.city,
+				data?.regionName ?? data?.region_name,
+				data?.country ?? data?.country_name,
+			].filter((e, i, arr) => e !== '' && arr.lastIndexOf(e) === i),
+			timezone: data?.timezone ?? data?.time_zone ?? 'N/A',
+			lat: data?.lat ?? data?.latitude ?? 'N/A',
+			lon: data?.lon ?? data?.longitude ?? 'N/A',
+		}
 
-        if (argv.m || argv.map) {
-            await open(`https://www.google.com/maps/search/?api=1&query=${lat},${lon}`);
-        }
-      }
-      else {
-        console.error(data.message);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  });
-});
+		console.log(chalk.gray(`      IP:`), chalk.cyan(result.ip))
+		console.log(chalk.gray(` ISP/Org:`), result.isp)
+		console.log(chalk.gray(`      AS:`), result.as)
+		console.log(chalk.gray(` Address:`), result.address.join(', '))
+		console.log(chalk.gray(`Timezone:`), result.timezone)
+		console.log(chalk.gray(`Location:`), `${result.lat}, ${result.lon}`)
+
+		if (argv.m || argv.map) {
+			import('open').then(open =>
+				open(
+					`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`
+				)
+			)
+		}
+	}
+}

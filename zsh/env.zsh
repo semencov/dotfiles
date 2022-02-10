@@ -32,15 +32,12 @@ if command -v brew 1>/dev/null; then
   export HOMEBREW_PREFIX=$(brew --prefix)
 fi
 
-# NVM
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+# Node.js Options
+export NODE_OPTIONS="--max-old-space-size=4096"
 
-# n
-export N_PRESERVE_NPM=1
-
-# # Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
-# export NPM_PACKAGES="$NVM_DIR/global"
-# export NPM_CONFIG_PREFIX=$NPM_PACKAGES
+# Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
+export NPM_PACKAGES="${HOME}/.npm-global"
+export NPM_CONFIG_PREFIX=$NPM_PACKAGES
 
 # Preferred editor for local and remote sessions
 if [[ -n $SSH_CONNECTION ]]; then

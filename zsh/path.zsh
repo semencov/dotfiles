@@ -2,9 +2,9 @@ fpath=($HOME/.zfunctions $HOME/.dotfiles/zsh/functions $fpath)
 
 # Prepend $PATH without duplicates
 function _prepend_path() {
-    if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$1"); then
-        PATH="$1:$PATH"
-    fi
+  if ! $(echo "$PATH" | tr ":" "\n" | grep -qx "$1"); then
+    PATH="$1:$PATH"
+  fi
 }
 
 # Construct $PATH
@@ -23,6 +23,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d /usr/local/opt/coreutils/libexec/gnubin ] && _prepend_path "/usr/local/opt/coreutils/libexec/gnubin"
 [ -d ~/.dotfiles/bin ] && _prepend_path "$HOME/.dotfiles/bin"
 [ -d ~/.composer/vendor/bin ] && _prepend_path "$HOME/.composer/vendor/bin"
+[ -d ~/.npm-global/bin ] && _prepend_path "$HOME/.npm-global/bin"
 [ -d ~/bin ] && _prepend_path "$HOME/bin"
 
 export PATH
