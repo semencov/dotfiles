@@ -47,5 +47,3 @@ npm install --global \
   netlify-cli \
   @zeplin/cli \
   @aws-amplify/cli
-
-sudo chown -R $(whoami) $(npm config get prefix)/{lib/node_modules,bin,share}
