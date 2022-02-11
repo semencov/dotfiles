@@ -2,6 +2,8 @@
 
 # fnm, Node version manager
 fnm install --lts
+fnm default system
+fnm use default
 
 # Setup NPM initial settings
 [ -d "${HOME}/.npm-global" ] || mkdir "${HOME}/.npm-global"
