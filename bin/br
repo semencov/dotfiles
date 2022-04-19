@@ -19,6 +19,14 @@ if [ "$1" == "-" ] && [ "$1" != "-d" ] && [ "$1" != "-D" ] && [ "$1" != "" ]; th
   fi
 fi
 
+if [ "$1" == "-" ]; then
+  # Switch to the previous branch
+  git checkout -
+else
+  # Pass all the arguments to branch
+  branch $@
+fi
+
 # Pull if a remote branch exists
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 remote_branch_exists=$(git branch -r --no-color | egrep " origin/$branch_name\$")

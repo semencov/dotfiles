@@ -12,6 +12,7 @@
     include = ~/.gitlocal
     excludesfile = ~/.gitignore
 	autocrlf = input
+	quotepath = off
 [color]
     diff   = auto
     status = auto
