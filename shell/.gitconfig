@@ -11,6 +11,7 @@
     pager = delta
     include = ~/.gitlocal
     excludesfile = ~/.gitignore
+    fileMode = false
 	autocrlf = input
 	quotepath = off
 [color]
