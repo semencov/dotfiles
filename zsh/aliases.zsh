@@ -52,7 +52,8 @@ alias j="npx jest --watch"
 alias removehost="ssh-keygen -R"
 alias which-command="whence"
 alias rgl='rg -l'
-alias rga='rg --no-ignore'
+alias rga='rg --hidden --no-ignore'
+alias fda='fd --hidden --no-ignore'
 alias copykey='command cat ~/.ssh/id_rsa.pub | cb'
 
 # Git
