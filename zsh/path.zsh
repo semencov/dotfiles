@@ -14,8 +14,8 @@ function _prepend_path() {
 
 PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 
-[ -d "/home/linuxbrew/.linuxbrew/bin" ] && _prepend_path "/home/linuxbrew/.linuxbrew/bin"
-[ -d "/home/linuxbrew/.linuxbrew/sbin" ] && _prepend_path "/home/linuxbrew/.linuxbrew/sbin"
+[ -d "/opt/homebrew/bin" ] && _prepend_path "/opt/homebrew/bin"
+[ -d "/opt/homebrew/sbin" ] && _prepend_path "/opt/homebrew/sbin"
 [ -d "$NPM_PACKAGES/bin" ] && _prepend_path "$NPM_PACKAGES/bin"
 [ -d ~/.fnm ] && _prepend_path "$HOME/.fnm"
 [ -d /usr/local/bin ] && _prepend_path "/usr/local/bin"

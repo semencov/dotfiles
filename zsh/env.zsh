@@ -6,26 +6,6 @@ export GITHUB_USER="semencov"
 export LC_ALL=en_US.UTF-8
 export LANG="en_US"
 
-SSH_ENV="$HOME/.ssh/agent-environment"
-
-function start_agent {
-  ssh-agent | sed 's/^echo/#echo/' >"${SSH_ENV}"
-  chmod 600 "${SSH_ENV}"
-  . "${SSH_ENV}" >/dev/null
-  ssh-add
-}
-
-# Source SSH settings, if applicable
-if [ -f "${SSH_ENV}" ]; then
-  . "${SSH_ENV}" >/dev/null
-  #ps ${SSH_AGENT_PID} doesn't work under cywgin
-  ps -ef | grep ${SSH_AGENT_PID} | grep ssh-agent$ >/dev/null || {
-    start_agent
-  }
-else
-  start_agent
-fi
-
 export GPG_TTY="$(tty)"
 
 if command -v brew 1>/dev/null; then
@@ -33,7 +13,7 @@ if command -v brew 1>/dev/null; then
 fi
 
 # Node.js Options
-export NODE_OPTIONS="--max-old-space-size=4096"
+export NODE_OPTIONS="--max-old-space-size=6144"
 
 # Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
 export NPM_PACKAGES="${HOME}/.npm-global"
@@ -68,4 +48,4 @@ export GIT_FRIENDLY_NO_COPY_URL_AFTER_PUSH=true
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"
 
 # pj
-export PROJECT_PATHS=(~/Projects/*)
+export PROJECT_PATHS=(~/Projects)
