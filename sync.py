@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Dotfiles syncronization.
@@ -35,15 +35,15 @@ def main():
 			if is_link_to(dotfile, source):
 				continue
 
-			response = raw_input("Overwrite file `%s'? [y/N] " % dotfile)
+			response = input("Overwrite file " + dotfile + "? [y/N] ")
 			if not response.lower().startswith('y'):
-				print "Skipping `%s'..." % dotfile
+				print("Skipping " + dotfile + "...")
 				continue
 
 			force_remove(dotfile)
 
 		os.symlink(source, dotfile)
-		print "%s => %s" % (dotfile, source)
+		print(dotfile + " => " + source)
 
 
 if __name__ == '__main__':
