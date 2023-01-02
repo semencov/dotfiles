@@ -10,6 +10,7 @@ export GPG_TTY="$(tty)"
 
 if command -v brew 1>/dev/null; then
   export HOMEBREW_PREFIX=$(brew --prefix)
+  export HOMEBREW_NO_ENV_HINTS=true
 fi
 
 # Node.js Options

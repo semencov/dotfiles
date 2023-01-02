@@ -7,7 +7,7 @@
 # License: MIT
 # https://github.com/sapegin/dotfiles
 
-source /opt/homebrew/opt/spaceship/spaceship.zsh
+source $HOMEBREW_PREFIX/opt/spaceship/spaceship.zsh
 source ~/.dotfiles/zsh/prompt/sections/git_simple.zsh
 
 SPACESHIP_PROMPT_ORDER=(
