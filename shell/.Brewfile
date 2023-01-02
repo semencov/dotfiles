@@ -11,6 +11,7 @@ cask_args appdir: "/Applications"
 brew "zsh"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
+brew "spaceship"
 
 brew "coreutils"
 brew "findutils"
