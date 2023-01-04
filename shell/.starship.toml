@@ -4,6 +4,7 @@ format = """\
   $directory\
   $custom\
   $git_simple\
+  $nodejs
   $line_break\
   $character\
   """
@@ -16,3 +17,6 @@ style = "cyan"
 command = "starship-git-simple"
 when = "true"
 style = ""
+
+[nodejs]
+symbol = ""
