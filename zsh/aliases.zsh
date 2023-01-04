@@ -17,6 +17,8 @@ alias o="open"
 alias oo="open ."
 alias e="$EDITOR"
 alias ee="$EDITOR ."
+alias c="$GUI_EDITOR"
+alias cc="$GUI_EDITOR ."
 
 # ls
 alias ls='exa -G'
@@ -95,7 +97,7 @@ alias zs="source ~/.zshrc"
 alias zshrc="$EDITOR $HOME/.zshrc"
 alias sshconfig="$EDITOR $HOME/.ssh/config"
 alias hostfile="sudo $EDITOR /etc/hosts"
-alias dotfiles="$EDITOR $HOME/.dotfiles"
+alias dotfiles="$GUI_EDITOR $HOME/.dotfiles"
 
 t() {
   # Defaults to 3 levels deep, do more with `t 5` or `t 1`

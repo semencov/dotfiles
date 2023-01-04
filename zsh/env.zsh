@@ -27,6 +27,13 @@ else
   export EDITOR='micro'
 fi
 
+if [[ -n $SSH_CONNECTION ]]; then
+  export GUI_EDITOR=$EDITOR
+else
+  command -v bat >/dev/null 2>&1 && export GUI_EDITOR='code' || export GUI_EDITOR=$EDITOR
+fi
+
+
 # Don't clear the screen after quitting a manual page
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 

@@ -8,13 +8,13 @@
 # https://github.com/sapegin/dotfiles
 
 source $HOMEBREW_PREFIX/opt/spaceship/spaceship.zsh
-source ~/.dotfiles/zsh/prompt/sections/git_simple.zsh
+# source ~/.dotfiles/zsh/prompt/sections/git_simple.zsh
 
 SPACESHIP_PROMPT_ORDER=(
   user       # Username section
   dir        # Current directory section
   host       # Hostname section
-  git_simple # Custom Git section
+  git_branch # git_simple # Custom Git section
   line_sep   # Line break
   jobs       # Background jobs indicator
   exit_code  # Exit code section
