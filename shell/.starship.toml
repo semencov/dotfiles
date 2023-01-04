@@ -10,7 +10,7 @@ format = """\
 command_timeout = 2000
 
 [directory]
-style = "bold white"
+style = "cyan"
 
 [custom.git_simple]
 command = "starship-git-simple"
