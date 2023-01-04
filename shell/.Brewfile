@@ -9,9 +9,9 @@ tap "homebrew/core"
 cask_args appdir: "/Applications"
 
 brew "zsh"
+brew "starship"
 brew "zsh-autosuggestions"
 brew "zsh-syntax-highlighting"
-brew "spaceship"
 
 brew "coreutils"
 brew "findutils"

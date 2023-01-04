@@ -14,7 +14,8 @@ SPACESHIP_PROMPT_ORDER=(
   user       # Username section
   dir        # Current directory section
   host       # Hostname section
-  git_branch # git_simple # Custom Git section
+  git        # git_simple Custom Git section
+  node
   line_sep   # Line break
   jobs       # Background jobs indicator
   exit_code  # Exit code section
