@@ -6,7 +6,6 @@ source ~/.dotfiles/zsh/aliases.zsh
 source ~/.dotfiles/zsh/completions.zsh
 source ~/.dotfiles/zsh/key-bindings.zsh
 source ~/.dotfiles/zsh/plugins.zsh
-# source ~/.dotfiles/zsh/prompt/prompt.zsh
 
 # Do not overwrite files when redirecting using ">". Note that you can still override this with ">|"
 # set -o noclobber
