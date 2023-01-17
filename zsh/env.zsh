@@ -15,6 +15,7 @@ fi
 
 # Node.js Options
 export NODE_OPTIONS="--max-old-space-size=6144"
+export NODE_TLS_REJECT_UNAUTHORIZED=0
 
 # Sudoless npm https://github.com/sindresorhus/guides/blob/master/npm-global-without-sudo.md
 export NPM_PACKAGES="${HOME}/.npm-global"
