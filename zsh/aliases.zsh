@@ -75,15 +75,6 @@ alias gist-paste="gist --private --copy --paste --filename"
 # gist-file filename.ext -- create private Gist from a file
 alias gist-file="gist --private --copy"
 
-# PHP
-alias art="php artisan"
-alias c="composer"
-alias cu="composer update"
-alias cr="composer require"
-alias ci="composer install"
-alias cgr="composer global require"
-alias cda="composer dump-autoload -o"
-
 # lsof
 alias lstcp='sudo lsof -iTCP -sTCP:LISTEN -P -n'
 alias lsudp='sudo lsof -iUDP -P -n'
