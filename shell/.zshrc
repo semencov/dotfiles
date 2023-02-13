@@ -43,6 +43,9 @@ ssh-add -A 2>/dev/null
 # fnm
 eval "$(fnm env --use-on-cd)"
 
+# Enable zsh-syntax-highlighting: https://github.com/zsh-users/zsh-syntax-highlighting
+[ -f /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && source /usr/local/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
 # Enable fzf: https://github.com/junegunn/fzf
 # Use fd (https://github.com/sharkdp/fd) to respect .gitignore
 export FZF_DEFAULT_COMMAND='fd --type f'
