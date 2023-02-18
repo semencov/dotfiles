@@ -1,0 +1,20 @@
+#!/usr/bin/env zx
+
+// @ts-ignore
+// import { spinner } from "zx/experimental";
+import spinner from "./spinningPromise.mjs";
+
+$.verbose = false;
+
+const { _: folders, remove = false } = argv;
+const DEST_DIR = `${$.env.HOME}/Projects/.archive`;
+
+for (const folder of folders) {
+  await spinner(`Archiving ${folder}`, async () => {
+    const basename = path.basename(folder);
+    const archiveName = `${basename}.7z`;
+    const archivePath = path.join(DEST_DIR, archiveName);
+    await $`7z a ${archivePath} ${folder}`;
+    await fs.remove(folder);
+  });
+}

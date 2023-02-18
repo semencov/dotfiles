@@ -5,7 +5,6 @@
 import spinner from "./spinningPromise.mjs";
 
 $.verbose = false;
-$.prefix = "set +e;";
 
 const { _: folders, force = false } = argv;
 

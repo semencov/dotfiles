@@ -1,5 +1,6 @@
 alias pjo="pj open"
 alias pjc="pj clean"
+alias pja="pj archive"
 
 pj () {
     emulate -L zsh
@@ -18,7 +19,12 @@ pj () {
             project=$1
             ;;
         "clean")
-            cmd=${="pj-clean"}
+            cmd=pj-clean
+            shift
+            project=$1
+            ;;
+        "archive")
+            cmd=pj-archive
             shift
             project=$1
             ;;
