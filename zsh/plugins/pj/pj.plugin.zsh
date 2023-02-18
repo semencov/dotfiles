@@ -18,7 +18,7 @@ pj () {
             project=$1
             ;;
         "clean")
-            cmd=${="cleanpj"}
+            cmd=${="pj-clean"}
             shift
             project=$1
             ;;
