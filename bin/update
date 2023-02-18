@@ -1,51 +1,38 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env zx
 
-# Get macOS software updates, update Homebrew, npm, Ruby packages, dotfiles and some other software
+// @ts-ignore
+import { spinner } from "zx/experimental";
 
-function header() {
-  echo -e "$(tput sgr 0 1)$(tput setaf 6)$1$(tput sgr0)"
-}
+$.verbose = false;
 
-# Ask for the administrator password upfront
-sudo -v
-echo
+await $`sudo -v`;
 
-# Dotfiles
-header "Updating dotfiles..."
-pushd "$HOME/.dotfiles"
-git pull
-./sync.py
-source "$HOME/.zshrc"
-popd
-echo
+await spinner("Updating dotfiles...", () => {
+  return within(async () => {
+    cd(`${$.env.HOME}/.dotfiles`);
 
-# macOS
-header "Updating macOS..."
-sudo -v
-sudo softwareupdate --all --install --force
-echo
+    await $`pull`;
+    return $`python3 ./sync.py`;
+  });
+});
 
-# Homebrew
-header "Updating Homebrew..."
-sudo -v
-brew upgrade
-brew cleanup
-brew doctor
-echo
+await spinner("Updating macOS...", async () => {
+  $.verbose = true;
+  await $`sudo -v`;
+  return $`sudo softwareupdate --all --install --force`;
+});
 
-# npm
-header "Updating npm..."
-npm-check -gsy
-echo
+await spinner("Updating Homebrew...", async () => {
+  $.verbose = false;
+  await $`brew upgrade`;
+  await $`brew cleanup`;
+  return $`brew doctor`;
+});
 
-# npm
-header "Updating Composer..."
-composer global self-update
-composer global update
-echo
+await spinner("Updating npm...", () => $`npm-check -gsy`);
 
-# git-friendly
-header "Updating git-friendly..."
-sudo -v
-sudo bash < <(curl https://raw.githubusercontent.com/jamiew/git-friendly/master/install.sh)
-echo
+await spinner(
+  "Updating git-friendly...",
+  () =>
+    $`sudo bash < <(curl https://raw.githubusercontent.com/jamiew/git-friendly/master/install.sh)`
+);

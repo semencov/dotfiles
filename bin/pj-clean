@@ -1,0 +1,39 @@
+#!/usr/bin/env zx
+
+// @ts-ignore
+// import { spinner } from "zx/experimental";
+import spinner from "./spinningPromise.mjs";
+
+$.verbose = false;
+$.prefix = "set +e;";
+
+const { _: folders, force = false } = argv;
+
+for (const folder of folders) {
+  await spinner(`Cleaning up ${folder}`, async () => {
+    return within(async () => {
+      cd(folder);
+
+      try {
+        if (force) {
+          await $`git clean -fdx`;
+          await $`git reset --hard`;
+        }
+
+        await $`git prune`;
+      } catch (err) {}
+
+      await $`find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +`;
+      await $`find . -name '.cache' -type d -prune -exec rm -rf '{}' +`;
+      await $`rm -rf ./vendor 2>/dev/null`;
+      await $`find . -name '.DS_Store' -type f -delete`;
+      await $`find . -name 'Thumbs.db' -type f -delete`;
+      await $`find . -name '._*' -type f -delete`;
+      await $`find . -name '*.log' -type f -delete`;
+      await $`find . -name '.Spotlight-V100' -type d -prune -exec rm -rf '{}' +`;
+      await $`find . -name '.Trashes' -type d -prune -exec rm -rf '{}' +`;
+      await $`find . -name '.fseventsd' -type d -prune -exec rm -rf '{}' +`;
+      await $`find . -name '.TemporaryItems' -type d -prune -exec rm -rf '{}' +`;
+    });
+  });
+}

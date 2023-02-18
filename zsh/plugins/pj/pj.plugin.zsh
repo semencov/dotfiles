@@ -1,4 +1,5 @@
 alias pjo="pj open"
+alias pjc="pj clean"
 
 pj () {
     emulate -L zsh
@@ -6,13 +7,25 @@ pj () {
     cmd="cd"
     project=$1
 
-    if [[ "open" == "$project" ]]; then
-        shift
-        project=$*
-        cmd=${=EDITOR}
-    else
-        project=$*
-    fi
+    case "$project" in
+        "-h"|"--help")
+            echo "Usage: pj [project]"
+            return
+            ;;
+        "open")
+            cmd=${=GUI_EDITOR}
+            shift
+            project=$1
+            ;;
+        "clean")
+            cmd=${="cleanpj"}
+            shift
+            project=$1
+            ;;
+        *)
+            project=$*
+            ;;
+    esac
 
     for basedir ($PROJECT_PATHS); do
         if [[ -d "$basedir/$project" ]]; then
