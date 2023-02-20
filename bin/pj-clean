@@ -24,6 +24,7 @@ for (const folder of folders) {
 
       await $`find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +`;
       await $`find . -name '.cache' -type d -prune -exec rm -rf '{}' +`;
+      await $`find . -name '.idea' -type d -prune -exec rm -rf '{}' +`;
       await $`rm -rf ./vendor 2>/dev/null`;
       await $`find . -name '.DS_Store' -type f -delete`;
       await $`find . -name 'Thumbs.db' -type f -delete`;
