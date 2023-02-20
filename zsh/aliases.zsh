@@ -23,10 +23,10 @@ alias cc="$GUI_EDITOR ."
 # ls
 alias ls='exa -G'
 alias l='exa -1 --group-directories-first'
-alias ll='exa -l --git-ignore -I .git/ --group-directories-first'
-alias la='exa -la --git-ignore -I .git/ --group-directories-first'
-alias llm='exa -la -smodified --git-ignore -I .git/'
-alias lls='exa -la -ssize --git-ignore -I .git/'
+alias ll='exa -l -I .git --git-ignore --group-directories-first --no-user'
+alias la='exa -la --group-directories-first --no-user'
+alias llm='exa -la -smodified --git-ignore -I .git'
+alias lls='exa -la -ssize --git-ignore -I .git'
 
 # rm
 alias rm="rm -i"
