@@ -1,7 +1,7 @@
 [user]
     name = Yuri Sementsov
     email = hello@smcv.dev
-    signingkey = BA577CD2
+    signingkey = 39461CE1
 [credential]
     helper = osxkeychain
 [gpg]
