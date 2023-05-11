@@ -9,9 +9,7 @@
 
 $.verbose = false
 
-const {
-	_: [, host = ''],
-} = argv
+const {	_: [host = ''] } = argv
 
 const resp = await fetch(`http://ip-api.com/json/${host}`)
 
