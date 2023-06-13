@@ -20,6 +20,8 @@ npm config set audit false
 # Npm
 npm install --global \
   zx \
+  qnm \
+  pnpm \
   yarn@legacy \
   npm-upgrade \
   npm-check \
@@ -31,17 +33,7 @@ npm install --global \
   @lhci/cli \
   pageres-cli \
   broken-link-checker \
-  @fabiospampinato/bump \
-  @marp-team/marp-cli \
   @vue/cli \
-  gatsby-cli \
-  preact-cli \
-  serverless \
-  @maizzle/cli \
-  @gridsome/cli \
-  @11ty/eleventy \
-  create-nuxt-app \
-  create-react-app \
   vercel \
   surge \
   netlify-cli \
