@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 
 # Setup syncronization of the current Git repo with GitHub repo of the same name
-# 
+#
 # Usage:
 #   git-github [repo]
-#   
+#
 
 if [[ -z $GITHUB_USER ]]; then
 	echo "\$GITHUB_USER is not defined."
 	exit 1
 fi
 
-local repo=${1-`basename "$(pwd)"`}
+repo=`basename "$(pwd)"`
+gh repo create $GITHUB_USER/$repo --private
+git init -b master
+git add .
+git commit -am "Initial commit"
 git remote add origin "git@github.com:$GITHUB_USER/$repo.git"
 git push -u origin master
