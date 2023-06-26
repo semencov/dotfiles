@@ -44,9 +44,6 @@ alias get="curl -O -L"
 # Download remote page with all assets
 alias getpage="wget --adjust-extension --convert-links --page-requisites --span-hosts --no-host-directories"
 
-# Run npm script without annoying noise
-alias nr="npm run --silent"
-
 # Jest watch
 alias j="npx jest --watch"
 
@@ -116,7 +113,20 @@ clone() {
   fi
   if [[ -r "./yarn.lock" ]]; then
     yarn
+  elif [[ -r "./pnpm-lock.yaml" ]]; then
+    pnpm install
   elif [[ -r "./package-lock.json" ]]; then
     npm install
+  fi
+}
+
+# Run npm script without annoying noise
+nr() {
+  if [[ -r "./yarn.lock" ]]; then
+    yarn run --silent $@
+  elif [[ -r "./pnpm-lock.yaml" ]]; then
+    pnpm run --silent $@
+  else
+    npm run --silent $@
   fi
 }
