@@ -5,6 +5,7 @@ tap "homebrew/bundle"
 tap "homebrew/cask"
 tap "homebrew/cask-fonts"
 tap "homebrew/core"
+tap "ankitpokhrel/jira-cli"
 
 cask_args appdir: "/Applications"
 
@@ -44,6 +45,7 @@ brew "git-recent"
 brew "git-when-merged"
 brew "gist"
 brew "gh"
+brew "jira-cli"
 
 cask "dropbox"
 cask "numi"

@@ -17,4 +17,4 @@ fi
 
 echo "Using $(chromedriver --version)"
 
-chromedriver --port=4444 --verbose --whitelisted-ips= --url-base=wd/hub
+chromedriver --port=4444 --verbose --whitelisted-ips= --url-base=wd/hub --force-prefers-reduced-motion
