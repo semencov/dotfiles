@@ -27,7 +27,7 @@ brew "curl"
 brew "httpie"
 brew "bat", args: ["build-from-source"]
 brew "micro"
-brew "exa"
+brew "eza"
 brew "fd"
 brew "tree"
 brew "ncdu"
