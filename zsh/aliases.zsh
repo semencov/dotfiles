@@ -103,6 +103,22 @@ gr() {
   cd "./$(git rev-parse --show-cdup 2>/dev/null)" 2>/dev/null
 }
 
+# shortcut to the project's package manager
+np() {
+  if [[ -r "./yarn.lock" ]]; then
+    yarn $@
+  elif [[ -r "./pnpm-lock.yaml" ]]; then
+    pnpm $@
+  else
+    npm $@
+  fi
+}
+
+# Run npm script without annoying noise
+nr() {
+  np run --silent $@
+}
+
 # git clone and cd to a repo directory
 clone() {
   git clone $@
@@ -111,22 +127,6 @@ clone() {
   else
     cd $(basename "$1" .git)
   fi
-  if [[ -r "./yarn.lock" ]]; then
-    yarn
-  elif [[ -r "./pnpm-lock.yaml" ]]; then
-    pnpm install
-  elif [[ -r "./package-lock.json" ]]; then
-    npm install
-  fi
-}
 
-# Run npm script without annoying noise
-nr() {
-  if [[ -r "./yarn.lock" ]]; then
-    yarn run --silent $@
-  elif [[ -r "./pnpm-lock.yaml" ]]; then
-    pnpm run --silent $@
-  else
-    npm run --silent $@
-  fi
+  np install
 }
