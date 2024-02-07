@@ -12,6 +12,8 @@ function _prepend_path() {
 # 2. ./node_modules/.bin - shorcut to run locally installed Node bins
 # 3. Custom bin folder for n, Ruby, CoreUtils, dotfiles, etc.
 
+export PNPM_HOME="$HOME/Library/pnpm"
+
 PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_modules/.bin'
 
 [ -d "/opt/homebrew/bin" ] && _prepend_path "/opt/homebrew/bin"
@@ -24,6 +26,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d ~/.dotfiles/bin ] && _prepend_path "$HOME/.dotfiles/bin"
 [ -d ~/.composer/vendor/bin ] && _prepend_path "$HOME/.composer/vendor/bin"
 [ -d ~/.npm-global/bin ] && _prepend_path "$HOME/.npm-global/bin"
+[ -d "$PNPM_HOME" ] && _prepend_path "$PNPM_HOME"
 [ -d ~/bin ] && _prepend_path "$HOME/bin"
 
 export PATH

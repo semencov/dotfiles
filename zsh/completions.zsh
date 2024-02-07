@@ -35,3 +35,6 @@ zstyle ':completion::complete:*' cache-path $ZSH_CACHE_DIR
 fpath=($HOMEBREW_PREFIX/share/zsh/functions $HOMEBREW_PREFIX/share/zsh-completions/functions $fpath)
 autoload -Uz _git && _git
 compdef __git_branch_names branch br
+
+# Autocompletions for pnpm
+[[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
