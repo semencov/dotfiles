@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 BRANCH=master
 START_DATE=$1

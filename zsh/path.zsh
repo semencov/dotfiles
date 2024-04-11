@@ -27,6 +27,6 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d ~/.composer/vendor/bin ] && _prepend_path "$HOME/.composer/vendor/bin"
 [ -d ~/.npm-global/bin ] && _prepend_path "$HOME/.npm-global/bin"
 [ -d "$PNPM_HOME" ] && _prepend_path "$PNPM_HOME"
-[ -d ~/bin ] && _prepend_path "$HOME/bin"
+[ -d ~/.bin ] && _prepend_path "$HOME/.bin"
 
 export PATH
