@@ -1,7 +1,5 @@
 #!/usr/bin/env zx
 
-// @ts-ignore
-// import { spinner } from "zx/experimental";
 import spinner from "./spinningPromise.mjs";
 
 $.verbose = false;

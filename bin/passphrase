@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Human readable password generator.
 # Based on https://github.com/Version2beta/passphrase
@@ -13,4 +13,4 @@ words = random.sample(list(open(DICT)), 2)
 phrase = name[0].rstrip().lower()
 for word in words:
 	phrase = phrase + word.rstrip().lower()
-print phrase
+print(phrase)

@@ -4,6 +4,7 @@ format = """\
   $directory\
   $custom\
   $git_simple\
+  $nodejs\
   $line_break\
   $character\
   """
@@ -18,4 +19,4 @@ when = "true"
 style = ""
 
 [nodejs]
-symbol = ""
+format = '[[ ($version) ](fg:#769ff0)]($style)'

@@ -15,12 +15,12 @@ await spinner("Updating dotfiles...",
   })
 );
 
-await spinner("Updating macOS...",
-  async () => {
-    await $`sudo -v`;
-    return $`sudo softwareupdate --all --install --force`;
-  }
-);
+// await spinner("Updating macOS...",
+//   async () => {
+//     await $`sudo -v`;
+//     return $`sudo softwareupdate --all --install --force`;
+//   }
+// );
 
 await spinner("Updating Homebrew...",
   async () => {
