@@ -17,6 +17,9 @@ npm config set init-version "0.0.1"
 npm config set fund false
 npm config set audit false
 
+corepack enable
+corepack enable npm
+
 # Npm
 npm install --global \
   zx \
