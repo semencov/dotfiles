@@ -35,10 +35,8 @@ npm install --global \
   lerna \
   @lhci/cli \
   pageres-cli \
-  broken-link-checker \
   @vue/cli \
   vercel \
   surge \
   netlify-cli \
-  @zeplin/cli \
   @aws-amplify/cli
