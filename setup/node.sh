@@ -7,6 +7,8 @@ fnm use default
 
 # Setup NPM initial settings
 [ -d "${HOME}/.npm-global" ] || mkdir "${HOME}/.npm-global"
+[ -d "${HOME}/.pnpm-global" ] || mkdir "${HOME}/.pnpm-global"
+
 npm config set prefix "${HOME}/.npm-global"
 npm config set loglevel error
 npm config set init-author-name "Yuri Sementsov"
@@ -23,20 +25,23 @@ corepack enable npm
 # Npm
 npm install --global \
   zx \
+  yarn@legacy \
+  vercel \
+  typescript \
+  turbo \
+  ts-node \
+  tldr \
+  surge \
+  serve \
   qnm \
   pnpm \
-  yarn@legacy \
   npm-upgrade \
   npm-check \
   npkill \
-  tldr \
-  quicktype \
-  serve \
-  lerna \
-  @lhci/cli \
-  pageres-cli \
-  @vue/cli \
-  vercel \
-  surge \
   netlify-cli \
+  lerna \
+  degit \
+  @vue/cli \
+  @lhci/cli \
+  @biomejs/biome \
   @aws-amplify/cli
