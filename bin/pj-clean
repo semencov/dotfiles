@@ -2,8 +2,6 @@
 
 import spinner from "./spinningPromise.mjs";
 
-$.verbose = false;
-
 const { _: folders, force = false } = argv;
 
 for (const folder of folders) {

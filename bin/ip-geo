@@ -1,50 +1,33 @@
 #!/usr/bin/env zx
 
-//
-// Show Geo information by IP
-//
-// Usage:
-//   ip-geo [ip_addr]
-//
-
-$.verbose = false
-
-const {	_: [host = ''] } = argv
+const { _: [host = ''] } = argv
 
 const resp = await fetch(`http://ip-api.com/json/${host}`)
 
 if (resp.ok) {
 	const data = await resp.json()
 
-	if (!('success' in data) || data?.status === 'success') {
+	if (data?.status === 'success') {
 		const result = {
-			ip: data?.query ?? data?.ip,
-			as: data?.as,
-			isp: `${data?.isp ?? 'N/A'}${
-				data?.isp !== data?.org ? ' / ' + data?.org : ''
-			}`,
-			address: [
-				data?.city,
-				data?.regionName ?? data?.region_name,
-				data?.country ?? data?.country_name,
-			].filter((e, i, arr) => e !== '' && arr.lastIndexOf(e) === i),
-			timezone: data?.timezone ?? data?.time_zone ?? 'N/A',
-			lat: data?.lat ?? data?.latitude ?? 'N/A',
-			lon: data?.lon ?? data?.longitude ?? 'N/A',
+			ip: data.query ?? data.ip,
+			as: data.as,
+			isp: `${data.isp ?? 'N/A'}${data.isp !== data.org ? ` / ${data.org}` : ''}`,
+			address: [data.city, data.regionName, data.country].filter(Boolean),
+			timezone: data.timezone ?? 'N/A',
+			lat: data.lat ?? 'N/A',
+			lon: data.lon ?? 'N/A',
 		}
 
-		console.log(chalk.gray(`      IP:`), chalk.cyan(result.ip))
-		console.log(chalk.gray(` ISP/Org:`), result.isp)
-		console.log(chalk.gray(`      AS:`), result.as)
-		console.log(chalk.gray(` Address:`), result.address.join(', '))
-		console.log(chalk.gray(`Timezone:`), result.timezone)
-		console.log(chalk.gray(`Location:`), `${result.lat}, ${result.lon}`)
+		echo(chalk.gray("      IP:"), chalk.cyan(result.ip))
+		echo(chalk.gray(" ISP/Org:"), result.isp)
+		echo(chalk.gray("      AS:"), result.as)
+		echo(chalk.gray(" Address:"), result.address.join(', '))
+		echo(chalk.gray("Timezone:"), result.timezone)
+		echo(chalk.gray("Location:"), `${result.lat}, ${result.lon}`)
 
 		if (argv.m || argv.map) {
 			import('open').then(open =>
-				open(
-					`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`
-				)
+				open(`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`)
 			)
 		}
 	}

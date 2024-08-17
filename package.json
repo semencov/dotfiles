@@ -7,12 +7,12 @@
 		"node": ">=14.3"
 	},
 	"dependencies": {
+		"@total-typescript/tsconfig": "^1.0.4",
 		"diff-so-fancy": "^1.4.3",
-		"glob": "^8.0.3",
-		"open": "^8.4.0",
-		"ora": "^6.1.2",
-		"pretty-bytes-cli": "^3.0.0",
-		"yargs": "^17.6.2",
-		"zx": "^7.1.1"
+		"glob": "^11.0.0",
+		"open": "^10.1.0",
+		"ora": "^8.0.1",
+		"typescript": "^5.5.4",
+		"zx": "^8.1.4"
 	}
 }

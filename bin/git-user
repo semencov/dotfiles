@@ -1,32 +1,37 @@
-#!/usr/bin/env zsh
-#
-# Show / Set current Git repo user name and email
-#
+#!/usr/bin/env zx
 
-set_gituser() {
-    git config user.name "$1"
-    git config user.email "$2"
-}
+import { $, argv } from "zx";
 
-get_gituser() {
-    local name=$(git config user.name)
-    local email=$(git config user.email)
-    echo "$name <$email>"
-}
+const setGituser = async (name, email) => {
+	await $`git config user.name ${name}`;
+	await $`git config user.email ${email}`;
+};
 
-if git rev-parse --git-dir >/dev/null 2>&1; then
-    while getopts "n:e:" flag; do
-        case $flag in
-        n) name=${OPTARG} ;;
-        e) email=${OPTARG} ;;
-        esac
-    done
+const getGituser = async () => {
+	const name = await $`git config user.name`;
+	const email = await $`git config user.email`;
+	echo(`${name.stdout.trim()} <${email.stdout.trim()}>`);
+};
 
-    if [[ -z "${name}" && -z "${email}" ]]; then
-        get_gituser
-    else
-        set_gituser "${name:-$(git config user.name)}" "${email:-$(git config user.email)}"
-    fi
-else
-    echo "Not a Git repository"
-fi
+const main = async () => {
+	try {
+		await $`git rev-parse --git-dir`;
+
+		const { n: name, e: email } = argv;
+
+		if (!name && !email) {
+			await getGituser();
+		} else {
+			const currentName = await $`git config user.name`;
+			const currentEmail = await $`git config user.email`;
+			await setGituser(
+				name || currentName.stdout.trim(),
+				email || currentEmail.stdout.trim(),
+			);
+		}
+	} catch (error) {
+		console.error("Not a Git repository");
+	}
+};
+
+main();

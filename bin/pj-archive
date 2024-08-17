@@ -1,8 +1,6 @@
 #!/usr/bin/env zx
-
+import { fs, path, $, argv } from "zx";
 import spinner from "./spinningPromise.mjs";
-
-$.verbose = false;
 
 const { _: folders, remove = false } = argv;
 const DEST_DIR = `${$.env.HOME}/Projects/.archive`;

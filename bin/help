@@ -1,23 +1,25 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zx
 
-# Tldr wrapper to show docs from ~/dotfiles/docs
-#
-# Usage:
-#   help command
-#
-# See more:
-# https://github.com/tldr-pages/tldr-node-client
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
-#
+// Tldr wrapper to show docs from ~/dotfiles/docs
+//
+// Usage:
+//   help command
+//
+// See more:
+// https://github.com/tldr-pages/tldr-node-client
+//
 
-root="$(dirname $(dirname $0))"
-md="$root/docs/$1.md"
+process.env.FORCE_COLOR = "1";
 
-if [ -f "$md" ]; then
-	tldr --render "$md"
-else
-	tldr "$@"
-fi
+const {
+	_: [command = ""],
+} = argv;
+
+const root = path.resolve(__dirname, "..");
+const mdFile = path.join(root, "docs", `${command}.md`);
+
+if (await fs.pathExists(mdFile)) {
+	echo(await $`tldr --render ${mdFile}`);
+} else {
+	echo(await $`tldr ${argv._.join(" ")}`);
+}

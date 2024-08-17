@@ -1,13 +1,16 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zx
 
-#
-# Show LAN IP
-#
+import { $, echo } from 'zx';
 
-if hostname -I > /dev/null 2>&1; then
-  ip="$(hostname -I)"
-else
-  ip="$(ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}')"
-fi
+// Show LAN IP
 
-echo $ip
+const $$ = $({ quiet: true });
+let ip;
+
+try {
+  ip = await $$`hostname -I`;
+} catch {
+  ip = await $$`ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'`;
+}
+
+echo(ip.stdout.trim());
