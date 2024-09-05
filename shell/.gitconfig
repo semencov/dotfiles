@@ -75,7 +75,7 @@
     fix = "!br fix/$@"
     done = "!f() { current_branch=$(git current); git rebase $current_branch master && push && git master; }; f"
     fixed = "!f() { current_branch=$(git current); git rebase $current_branch master && push && git master && git purge $current_branch; }; f"
-    purge = "!git push --delete origin $1 && branch -D $1"
+    purge = "!git push --delete origin $1 && git branch -D $1"
     # Merge fresh master into the current branch
     mmm = "!git fetch origin master && git merge origin/master --no-edit"
     up = "!git fetch; git rebase --autostash FETCH_HEAD"
