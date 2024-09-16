@@ -20,20 +20,20 @@
 
 [alias]
     a  = "!git add . && git st"
-    aa = "git add -A"
+    aa = add -A
     ua = reset HEAD
     c = commit
     ca = commit -a
     cam = commit -am
     am = commit --amend
+    ap = commit -a --amend --no-edit
     co = checkout
     d = diff
-    st = status --short --branch
+    s = status -sb
     cp = cherry-pick
-    append = commit -a --amend --no-edit
     skip = rebase --skip
     abort = rebase --abort
-    cont = "!git add . && git rebase --continue"
+    cont = rebase --continue
     current = rev-parse --abbrev-ref HEAD
     last-msg = log -1 --pretty=%B
     l = log --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
@@ -45,7 +45,7 @@
     yolo = "!git commit -am \"$(curl -sL whatthecommit.com/index.txt)\""
     patch = "!git --no-pager diff --no-color"
     master = "!git checkout master && pull"
-    orphan = "!git checkout --orphan $1 && git rm --cached -rf . && git clean -fdx"
+    orphan = "!git checkout --orphan $1 && git rm --cached -rdf . && git clean -fdx"
     new = "!br feature/$@"
     fix = "!br fix/$@"
     done = "!f() { current_branch=$(git current); git rebase $current_branch master && push && git master; }; f"
