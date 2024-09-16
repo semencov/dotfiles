@@ -9,12 +9,12 @@
 [core]
     editor = micro
     pager = delta
-    include = ~/.gitlocal
+	autocrlf = false
+	safecrlf = false
+    mergeoptions = --no-edit
     excludesfile = ~/.gitignore
-    fileMode = false
-	autocrlf = input
-	quotepath = off
-	fileMode = false
+	quotepath = false
+	preloadindex = true
 [color]
 	ui = auto
 
@@ -106,6 +106,8 @@
 	conflictstyle = merge
 [diff]
 	colorMoved = default
+[include]
+	path = .gitlocal
 [filter "media"]
 	required = true
 	clean = git media clean %f
