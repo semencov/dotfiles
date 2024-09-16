@@ -57,7 +57,7 @@ export MICRO_TRUECOLOR=1
 export GIT_FRIENDLY_NO_BUNDLE=true
 
 # git-friendly: disable URL copying after push
-export GIT_FRIENDLY_NO_COPY_URL_AFTER_PUSH=true
+# export GIT_FRIENDLY_NO_COPY_URL_AFTER_PUSH=true
 
 # Ripgrep config file location
 export RIPGREP_CONFIG_PATH="$HOME/.ripgreprc"

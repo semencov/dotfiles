@@ -31,7 +31,3 @@ await spinner("Updating Homebrew...",
 );
 
 await spinner("Updating npm...", () => $`npm-check -gsy`);
-
-await spinner("Updating git-friendly...",
-  () => $`sudo bash < <(curl https://raw.githubusercontent.com/jamiew/git-friendly/master/install.sh)`
-);
