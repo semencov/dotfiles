@@ -26,9 +26,8 @@ if (resp.ok) {
 		echo(chalk.gray("Location:"), `${result.lat}, ${result.lon}`)
 
 		if (argv.m || argv.map) {
-			import('open').then(open =>
-				open(`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`)
-			)
+      const { default: open } = await import('open');
+      open(`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`)
 		}
 	}
 }
