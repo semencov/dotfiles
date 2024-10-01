@@ -1,6 +1,13 @@
 # Caching autocompletion
 # https://blog.callstack.io/supercharge-your-terminal-with-zsh-8b369d689770
 
+fpath=(
+  $HOMEBREW_PREFIX/share/zsh/functions
+  $HOMEBREW_PREFIX/share/zsh/site-functions
+  $HOMEBREW_PREFIX/share/zsh-completions/functions
+  $fpath
+)
+
 autoload -Uz compinit
 
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
@@ -32,7 +39,6 @@ zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion::complete:*' cache-path $ZSH_CACHE_DIR
 
 # Autocompletion for git-friendly
-fpath=($HOMEBREW_PREFIX/share/zsh/functions $HOMEBREW_PREFIX/share/zsh-completions/functions $fpath)
 autoload -Uz _git && _git
 compdef __git_branch_names branch br
 
