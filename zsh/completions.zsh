@@ -8,38 +8,37 @@ fpath=(
   $fpath
 )
 
+# Load and initialize the completion system
 autoload -Uz compinit
 
+# Only regenerate the completion dump once a day
 if [[ -n ~/.zcompdump(#qN.mh+24) ]]; then
   compinit -i
 else
   compinit -C -i
 fi
 
-# Menu-like autocompletion selection
+# Now that compinit is called, we can load the complist module
 zmodload -i zsh/complist
 
-# Automatically list choices on ambiguous completion
+# Set options for completion behavior
 setopt auto_list
-# Automatically use menu completion
 setopt auto_menu
-# Move cursor to end if word had one match
 setopt always_to_end
 
-# Select completions with arrow keys
+# Configure completion styles
 zstyle ':completion:*' menu select
-# Group results by category
 zstyle ':completion:*' group-name ''
-# Enable approximate matches for completion
-zstyle ':completion:::::' completer _expand _complete _ignored _approximate
-# Case and hyphen insensitive
+zstyle ':completion:*' completer _expand _complete _ignored _approximate
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z-_}={A-Za-z_-}' 'r:|=*' 'l:|=* r:|=*'
-# Use caching so that commands like apt and dpkg complete are useable
-zstyle ':completion::complete:*' use-cache 1
-zstyle ':completion::complete:*' cache-path $ZSH_CACHE_DIR
+zstyle ':completion:*' use-cache on
+zstyle ':completion:*' cache-path $ZSH_CACHE_DIR
+
+# Load git completion
+autoload -Uz _git
+zstyle ':completion:*:*:git:*' script $HOMEBREW_PREFIX/share/zsh/site-functions/_git
 
 # Autocompletion for git-friendly
-autoload -Uz _git && _git
 compdef __git_branch_names branch br
 
 # Autocompletions for pnpm
