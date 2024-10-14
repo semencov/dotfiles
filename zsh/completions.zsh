@@ -4,7 +4,7 @@
 fpath=(
   $HOMEBREW_PREFIX/share/zsh/functions
   $HOMEBREW_PREFIX/share/zsh/site-functions
-  $HOMEBREW_PREFIX/share/zsh-completions/functions
+  $HOMEBREW_PREFIX/share/zsh-completions
   $fpath
 )
 
@@ -39,7 +39,7 @@ autoload -Uz _git
 zstyle ':completion:*:*:git:*' script $HOMEBREW_PREFIX/share/zsh/site-functions/_git
 
 # Autocompletion for git-friendly
-compdef __git_branch_names branch br
+compdef __gitex_branch_names branch br
 
 # Autocompletions for pnpm
 [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true

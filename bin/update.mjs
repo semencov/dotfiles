@@ -1,8 +1,5 @@
 #!/usr/bin/env zx
 
-// @ts-ignore
-import { spinner } from "zx/experimental";
-
 $.verbose = false;
 
 await $`sudo -v`;
@@ -15,12 +12,12 @@ await spinner("Updating dotfiles...",
   })
 );
 
-// await spinner("Updating macOS...",
-//   async () => {
-//     await $`sudo -v`;
-//     return $`sudo softwareupdate --all --install --force`;
-//   }
-// );
+await spinner("Updating macOS...",
+  async () => {
+    await $`sudo -v`;
+    return $`sudo softwareupdate --all --install --force`;
+  }
+);
 
 await spinner("Updating Homebrew...",
   async () => {
