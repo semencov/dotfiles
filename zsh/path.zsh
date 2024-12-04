@@ -25,6 +25,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d /usr/local/opt/coreutils/libexec/gnubin ] && _prepend_path "/usr/local/opt/coreutils/libexec/gnubin"
 [ -d ~/.dotfiles/bin ] && _prepend_path "$HOME/.dotfiles/bin"
 [ -d ~/.composer/vendor/bin ] && _prepend_path "$HOME/.composer/vendor/bin"
+[ -d ~/.lando/bin ] && _prepend_path "$HOME/.lando/bin"
 [ -d ~/.npm-global/bin ] && _prepend_path "$HOME/.npm-global/bin"
 [ -d "$PNPM_HOME" ] && _prepend_path "$PNPM_HOME"
 [ -d ~/.bin ] && _prepend_path "$HOME/.bin"
