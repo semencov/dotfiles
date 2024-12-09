@@ -10,6 +10,16 @@ format = """\
   """
 command_timeout = 2000
 
+[username]
+format = "[$user]($style) "
+style_user = "white dimmed"
+aliases = { "yuri.sementsov@usgroup.loc" = "Yuri.Sementsov" }
+
+[hostname]
+ssh_symbol = "@"
+format = "[$ssh_symbol$hostname]($style) in "
+style = "yellow"
+
 [directory]
 style = "cyan"
 
