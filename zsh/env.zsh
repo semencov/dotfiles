@@ -21,17 +21,17 @@ export NODE_OPTIONS="--max-old-space-size=6144 --trace-warnings"
 export NPM_PACKAGES="${HOME}/.npm-global"
 export NPM_CONFIG_PREFIX=$NPM_PACKAGES
 
-if command -v brew 1>/dev/null; then
+if command -v pnpm 1>/dev/null; then
   export NODE_PACKAGE_MANAGER="pnpm"
 else
   export NODE_PACKAGE_MANAGER="npm"
 fi
 
 # Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='nano'
-else
+if command -v micro >/dev/null 2>&1; then
   export EDITOR='micro'
+else
+  export EDITOR='nano'
 fi
 
 if [[ -n $SSH_CONNECTION ]]; then
