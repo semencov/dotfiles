@@ -37,7 +37,7 @@ fi
 if [[ -n $SSH_CONNECTION ]]; then
   export GUI_EDITOR=$EDITOR
 else
-  command -v bat >/dev/null 2>&1 && export GUI_EDITOR='code' || export GUI_EDITOR=$EDITOR
+  command -v code >/dev/null 2>&1 && export GUI_EDITOR='code' || export GUI_EDITOR=$EDITOR
 fi
 
 
