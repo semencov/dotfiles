@@ -28,7 +28,6 @@ npm install --global \
   yarn@legacy \
   vercel \
   typescript \
-  turbo \
   ts-node \
   tldr \
   surge \
@@ -38,10 +37,7 @@ npm install --global \
   npm-upgrade \
   npm-check \
   npkill \
-  netlify-cli \
   lerna \
   degit \
-  @vue/cli \
   @lhci/cli \
-  @biomejs/biome \
-  @aws-amplify/cli
+  @biomejs/biome
