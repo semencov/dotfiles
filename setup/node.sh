@@ -15,7 +15,7 @@ npm config set init-author-name "Yuri Sementsov"
 npm config set init-author-email "hello@smcv.dev"
 npm config set init-author-url "https://smcv.dev"
 npm config set init-license "MIT"
-npm config set init-version "0.0.1"
+npm config set init-version "1.0.0"
 npm config set fund false
 npm config set audit false
 
@@ -28,7 +28,7 @@ npm install --global \
   yarn@legacy \
   vercel \
   typescript \
-  ts-node \
+  tsx \
   tldr \
   surge \
   serve \
