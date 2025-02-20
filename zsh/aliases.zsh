@@ -30,7 +30,7 @@ alias lls='eza -la -ssize --git-ignore -I .git'
 
 # rm
 alias rm="rm -i"
-alias rmf="rm -rf"
+alias rmf="rm -rfv"
 
 # Permissions
 alias -- +x="chmod +x"

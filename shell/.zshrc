@@ -67,3 +67,6 @@ _fzf_compgen_dir() {
 # Starship prompt
 export STARSHIP_CONFIG=~/.starship.toml
 eval "$(starship init zsh)"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/yuri.sementsov/.cache/lm-studio/bin"
