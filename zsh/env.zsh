@@ -37,8 +37,13 @@ fi
 if [[ -n $SSH_CONNECTION ]]; then
   export GUI_EDITOR=$EDITOR
 else
-  command -v zed >/dev/null 2>&1 && export GUI_EDITOR='zed' || export GUI_EDITOR=$EDITOR
-  command -v code >/dev/null 2>&1 && export GUI_EDITOR='code' || export GUI_EDITOR=$EDITOR
+  if command -v zed >/dev/null 1>/dev/null; then
+    export GUI_EDITOR='zed'
+  elif command -v code >/dev/null 1>/dev/null; then
+    export GUI_EDITOR='code'
+  else
+    export GUI_EDITOR=$EDITOR
+  fi
 fi
 
 
