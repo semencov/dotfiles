@@ -36,7 +36,7 @@ alias rmf="rm -rfv"
 alias -- +x="chmod +x"
 
 # Bat: https://github.com/sharkdp/bat
-command -v bat >/dev/null 2>&1 && alias cat="bat --style=numbers,changes"
+command -v bat >/dev/null 2>&1 && alias cat="bat --style=numbers,changes --paging=never"
 
 # Download file and save it with filename of remote file
 alias get="curl -O -L"

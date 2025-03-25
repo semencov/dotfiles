@@ -7,8 +7,8 @@
 
 GIT_SIMPLE_CLEAN_SYMBOL="☀"
 GIT_SIMPLE_DIRTY_SYMBOL="☂"
-GIT_SIMPLE_CLEAN_COLOR="\033[32;1m" # Bold green
-GIT_SIMPLE_DIRTY_COLOR="\033[31;1m" # Bold red
+GIT_SIMPLE_CLEAN_COLOR="\033[32m" # Bold green
+GIT_SIMPLE_DIRTY_COLOR="\033[31m" # Bold red
 GIT_SIMPLE_RESET_COLOR="\033[0m"
 
 # Check if the current directory is in a Git repository.
