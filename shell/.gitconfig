@@ -36,7 +36,7 @@
     cont = rebase --continue
     current = rev-parse --abbrev-ref HEAD
     last-msg = log -1 --pretty=%B
-    l = log --pretty=format:'%Cred%h%Creset%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
+    l = log --pretty=format:'%Cred%h%Creset  %C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
     ll = log --stat --abbrev-commit
     wtf = diff --name-only --diff-filter=U
     br = "!br $@"
@@ -101,7 +101,7 @@
     commit-decoration-style = yellow box ul
     file-style = yellow ul
     file-decoration-style = none
-    hunk-header-decoration-style = yellow box    
+    hunk-header-decoration-style = yellow box
 [merge]
 	conflictstyle = merge
 [diff]

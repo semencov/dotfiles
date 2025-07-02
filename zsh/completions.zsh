@@ -8,6 +8,9 @@ fpath=(
   $fpath
 )
 
+[ -d ~/.docker/completions ] && fpath=($HOME/.docker/completions $fpath)
+
+
 # Load and initialize the completion system
 autoload -Uz compinit
 

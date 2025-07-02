@@ -38,7 +38,7 @@ HISTSIZE=100000
 SAVEHIST=$HISTSIZE
 
 # Import ssh keys in keychain
-ssh-add -A 2>/dev/null
+ssh-add --apple-load-keychain 2>/dev/null
 
 # fnm
 eval "$(fnm env --use-on-cd)"
@@ -68,5 +68,4 @@ _fzf_compgen_dir() {
 export STARSHIP_CONFIG=~/.starship.toml
 eval "$(starship init zsh)"
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/yuri.sementsov/.cache/lm-studio/bin"
+
