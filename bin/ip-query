@@ -1,0 +1,39 @@
+#!/usr/bin/env zx
+
+const {
+  _: [host = ""],
+} = argv;
+
+const resp = await fetch(`http://api.ipquery.io/${host}?format=json`);
+
+if (resp.ok) {
+  const data = await resp.json();
+
+  console.log(data);
+
+  if (data?.status === "success") {
+    const result = {
+      ip: data.query ?? data.ip,
+      as: data.as,
+      isp: `${data.isp ?? "N/A"}${data.isp !== data.org ? ` / ${data.org}` : ""}`,
+      address: [data.city, data.regionName, data.country].filter(Boolean),
+      timezone: data.timezone ?? "N/A",
+      lat: data.lat ?? "N/A",
+      lon: data.lon ?? "N/A",
+    };
+
+    echo(chalk.gray("      IP:"), chalk.cyan(result.ip));
+    echo(chalk.gray(" ISP/Org:"), result.isp);
+    echo(chalk.gray("      AS:"), result.as);
+    echo(chalk.gray(" Address:"), result.address.join(", "));
+    echo(chalk.gray("Timezone:"), result.timezone);
+    echo(chalk.gray("Location:"), `${result.lat}, ${result.lon}`);
+
+    if (argv.m || argv.map) {
+      const { default: open } = await import("open");
+      open(
+        `https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`,
+      );
+    }
+  }
+}

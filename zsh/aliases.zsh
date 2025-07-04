@@ -89,9 +89,9 @@ alias hostfile="sudo $EDITOR /etc/hosts"
 alias dotfiles="$GUI_EDITOR $HOME/.dotfiles"
 
 t() {
-  # Defaults to 3 levels deep, do more with `t 5` or `t 1`
+  # Defaults to 3 levels deep, do more with `t . 5` or `t . 1`
   # pass additional args after
-  tree -I '.git|node_modules|bower_components|.DS_Store' --dirsfirst --filelimit 15 -L ${1:-3} -aC $2
+  tree -I '.git|node_modules|bower_components|vendor|.DS_Store' --dirsfirst --filelimit 50 -L ${2:-3} -aC $1
 }
 
 # Make a directory and cd to it

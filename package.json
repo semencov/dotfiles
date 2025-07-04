@@ -1,20 +1,20 @@
 {
-	"name": "dotfiles",
-	"version": "0.0.0",
-	"private": true,
-	"type": "module",
-	"engines": {
-		"node": ">=14.3"
-	},
-	"dependencies": {
-		"@total-typescript/tsconfig": "^1.0.4",
-		"diff-so-fancy": "^1.4.3",
-		"glob": "^11.0.1",
-		"open": "^10.1.0",
-		"ora": "^8.2.0",
-		"pretty-bytes-cli": "^3.0.0",
-		"table-layout": "^4.1.1",
-		"typescript": "^5.8.3",
-		"zx": "^8.5.0"
-	}
+  "name": "dotfiles",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=14.3"
+  },
+  "dependencies": {
+    "@total-typescript/tsconfig": "^1.0.4",
+    "diff-so-fancy": "^1.4.3",
+    "glob": "^11.0.1",
+    "open": "^10.1.0",
+    "ora": "^8.2.0",
+    "pretty-bytes-cli": "^3.0.0",
+    "table-layout": "^4.1.1",
+    "typescript": "^5.8.3",
+    "zx": "^8.6.1"
+  }
 }
