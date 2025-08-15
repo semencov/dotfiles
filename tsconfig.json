@@ -1,8 +1,14 @@
 {
   "extends": "@total-typescript/tsconfig/tsc/no-dom/library",
-  "include": ["**/*"],
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowJs": false
+  },
+  "include": [],
   "exclude": [
-    "bin/**/*",
-    "zsh/**/*"
+    "node_modules",
+    "**/*.js",
+    "**/*.mjs"
   ]
 }
