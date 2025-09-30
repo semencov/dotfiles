@@ -5,8 +5,8 @@
 # Based on https://github.com/denysdovhan/spaceship-prompt/
 #
 
-GIT_SIMPLE_CLEAN_SYMBOL="☀"
-GIT_SIMPLE_DIRTY_SYMBOL="☂"
+GIT_SIMPLE_CLEAN_SYMBOL=""
+GIT_SIMPLE_DIRTY_SYMBOL=""
 GIT_SIMPLE_CLEAN_COLOR="\033[32m" # Bold green
 GIT_SIMPLE_DIRTY_COLOR="\033[31m" # Bold red
 GIT_SIMPLE_RESET_COLOR="\033[0m"
@@ -33,7 +33,7 @@ git_simple() {
     symbol="$GIT_SIMPLE_DIRTY_SYMBOL"
   fi
 
-  echo -e "$color$symbol $git_current_branch$GIT_SIMPLE_RESET_COLOR"
+  echo -e "$color $symbol $git_current_branch$GIT_SIMPLE_RESET_COLOR"
 }
 
 git_simple

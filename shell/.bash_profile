@@ -4,3 +4,8 @@ if [ "$SSH_TTY" ]; then
         exec $(which zsh) -l -i
     fi
 fi
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/yuri.sementsov/.cache/lm-studio/bin"
+# End of LM Studio CLI section
+

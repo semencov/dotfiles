@@ -1,4 +1,5 @@
 format = """\
+  $os\
   $username\
   $hostname\
   $directory\
@@ -9,6 +10,15 @@ format = """\
   $character\
   """
 command_timeout = 2000
+
+[os]
+disabled = true
+format = "[$symbol]($style) "
+style = "white"
+
+[os.symbols]
+Linux = ""
+Macos = ""
 
 [username]
 format = "[$user]($style) "
@@ -29,4 +39,4 @@ when = "true"
 style = ""
 
 [nodejs]
-format = '[[ ($version) ](fg:#769ff0)]($style)'
+format = '[[ 󰎙 ($version) ](fg:#769ff0)]($style)'
