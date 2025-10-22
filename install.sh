@@ -158,7 +158,7 @@ install_command_line_tools() {
 
 install_homebrew() {
     log "Installing the Homebrew:"
-    execute "/bin/bash" "-c" "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+    execute "/bin/bash" "-c" "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
 clone_dotfiles() {

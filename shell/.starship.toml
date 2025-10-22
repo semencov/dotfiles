@@ -39,4 +39,4 @@ when = "true"
 style = ""
 
 [nodejs]
-format = '[[ 󰎙 ($version) ](fg:#769ff0)]($style)'
+format = '[[ 󰎙 ($version) ](fg:#5c5c5c)]($style)'
