@@ -1,3 +1,4 @@
+[ -s ~/.local/bin/cursor-agent ] && eval "$(~/.local/bin/cursor-agent shell-integration zsh)"
 [ -s ~/.iterm2_shell_integration.zsh ] && source ~/.iterm2_shell_integration.zsh
 
 source ~/.dotfiles/zsh/path.zsh
