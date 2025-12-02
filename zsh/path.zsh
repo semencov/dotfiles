@@ -31,5 +31,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d ~/.bin ] && _prepend_path "$HOME/.bin"
 [ -d ~/.lando/bin ] && _prepend_path "$HOME/.lando/bin"
 [ -d ~/.cache/lm-studio/bin ] && _prepend_path "$HOME/.cache/lm-studio/bin"
+[ -d /opt/homebrew/opt/php@7.3/bin ] && _prepend_path "/opt/homebrew/opt/php@7.3/bin"
+[ -d /opt/homebrew/opt/php@7.3/sbin ] && _prepend_path "/opt/homebrew/opt/php@7.3/sbin"
 
 export PATH
