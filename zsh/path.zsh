@@ -29,6 +29,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d ~/.npm-global/bin ] && _prepend_path "$HOME/.npm-global/bin"
 [ -d "$PNPM_HOME" ] && _prepend_path "$PNPM_HOME"
 [ -d ~/.bin ] && _prepend_path "$HOME/.bin"
+[ -d ~/.local/bin ] && _prepend_path "$HOME/.local/bin"
 [ -d ~/.lando/bin ] && _prepend_path "$HOME/.lando/bin"
 [ -d ~/.cache/lm-studio/bin ] && _prepend_path "$HOME/.cache/lm-studio/bin"
 [ -d /opt/homebrew/opt/php@7.3/bin ] && _prepend_path "/opt/homebrew/opt/php@7.3/bin"

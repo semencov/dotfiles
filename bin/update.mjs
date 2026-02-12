@@ -15,7 +15,7 @@ await spinner("Updating dotfiles...",
 await spinner("Updating macOS...",
   async () => {
     await $`sudo -v`;
-    return $`sudo softwareupdate --all --install --force`;
+    return $`sudo softwareupdate --install --all`;
   }
 );
 
