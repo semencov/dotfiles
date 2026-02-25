@@ -123,3 +123,4 @@
 	required = true
 [safe]
 	directory = /app
+	directory = *

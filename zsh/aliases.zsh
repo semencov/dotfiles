@@ -29,7 +29,7 @@ alias llm='eza -la -smodified --git-ignore -I .git'
 alias lls='eza -la -ssize --git-ignore -I .git'
 
 # rm
-alias rm="rm -i"
+# alias rm="rm -i"
 alias rmf="rm -rfv"
 
 # Permissions
