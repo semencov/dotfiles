@@ -16,9 +16,14 @@ alias -- -="cd -"
 alias o="open"
 alias oo="open ."
 alias e="$EDITOR"
-alias ee="$EDITOR ."
-alias c="$GUI_EDITOR"
-alias cc="$GUI_EDITOR ."
+alias ee="$GUI_EDITOR"
+
+# Claude
+alias c="claude --print"
+alias cc="claude"
+alias ccd="claude --debug"
+alias ccw="claude --worktree"
+alias ccc="claude --continue"
 
 # ls
 alias ls='eza -G'

@@ -74,7 +74,7 @@ brew "oven-sh/bun/bun"
 cask "java" unless system "/usr/libexec/java_home --failfast"
 
 # Python
-brew "python@3.12"
+brew "python@3.18"
 brew "uv"
 
 # Rust
@@ -86,12 +86,13 @@ brew "lazysql"
 brew "lazyssh"
 brew "htop"
 brew "mactop"
-brew "gotop"
 brew "midnight-commander"
 brew "ncdu"
+brew "yazi"
 
 # AI tools
 brew "codex"
+cask "claude-code"
 
 # Applications
 cask "container"
@@ -99,7 +100,7 @@ cask "google-chrome"
 cask "firefox"
 cask "zoom"
 cask "iterm2"
-cask "visual-studio-code"
+cask "ghostty"
 cask "telegram"
 cask "figma"
 cask "zed"
