@@ -25,19 +25,18 @@ corepack enable npm
 # Npm
 npm install --global \
   zx \
-  yarn@legacy \
-  vercel \
-  typescript \
   tsx \
+  qnm \
   tldr \
+  pnpm \
   surge \
   serve \
-  qnm \
-  pnpm \
-  npm-upgrade \
-  npm-check \
-  npkill \
-  lerna \
   degit \
-  @lhci/cli \
+  vercel \
+  npkill \
+  npm-check \
+  opencommit \
+  typescript \
+  yarn@legacy \
+  npm-upgrade \
   @biomejs/biome
