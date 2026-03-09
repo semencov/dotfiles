@@ -20,7 +20,7 @@ npm config set fund false
 npm config set audit false
 
 corepack enable
-corepack enable npm
+corepack enable pnpm
 
 # Npm
 npm install --global \
@@ -39,4 +39,5 @@ npm install --global \
   typescript \
   yarn@legacy \
   npm-upgrade \
-  @biomejs/biome
+  @biomejs/biome \
+  @fission-ai/openspec
