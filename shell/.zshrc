@@ -72,6 +72,5 @@ eval "$(starship init zsh)"
 export PATH="$PATH:/Users/yuri.sementsov/.cache/lm-studio/bin"
 # End of LM Studio CLI section
 
-
-# Added by Antigravity
-export PATH="/Users/yuri.sementsov/.antigravity/antigravity/bin:$PATH"
+# Vite+ bin (https://viteplus.dev)
+[ -f "$HOME/.vite-plus/env" ] && . "$HOME/.vite-plus/env"

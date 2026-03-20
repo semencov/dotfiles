@@ -46,3 +46,6 @@ compdef __gitex_branch_names branch br
 
 # Autocompletions for pnpm
 [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
+
+# bun completions
+[ -s "~/.bun/_bun" ] && . "~/.bun/_bun" || true

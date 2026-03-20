@@ -111,7 +111,9 @@ gr() {
 
 # shortcut to the project's package manager
 np() {
-  if [[ -r "./yarn.lock" ]]; then
+  if [[ -r "./bun.lock" ]]; then
+    bun $@
+  elif [[ -r "./yarn.lock" ]]; then
     yarn $@
   elif [[ -r "./pnpm-lock.yaml" ]]; then
     pnpm $@
