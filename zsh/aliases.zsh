@@ -25,6 +25,12 @@ alias ccd="claude --debug"
 alias ccw="claude --worktree"
 alias ccc="claude --continue"
 
+# Codex
+alias cx="codex"
+alias cxe="codex exec"
+alias cxd="claude debug"
+alias cxc="claude resume"
+
 # ls
 alias ls='eza -G'
 alias l='eza -1 --group-directories-first'

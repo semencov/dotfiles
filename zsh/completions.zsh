@@ -49,3 +49,6 @@ compdef __gitex_branch_names branch br
 
 # bun completions
 [ -s "~/.bun/_bun" ] && . "~/.bun/_bun" || true
+
+# Codex autocompletions
+command -v codex >/dev/null 2>&1 && eval "$(codex completion zsh)" || true
