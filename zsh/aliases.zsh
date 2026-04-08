@@ -130,7 +130,11 @@ np() {
 
 # Run npm script without annoying noise
 nr() {
-  np run --silent $@
+  if [[ -r "./bun.lock" ]]; then
+    bun run --silent --bun $@
+  else
+    np run --silent $@
+  fi
 }
 
 # git clone and cd to a repo directory
