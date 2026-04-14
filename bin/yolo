@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Common stuff
+RED="$(tput setaf 1)"
+UNDERLINE="$(tput sgr 0 1)"
+NOCOLOR="$(tput sgr0)"
+function error() { echo -e "$UNDERLINE$RED$1$NOCOLOR\n"; }
+
+DIFF=$(git diff --cached)
+
+if [[ -z "$DIFF" ]]; then
+  error "error: no staged changes"
+  exit 1
+fi
+
+JIRA_KEY=$(git branch --show-current 2>/dev/null | grep -oE '[A-Z]+-[0-9]+' | head -1 || true)
+
+if [[ -n "$JIRA_KEY" ]]; then
+  FORMAT_INSTRUCTION="Prefix the message with '${JIRA_KEY}: ' (e.g. '${JIRA_KEY}: Add login button')"
+else
+  FORMAT_INSTRUCTION="Use conventional commits format: type(scope): Description. Types: feat|fix|refactor|docs|style|test|chore|perf|ci|revert. Scope is optional short lowercase noun for affected area."
+fi
+
+PROMPT="Generate a git commit message for this diff.
+${FORMAT_INSTRUCTION}
+Rules: imperative mood, capitalize first word, no period, under 256 chars.
+Output ONLY the message — plain text, no quotes, no code fences, no explanation."
+
+MSG=$(echo "$DIFF" | claude -p "$PROMPT" --model claude-haiku-4-5-20251001)
+
+echo "$MSG"
+git commit -m "$MSG"

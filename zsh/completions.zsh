@@ -5,6 +5,7 @@ fpath=(
   $HOMEBREW_PREFIX/share/zsh/functions
   $HOMEBREW_PREFIX/share/zsh/site-functions
   $HOMEBREW_PREFIX/share/zsh-completions
+  $HOME/.zsh/completions
   $fpath
 )
 
@@ -38,7 +39,7 @@ zstyle ':completion:*' use-cache on
 zstyle ':completion:*' cache-path $ZSH_CACHE_DIR
 
 # Load git completion
-autoload -Uz _git
+# autoload -Uz _git
 zstyle ':completion:*:*:git:*' script $HOMEBREW_PREFIX/share/zsh/site-functions/_git
 
 # Autocompletion for git-friendly
@@ -48,7 +49,7 @@ compdef __gitex_branch_names branch br
 [[ -f ~/.config/tabtab/zsh/__tabtab.zsh ]] && . ~/.config/tabtab/zsh/__tabtab.zsh || true
 
 # bun completions
-[ -s "~/.bun/_bun" ] && . "~/.bun/_bun" || true
+[ -s ~/.bun/_bun ] && . ~/.bun/_bun || true
 
 # Codex autocompletions
 command -v codex >/dev/null 2>&1 && eval "$(codex completion zsh)" || true
