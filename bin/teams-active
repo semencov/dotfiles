@@ -1,5 +1,7 @@
 #!/bin/bash
+
 caffeinate -d &
+
 while true;
 do
     osascript -e 'tell application "Microsoft Teams" to activate'
