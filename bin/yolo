@@ -1,7 +1,6 @@
 #!/usr/bin/env zx
-import readline from 'node:readline';
 
-$.verbose = false;
+import readline from 'node:readline';
 
 async function editableQuestion(query, value) {
     const rl = readline.createInterface({
@@ -33,7 +32,7 @@ if (!diff.trim()) {
 
 const stagedFiles = await $`git diff --cached --name-status`.text();
 
-console.log(chalk.bold('Staged files:'));
+console.log(chalk.dim('Staged files:'));
 console.log(stagedFiles.trim());
 console.log();
 
@@ -47,13 +46,10 @@ Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
 
 const message = await spinner('Generating commit message...', () =>
-    $({ input: diff })`pi -p ${prompt} --model openai-codex/gpt-5.4-mini`.text(),
+    $({ input: diff })`pi -p "${prompt}" --model "openai-codex/gpt-5.4-mini"`.text(),
 );
 const generatedMessage = message.trim();
-
-const commitMessage = (
-    await editableQuestion(chalk.dim('Commit message: '), generatedMessage)
-).trim();
+const commitMessage = (await editableQuestion(chalk.dim('Commit message: '), generatedMessage)).trim();
 
 if (!commitMessage) {
     console.error(chalk.red.underline('error: empty commit message'));
