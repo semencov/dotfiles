@@ -1,4 +1,5 @@
 #!/usr/bin/env zx
+
 $.verbose = true;
 
 const diff = await $`git diff --cached`.text();
