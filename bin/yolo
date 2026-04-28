@@ -1,6 +1,23 @@
 #!/usr/bin/env zx
+import readline from 'node:readline';
 
-$.verbose = true;
+$.verbose = false;
+
+async function editableQuestion(query, value) {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+        terminal: true,
+    });
+
+    return new Promise((resolve) => {
+        rl.question(query, (answer) => {
+            rl.close();
+            resolve(answer);
+        });
+        rl.write(value);
+    });
+}
 
 const diff = await $`git diff --cached`.text();
 const branch = await $`git branch --show-current`
@@ -14,6 +31,12 @@ if (!diff.trim()) {
     process.exit(1);
 }
 
+const stagedFiles = await $`git diff --cached --name-status`.text();
+
+console.log(chalk.bold('Staged files:'));
+console.log(stagedFiles.trim());
+console.log();
+
 const formatInstruction = jiraKey
     ? `Prefix the message with '${jiraKey}: ' (e.g. '${jiraKey}: Add login button')`
     : 'Use conventional commits format: type(scope): Description. Types: feat|fix|refactor|docs|style|test|chore|perf|ci|revert. Scope is optional short lowercase noun for affected area.';
@@ -23,9 +46,18 @@ ${formatInstruction}
 Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
 
-const message = await $({
-    input: diff,
-})`pi -p "${prompt}" --model "openai-codex/gpt-5.4-mini"`.text();
-const commitMessage = message.trim();
+const message = await spinner('Generating commit message...', () =>
+    $({ input: diff })`pi -p ${prompt} --model openai-codex/gpt-5.4-mini`.text(),
+);
+const generatedMessage = message.trim();
 
-await $`git commit -m "${commitMessage}"`;
+const commitMessage = (
+    await editableQuestion(chalk.dim('Commit message: '), generatedMessage)
+).trim();
+
+if (!commitMessage) {
+    console.error(chalk.red.underline('error: empty commit message'));
+    process.exit(1);
+}
+
+await $`git commit -m ${commitMessage}`;
