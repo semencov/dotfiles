@@ -28,9 +28,11 @@ ${formatInstruction}
 Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
 
-const message = await $({ input: diff })`pi -p ${prompt} --model openai-codex/gpt-5.4-mini`.text();
+const message = await $({
+    input: diff,
+})`pi -p "${prompt}" --model "openai-codex/gpt-5.4-mini"`.text();
 
 const commitMessage = message.trim();
 
 console.log(commitMessage);
-await $`git commit -m ${commitMessage}`;
+await $`git commit -m "${commitMessage}"`;
