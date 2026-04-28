@@ -27,7 +27,7 @@ ${FORMAT_INSTRUCTION}
 Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message — plain text, no quotes, no code fences, no explanation."
 
-MSG=$(echo "$DIFF" | claude -p "$PROMPT" --model claude-haiku-4-5-20251001)
+MSG=$(echo "$DIFF" | pi -p "$PROMPT" --model "openai-codex/gpt-5.4-mini")
 
 echo "$MSG"
 git commit -m "$MSG"
