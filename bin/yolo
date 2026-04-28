@@ -1,29 +1,23 @@
 #!/usr/bin/env zx
-
-$.verbose = false;
-
-function error(message) {
-    console.error(`${chalk.red.underline(message)}\n`);
-}
+$.verbose = true;
 
 const diff = await $`git diff --cached`.text();
-
-if (!diff.trim()) {
-    error('error: no staged changes');
-    process.exit(1);
-}
-
 const branch = await $`git branch --show-current`
     .quiet()
     .text()
     .catch(() => '');
 const jiraKey = branch.match(/[A-Z]+-[0-9]+/)?.[0];
 
+if (!diff.trim()) {
+    console.error(chalk.red.underline('error: no staged changes'));
+    process.exit(1);
+}
+
 const formatInstruction = jiraKey
     ? `Prefix the message with '${jiraKey}: ' (e.g. '${jiraKey}: Add login button')`
     : 'Use conventional commits format: type(scope): Description. Types: feat|fix|refactor|docs|style|test|chore|perf|ci|revert. Scope is optional short lowercase noun for affected area.';
 
-const prompt = `Generate a git commit message for this diff.
+const prompt = `Generate a git commit message for the staged changes.
 ${formatInstruction}
 Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
@@ -31,8 +25,6 @@ Output ONLY the message -- plain text, no quotes, no code fences, no explanation
 const message = await $({
     input: diff,
 })`pi -p "${prompt}" --model "openai-codex/gpt-5.4-mini"`.text();
-
 const commitMessage = message.trim();
 
-console.log(commitMessage);
 await $`git commit -m "${commitMessage}"`;
