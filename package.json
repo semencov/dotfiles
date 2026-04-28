@@ -8,11 +8,11 @@
   },
   "dependencies": {
     "@total-typescript/tsconfig": "^1.0.4",
-    "diff-so-fancy": "^1.4.3",
+    "diff-so-fancy": "^1.4.6",
     "open": "^11.0.0",
-    "ora": "^9.3.0",
+    "ora": "^9.4.0",
     "pretty-bytes-cli": "^3.0.0",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "zx": "^8.8.5"
   }
 }

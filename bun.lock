@@ -5,13 +5,13 @@
     "": {
       "name": "dotfiles",
       "dependencies": {
-        "@total-typescript/tsconfig": "^1.0.4",
-        "diff-so-fancy": "^1.4.3",
-        "open": "^11.0.0",
-        "ora": "^9.3.0",
-        "pretty-bytes-cli": "^3.0.0",
-        "typescript": "^5.9.3",
-        "zx": "^8.8.5",
+        "@total-typescript/tsconfig": "latest",
+        "diff-so-fancy": "latest",
+        "open": "latest",
+        "ora": "latest",
+        "pretty-bytes-cli": "latest",
+        "typescript": "latest",
+        "zx": "latest",
       },
     },
   },
@@ -52,7 +52,7 @@
 
     "define-lazy-prop": ["define-lazy-prop@3.0.0", "", {}, "sha512-N+MeXYoqr3pOgn8xfyRPREN7gHakLYjhsHhWGT3fWAiL4IkAt0iDw14QiiEm2bE30c5XX5q0FtAA3CK5f9/BUg=="],
 
-    "diff-so-fancy": ["diff-so-fancy@1.4.3", "", { "bin": { "diff-so-fancy": "third_party/build_fatpack/diff-so-fancy" } }, "sha512-ZXNe6ZLdzCHt5cdMPwQOsuNcPI86VYArxloIqmedkTK3qlii59gHe5eR82CrNrc4aZ/A0V1b7askmDzBwftZKA=="],
+    "diff-so-fancy": ["diff-so-fancy@1.4.6", "", { "bin": { "diff-so-fancy": "dist/diff-so-fancy" } }, "sha512-v/9A1OiuVtlIK8fORT40oW4uPoADv5nHXUXldcU9x8soVBSgDHmqEEtAWuXO1gjoSxZhJ93t+AC2JbBSmIUS7A=="],
 
     "error-ex": ["error-ex@1.3.4", "", { "dependencies": { "is-arrayish": "0.2.1" } }, "sha512-sqQamAnR14VgCr1A618A3sGrygcpK+HEbenA/HiEAkkUwcZIIB/tgWqHFxWgOyDh4nB4JCRimh79dR5Ywc9MDQ=="],
 
@@ -118,7 +118,7 @@
 
     "open": ["open@11.0.0", "", { "dependencies": { "default-browser": "5.5.0", "define-lazy-prop": "3.0.0", "is-in-ssh": "1.0.0", "is-inside-container": "1.0.0", "powershell-utils": "0.1.0", "wsl-utils": "0.3.1" } }, "sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw=="],
 
-    "ora": ["ora@9.3.0", "", { "dependencies": { "chalk": "5.6.2", "cli-cursor": "5.0.0", "cli-spinners": "3.4.0", "is-interactive": "2.0.0", "is-unicode-supported": "2.1.0", "log-symbols": "7.0.1", "stdin-discarder": "0.3.1", "string-width": "8.2.0" } }, "sha512-lBX72MWFduWEf7v7uWf5DHp9Jn5BI8bNPGuFgtXMmr2uDz2Gz2749y3am3agSDdkhHPHYmmxEGSKH85ZLGzgXw=="],
+    "ora": ["ora@9.4.0", "", { "dependencies": { "chalk": "^5.6.2", "cli-cursor": "^5.0.0", "cli-spinners": "^3.2.0", "is-interactive": "^2.0.0", "is-unicode-supported": "^2.1.0", "log-symbols": "^7.0.1", "stdin-discarder": "^0.3.2", "string-width": "^8.1.0" } }, "sha512-84cglkRILFxdtA8hAvLNdMrtBpPNBTrQ9/ulg0FA7xLMnD6mifv+enAIeRmvtv+WgdCE+LPGOfQmtJRrVaIVhQ=="],
 
     "p-limit": ["p-limit@3.1.0", "", { "dependencies": { "yocto-queue": "0.1.0" } }, "sha512-TYOanM3wGwNGsZN2cVTYPArw454xnXj5qmWF1bEoAc4+cU/ol7GVh7odevjp1FNHduHc3KZMcFduxU5Xc6uJRQ=="],
 
@@ -160,7 +160,7 @@
 
     "spdx-license-ids": ["spdx-license-ids@3.0.23", "", {}, "sha512-CWLcCCH7VLu13TgOH+r8p1O/Znwhqv/dbb6lqWy67G+pT1kHmeD/+V36AVb/vq8QMIQwVShJ6Ssl5FPh0fuSdw=="],
 
-    "stdin-discarder": ["stdin-discarder@0.3.1", "", {}, "sha512-reExS1kSGoElkextOcPkel4NE99S0BWxjUHQeDFnR8S993JxpPX7KU4MNmO19NXhlJp+8dmdCbKQVNgLJh2teA=="],
+    "stdin-discarder": ["stdin-discarder@0.3.2", "", {}, "sha512-eCPu1qRxPVkl5605OTWF8Wz40b4Mf45NY5LQmVPQ599knfs5QhASUm9GbJ5BDMDOXgrnh0wyEdvzmL//YMlw0A=="],
 
     "string-width": ["string-width@8.2.0", "", { "dependencies": { "get-east-asian-width": "1.5.0", "strip-ansi": "7.2.0" } }, "sha512-6hJPQ8N0V0P3SNmP6h2J99RLuzrWz2gvT7VnK5tKvrNqJoyS9W4/Fb8mo31UiPvy00z7DQXkP2hnKBVav76thw=="],
 
@@ -172,7 +172,7 @@
 
     "type-fest": ["type-fest@1.4.0", "", {}, "sha512-yGSza74xk0UG8k+pLh5oeoYirvIiWo5t0/o3zHHAO2tRDiZcxWP7fywNlXhqb6/r6sWvwi+RsyQMWhVLe4BVuA=="],
 
-    "typescript": ["typescript@5.9.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=="],
+    "typescript": ["typescript@6.0.3", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw=="],
 
     "validate-npm-package-license": ["validate-npm-package-license@3.0.4", "", { "dependencies": { "spdx-correct": "3.2.0", "spdx-expression-parse": "3.0.1" } }, "sha512-DpKm2Ui/xN7/HQKCtpZxoRWBhZ9Z0kqtygG8XCgNQ8ZlDnxuQmWhj566j8fN4Cu3/JmbhsDo7fcAJq4s9h27Ew=="],
 
