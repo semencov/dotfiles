@@ -25,7 +25,7 @@ PATH='/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:./node_module
 [ -d /usr/local/opt/ruby/bin ] && _prepend_path "/usr/local/opt/ruby/bin"
 [ -d ~/.fnm ] && _prepend_path "$HOME/.fnm"
 [ -d "$NPM_PACKAGES/bin" ] && _prepend_path "$NPM_PACKAGES/bin"
-[ -d "$PNPM_HOME" ] && _prepend_path "$PNPM_HOME"
+[ -d "$PNPM_HOME/bin" ] && _prepend_path "$PNPM_HOME/bin"
 [ -d ~/.bun/bin ] && _prepend_path "$HOME/.bun/bin"
 [ -d ~/.composer/vendor/bin ] && _prepend_path "$HOME/.composer/vendor/bin"
 [ -d ~/.lando/bin ] && _prepend_path "$HOME/.lando/bin"
