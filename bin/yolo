@@ -1,20 +1,121 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-import readline from 'node:readline';
+import { $ } from 'bun';
+
+const styles = {
+    dim: (value) => `\x1b[2m${value}\x1b[0m`,
+    error: (value) => `\x1b[31;4m${value}\x1b[0m`,
+};
+
+async function spinner(message, task) {
+    if (!process.stderr.isTTY) {
+        console.error(styles.dim(message));
+        return task();
+    }
+
+    const frames = ['-', '\\', '|', '/'];
+    let index = 0;
+    const interval = setInterval(() => {
+        process.stderr.write(`\r${styles.dim(`${frames[index++ % frames.length]} ${message}`)}`);
+    }, 80);
+
+    try {
+        return await task();
+    } finally {
+        clearInterval(interval);
+        process.stderr.write(`\r${' '.repeat(message.length + 2)}\r`);
+    }
+}
+
+function visibleLength(value) {
+    return value.replace(/\x1b\[[0-9;]*m/g, '').length;
+}
 
 async function editableQuestion(query, value) {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: true,
-    });
-
     return new Promise((resolve) => {
-        rl.question(query, (answer) => {
-            rl.close();
-            resolve(answer);
-        });
-        rl.write(value);
+        let answer = value;
+        let cursor = value.length;
+        const promptLength = visibleLength(query);
+
+        function redraw() {
+            process.stdout.write(`\r\x1b[2K${query}${answer}`);
+            process.stdout.write(`\r\x1b[${promptLength + cursor}C`);
+        }
+
+        function cleanup() {
+            process.stdin.setRawMode(false);
+            process.stdin.pause();
+            process.stdin.off('data', onData);
+        }
+
+        function onData(data) {
+            const input = data.toString('utf8');
+
+            if (input === '\u0003') {
+                cleanup();
+                process.stdout.write('\n');
+                process.exit(130);
+            }
+
+            if (input === '\r' || input === '\n') {
+                cleanup();
+                process.stdout.write('\n');
+                resolve(answer);
+                return;
+            }
+
+            if (input === '\u007f') {
+                if (cursor > 0) {
+                    answer = answer.slice(0, cursor - 1) + answer.slice(cursor);
+                    cursor -= 1;
+                    redraw();
+                }
+                return;
+            }
+
+            if (input === '\x1b[D') {
+                cursor = Math.max(0, cursor - 1);
+                redraw();
+                return;
+            }
+
+            if (input === '\x1b[C') {
+                cursor = Math.min(answer.length, cursor + 1);
+                redraw();
+                return;
+            }
+
+            if (input === '\x1b[H' || input === '\x1b[1~') {
+                cursor = 0;
+                redraw();
+                return;
+            }
+
+            if (input === '\x1b[F' || input === '\x1b[4~') {
+                cursor = answer.length;
+                redraw();
+                return;
+            }
+
+            if (input === '\x1b[3~') {
+                if (cursor < answer.length) {
+                    answer = answer.slice(0, cursor) + answer.slice(cursor + 1);
+                    redraw();
+                }
+                return;
+            }
+
+            if (input.length === 1 && input >= ' ') {
+                answer = answer.slice(0, cursor) + input + answer.slice(cursor);
+                cursor += input.length;
+                redraw();
+            }
+        }
+
+        process.stdin.setRawMode(true);
+        process.stdin.resume();
+        process.stdin.on('data', onData);
+        redraw();
     });
 }
 
@@ -26,13 +127,13 @@ const branch = await $`git branch --show-current`
 const jiraKey = branch.match(/[A-Z]+-[0-9]+/)?.[0];
 
 if (!diff.trim()) {
-    console.error(chalk.red.underline('error: no staged changes'));
+    console.error(styles.error('error: no staged changes'));
     process.exit(1);
 }
 
 const stagedFiles = await $`git diff --cached --name-status`.text();
 
-console.log(chalk.dim('Staged files:'));
+console.log(styles.dim('Staged files:'));
 console.log(stagedFiles.trim());
 console.log();
 
@@ -46,13 +147,15 @@ Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
 
 const message = await spinner('Generating commit message...', () =>
-    $({ input: diff })`pi -p "${prompt}" --model "openai-codex/gpt-5.4-mini" --no-session`.text(),
+    $`bunx --bun pi -p ${prompt} --model openai-codex/gpt-5.4-mini --no-session < ${new Response(diff)}`.text(),
 );
 const generatedMessage = message.trim();
-const commitMessage = (await editableQuestion(chalk.dim('Commit message: '), generatedMessage)).trim();
+const commitMessage = (
+    await editableQuestion(styles.dim('Commit message: '), generatedMessage)
+).trim();
 
 if (!commitMessage) {
-    console.error(chalk.red.underline('error: empty commit message'));
+    console.error(styles.error('error: empty commit message'));
     process.exit(1);
 }
 
