@@ -52,7 +52,7 @@
 
     "define-lazy-prop": ["define-lazy-prop@3.0.0", "", {}, "sha512-N+MeXYoqr3pOgn8xfyRPREN7gHakLYjhsHhWGT3fWAiL4IkAt0iDw14QiiEm2bE30c5XX5q0FtAA3CK5f9/BUg=="],
 
-    "diff-so-fancy": ["diff-so-fancy@1.4.6", "", { "bin": { "diff-so-fancy": "dist/diff-so-fancy" } }, "sha512-v/9A1OiuVtlIK8fORT40oW4uPoADv5nHXUXldcU9x8soVBSgDHmqEEtAWuXO1gjoSxZhJ93t+AC2JbBSmIUS7A=="],
+    "diff-so-fancy": ["diff-so-fancy@1.4.10", "", { "bin": { "diff-so-fancy": "dist/diff-so-fancy" } }, "sha512-XQKOiBeQ2fkemfeXuEjSg6XMdkA3Z3IdxdRD9CfGBK+LA0cpB4fy1m3Zf5s8MskND1Qrxk+0bqWrMLvcG9AIzQ=="],
 
     "error-ex": ["error-ex@1.3.4", "", { "dependencies": { "is-arrayish": "0.2.1" } }, "sha512-sqQamAnR14VgCr1A618A3sGrygcpK+HEbenA/HiEAkkUwcZIIB/tgWqHFxWgOyDh4nB4JCRimh79dR5Ywc9MDQ=="],
 

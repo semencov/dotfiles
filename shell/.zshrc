@@ -1,5 +1,3 @@
-[ -s ~/.iterm2_shell_integration.zsh ] && source ~/.iterm2_shell_integration.zsh
-
 source ~/.dotfiles/zsh/path.zsh
 source ~/.dotfiles/zsh/env.zsh
 source ~/.dotfiles/zsh/aliases.zsh
