@@ -10,6 +10,7 @@ fnm use default
 [ -d "${HOME}/.pnpm-global" ] || mkdir "${HOME}/.pnpm-global"
 
 npm config set prefix "${HOME}/.npm-global"
+npm config set min-release-age 7
 npm config set loglevel error
 npm config set init-author-name "Yuri Sementsov"
 npm config set init-author-email "hello@smcv.dev"
