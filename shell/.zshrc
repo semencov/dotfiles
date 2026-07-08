@@ -55,5 +55,3 @@ _fzf_compgen_dir() {
 export STARSHIP_CONFIG=~/.starship.toml
 eval "$(starship init zsh)"
 
-# Vite+ bin (https://viteplus.dev)
-#[ -f "$HOME/.vite-plus/env" ] && . "$HOME/.vite-plus/env"

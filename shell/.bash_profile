@@ -7,7 +7,3 @@ fi
 
 source ~/.zshlocal
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/yuri.sementsov/.cache/lm-studio/bin"
-# End of LM Studio CLI section
-
