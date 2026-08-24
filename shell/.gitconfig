@@ -106,6 +106,9 @@
 	conflictstyle = merge
 [diff]
 	colorMoved = default
+[diff "lockb"]
+	textconv = bun
+	binary = true
 [include]
 	path = .gitlocal
 [filter "media"]
@@ -122,5 +125,4 @@
 	process = git-lfs filter-process
 	required = true
 [safe]
-	directory = /app
 	directory = *
