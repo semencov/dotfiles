@@ -12,3 +12,4 @@ Thumbs.db
 vscode/User/globalStorage/state.vscdb
 vscode/User/globalStorage/state.vscdb.backup
 update-*.mjs
+.worktrees/
