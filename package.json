@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dotfiles": "bun bin/dotfiles",
     "test": "bun test",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
