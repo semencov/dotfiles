@@ -7,12 +7,12 @@
     helper = osxkeychain
 
 [credential "https://github.com"]
-	helper =
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	  helper =
+	  helper = !/opt/homebrew/bin/gh auth git-credential
 
 [credential "https://gist.github.com"]
-	helper =
-	helper = !/opt/homebrew/bin/gh auth git-credential
+	  helper =
+	  helper = !/opt/homebrew/bin/gh auth git-credential
 
 [gpg]
     program = gpg
@@ -20,15 +20,15 @@
 [core]
     editor = micro
     pager = delta
-	autocrlf = false
-	safecrlf = false
+	  autocrlf = false
+	  safecrlf = false
     mergeoptions = --no-edit
     excludesfile = ~/.gitignore
-	quotepath = false
-	preloadindex = true
+	  quotepath = false
+	  preloadindex = true
 
 [color]
-	ui = auto
+	  ui = auto
 
 [alias]
     a  = "!git add . && git st"
