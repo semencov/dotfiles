@@ -2,10 +2,21 @@
     name = Yuri Sementsov
     email = Yuri.Sementsov@ecentria.com
     signingkey = 39461CE1
+
 [credential]
     helper = osxkeychain
+
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+
 [gpg]
     program = gpg
+
 [core]
     editor = micro
     pager = delta
@@ -15,6 +26,7 @@
     excludesfile = ~/.gitignore
 	quotepath = false
 	preloadindex = true
+
 [color]
 	ui = auto
 
@@ -63,25 +75,33 @@
 
 [init]
 	defaultBranch = master
+
 [pull]
 	rebase = false
+
 [push]
 	# When pushing code, always push only your current branch to a branch of the same name
 	default = current
     # Automatically set up upstream tracking
 	autoSetupRemote = true
+
 [fetch]
 	# Automatically prune deleted branches from your local copy when you fetch (or pull)
 	prune = true
+
 [log]
 	# Show branch names with git log
 	decorate = short
+
 [branch]
     autoSetupRebase = always
+
 [interactive]
     diffFilter = delta --color-only
+
 [add.interactive]
 	useBuiltin = false
+
 [delta]
 	navigate = false
 	light = false
@@ -97,32 +117,41 @@
     whitespace-error-style = 22 reverse
     colorMoved = default
     zero-style = dim syntax
+
 [delta "decorations"]
     commit-decoration-style = yellow box ul
     file-style = yellow ul
     file-decoration-style = none
     hunk-header-decoration-style = yellow box
+
 [merge]
 	conflictstyle = merge
+
 [diff]
 	colorMoved = default
+
 [diff "lockb"]
 	textconv = bun
 	binary = true
+
 [include]
 	path = ~/.gitlocal
+
 [filter "media"]
 	required = true
 	clean = git media clean %f
 	smudge = git media smudge %f
+
 [filter "hawser"]
 	clean = git hawser clean %f
 	smudge = git hawser smudge %f
 	required = true
+
 [filter "lfs"]
 	clean = git-lfs clean -- %f
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process
 	required = true
+
 [safe]
 	directory = *
