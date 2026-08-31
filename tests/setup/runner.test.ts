@@ -5,7 +5,7 @@ import type { TaskContext } from "../../src/setup/types";
 import { createFakeDependencies } from "../support/fakes";
 import { task } from "./helpers";
 
-const context = () => ({ ...createFakeDependencies(), dryRun: false }) satisfies TaskContext;
+const context = () => ({ ...createFakeDependencies(), dryRun: false, nonInteractive: false }) satisfies TaskContext;
 
 describe("SetupRunner", () => {
   test("finishes every preflight before the first mutation", async () => {
@@ -50,7 +50,7 @@ describe("SetupRunner", () => {
       verify: async () => { events.push("verify"); return { ok: true }; },
     })];
 
-    const result = await new SetupRunner().run(tasks, { ...createFakeDependencies(), dryRun: true }, {
+    const result = await new SetupRunner().run(tasks, { ...createFakeDependencies(), dryRun: true, nonInteractive: false }, {
       beforeApply: async () => { events.push("beforeApply"); },
     });
 

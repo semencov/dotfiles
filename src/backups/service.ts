@@ -116,10 +116,16 @@ export class BackupService {
     if (candidates.length === 0) return null;
 
     const createdAt = this.#now();
-    const id = archiveId(createdAt);
-    const path = resolve(this.#backupRoot, id);
     await this.#fs.mkdir(this.#backupRoot, 0o700);
-    if (await this.#fs.exists(path)) throw new Error(`Backup archive already exists: ${id}`);
+    const baseId = archiveId(createdAt);
+    let id = baseId;
+    let path = resolve(this.#backupRoot, id);
+    let suffix = 2;
+    while (await this.#fs.exists(path)) {
+      id = `${baseId}-${suffix}`;
+      path = resolve(this.#backupRoot, id);
+      suffix += 1;
+    }
     await this.#fs.mkdir(path, 0o700);
     const entries: BackupEntry[] = [];
 

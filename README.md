@@ -1,30 +1,28 @@
 # Dotfiles
 
-My personal dotfiles. It contains the installation of some basic tools, some handy aliases and functions. Backups of settings are done via [Mackup](https://github.com/lra/mackup).
+Personal macOS workstation and Ubuntu/Debian development-server state. Chezmoi owns files under `$HOME`; a strict Bun/TypeScript CLI owns setup orchestration, validation, backups, and reruns.
 
-![screenshot](https://raw.githubusercontent.com/semencov/dotfiles/master/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/semencov/dotfiles/HEAD/screenshot.png)
 
-## Installation
+## Install
 
-Prerequisites:
-
-1. [Install Xcode Command Line Tools](http://railsapps.github.io/xcode-command-line-tools.html).
-
-Then run these commands in the terminal:
+Run as the target user, never as root:
 
 ```sh
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/semencov/dotfiles/master/install.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/semencov/dotfiles/HEAD/install.sh)"
 ```
 
-Now you can run scripts like `setup/zsh.sh` or `setup/osx.sh` to install other stuff.
+The bootstrap supports Apple Silicon and Intel macOS, plus arm64/x86-64 Ubuntu and Debian. It installs only bootstrap prerequisites, Bun, and chezmoi; clones the canonical HTTPS repository; installs locked CLI dependencies; then opens the interactive setup wizard.
 
-## Updating
+For headless setup, pass arguments after the Bash `--` separator:
 
 ```sh
-dotfiles
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/semencov/dotfiles/HEAD/install.sh)" -- \
+  --non-interactive \
+  --select core-tools,git \
+  --skip homebrew-packages,shell
 ```
 
-## Further customization
+Rerun the installer or use `dotfiles setup` to reconfigure the machine. Use `dotfiles apply --dry-run` to inspect managed-home changes and `dotfiles apply` to converge them. See [setup](docs/setup.md) and [recovery](docs/recovery.md).
 
-- Add any zsh profile customizations to `~/.zshlocal`.
-- Add your git username/email/etc. to `~/.gitlocal`.
+The scripts under `setup/` are deprecated compatibility references. The typed setup CLI is authoritative; do not use legacy scripts for new-machine provisioning.

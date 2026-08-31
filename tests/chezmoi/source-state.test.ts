@@ -38,6 +38,7 @@ describe("chezmoi source state", () => {
         expect(await realpath(legacy)).toBe(await realpath(source));
       }
     }
+    await expect(lstat(join(repository, "sync.py"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
   test("contains no tracked token assignments or private keys", async () => {

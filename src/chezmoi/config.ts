@@ -67,11 +67,21 @@ export async function installChezmoiConfiguration(
   await validateSourceRepository(options.machine.sourceDir, options.expectedRepo, options.fs);
   const contents = serializeChezmoiConfig(options.machine);
   const configDirectory = dirname(options.configPath);
-  const candidates = await discoverChezmoiConflicts([
-    { target: join(configDirectory, "chezmoi.toml"), type: "absent", reason: "chezmoi-config-migration" },
-    { target: options.configPath, type: "file", contents: new TextEncoder().encode(contents), reason: "chezmoi-config-migration" },
-    { target: join(configDirectory, "chezmoistate.boltdb"), type: "absent", reason: "chezmoi-config-migration" },
-  ], options.fs, options.homeDir);
+  const configIsCurrent = await options.fs.exists(options.configPath)
+    && await options.fs.readText(options.configPath) === contents;
+  const configTarget = {
+    target: options.configPath,
+    type: "file" as const,
+    contents: new TextEncoder().encode(contents),
+    reason: "chezmoi-config-migration" as const,
+  };
+  const candidates = await discoverChezmoiConflicts(configIsCurrent
+    ? [configTarget]
+    : [
+        { target: join(configDirectory, "chezmoi.toml"), type: "absent", reason: "chezmoi-config-migration" },
+        configTarget,
+        { target: join(configDirectory, "chezmoistate.boltdb"), type: "absent", reason: "chezmoi-config-migration" },
+      ], options.fs, options.homeDir);
   const archive = await options.backups.archive(candidates);
 
   await options.fs.mkdir(configDirectory, 0o700);

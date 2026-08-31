@@ -106,3 +106,28 @@ test("installChezmoiConfiguration archives legacy config/state and leaves stale 
   expect(await readFile(join(staleSource, "dot_zshrc"), "utf8")).toBe("stale but preserved");
   expect(JSON.stringify(logger.entries)).toContain(staleSource);
 });
+
+test("installChezmoiConfiguration preserves current chezmoi state on rerun", async () => {
+  const home = await temporaryHome();
+  const paths = createDotfilesPaths(home);
+  const fs = new NodeFileSystem();
+  await mkdir(paths.repo, { recursive: true });
+  await writeFile(join(paths.repo, ".chezmoiroot"), "home\n");
+  await mkdir(dirname(paths.chezmoiConfig), { recursive: true });
+  await writeFile(paths.chezmoiConfig, serializeChezmoiConfig(machine(paths.repo)), { mode: 0o600 });
+  const state = join(dirname(paths.chezmoiConfig), "chezmoistate.boltdb");
+  await writeFile(state, "current state");
+
+  const result = await installChezmoiConfiguration({
+    machine: machine(paths.repo),
+    expectedRepo: paths.repo,
+    homeDir: home,
+    configPath: paths.chezmoiConfig,
+    fs,
+    backups: new BackupService({ fs, homeDir: home, backupRoot: paths.backups }),
+    logger: new FakeLogger(),
+  });
+
+  expect(result.archive).toBeNull();
+  expect(await readFile(state, "utf8")).toBe("current state");
+});

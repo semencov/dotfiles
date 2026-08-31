@@ -70,6 +70,40 @@ describe("BackupService", () => {
     expect(conflicts).toEqual([]);
   });
 
+  test("allocates distinct archives for multiple conflicts in the same second", async () => {
+    const home = await temporaryHome();
+    const fs = new NodeFileSystem();
+    const backupRoot = join(home, ".local", "state", "dotfiles", "backups");
+    const service = new BackupService({
+      fs,
+      homeDir: home,
+      backupRoot,
+      now: () => new Date("2026-08-31T06:07:08.000Z"),
+    });
+    const first = join(home, ".first");
+    const second = join(home, ".second");
+    await writeFile(first, "first");
+    await writeFile(second, "second");
+
+    const firstArchive = await service.archive([{
+      source: first,
+      relativePath: ".first",
+      type: "file",
+      mode: 0o644,
+      reason: "chezmoi-conflict",
+    }]);
+    const secondArchive = await service.archive([{
+      source: second,
+      relativePath: ".second",
+      type: "file",
+      mode: 0o644,
+      reason: "chezmoi-conflict",
+    }]);
+
+    expect(firstArchive?.id).toBe("20260831T060708Z");
+    expect(secondArchive?.id).toBe("20260831T060708Z-2");
+  });
+
   test("rejects paths outside HOME before creating an archive", async () => {
     const home = await temporaryHome();
     const outside = await mkdtemp(join(tmpdir(), "dotfiles-outside-"));

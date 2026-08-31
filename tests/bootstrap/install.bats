@@ -82,6 +82,7 @@ teardown() {
   run_installer --non-interactive --dry-run
 
   [ "$status" -eq 0 ]
+  grep -Fq 'arg=--frozen-lockfile' "$BOOTSTRAP_LOG"
   grep -Fq "git-clone=https://github.com/semencov/dotfiles.git|$HOME/.dotfiles" "$BOOTSTRAP_LOG"
 }
 

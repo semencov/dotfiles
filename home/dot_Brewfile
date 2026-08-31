@@ -1,10 +1,12 @@
-tap "buo/cask-upgrade"
-tap "mas-cli/tap"
 tap "github/gh"
 tap "git-friendly/git-friendly"
 tap "oven-sh/bun"
 
-cask_args appdir: "/Applications"
+if OS.mac?
+  tap "buo/cask-upgrade"
+  tap "mas-cli/tap"
+  cask_args appdir: "/Applications"
+end
 
 # Zsh Essentials
 brew "zsh"
@@ -17,11 +19,11 @@ brew "zsh-syntax-highlighting"
 brew "uutils-coreutils"
 brew "uutils-findutils"
 brew "autoconf"
+brew "bats-core"
 brew "pkg-config"
 brew "chezmoi"
 brew "mackup"
-brew "mas"
-cask "ilya-birman-typography-layout"
+brew "shellcheck"
 
 # Utils
 brew "bat", args: ["build-from-source"]
@@ -66,9 +68,6 @@ brew "fnm"
 brew "deno"
 brew "oven-sh/bun/bun"
 
-# Java
-cask "java" unless system "/usr/libexec/java_home --failfast"
-
 # Python
 brew "python"
 brew "uv"
@@ -80,23 +79,32 @@ brew "rust"
 brew "lazygit"
 brew "lazyssh"
 brew "htop"
-brew "mactop"
 brew "midnight-commander"
 brew "ncdu"
 brew "yazi"
 
 # AI tools
 brew "codex"
-cask "claude-code"
 
-# Applications
-cask "container"
-cask "google-chrome"
-cask "firefox"
-cask "cmux"
-cask "zed"
+if OS.mac?
+  # macOS tools
+  brew "mas"
+  brew "mactop"
 
-# Fonts
-cask "font-fira-code"
-cask "font-fira-code-nerd-font"
-cask "font-powerline-symbols"
+  # Java
+  cask "java" unless system "/usr/libexec/java_home --failfast"
+
+  # Applications
+  cask "ilya-birman-typography-layout"
+  cask "claude-code"
+  cask "container"
+  cask "google-chrome"
+  cask "firefox"
+  cask "cmux"
+  cask "zed"
+
+  # Fonts
+  cask "font-fira-code"
+  cask "font-fira-code-nerd-font"
+  cask "font-powerline-symbols"
+end

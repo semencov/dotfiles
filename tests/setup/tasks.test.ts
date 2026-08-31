@@ -6,13 +6,15 @@ import { createShellTask } from "../../src/setup/tasks/shell";
 import type { TaskContext } from "../../src/setup/types";
 import { createFakeDependencies } from "../support/fakes";
 
-function context(os: "macos" | "ubuntu" = "macos"): TaskContext & ReturnType<typeof createFakeDependencies> {
+function context(os: "macos" | "ubuntu" | "debian" = "macos"): TaskContext & ReturnType<typeof createFakeDependencies> {
   const dependencies = createFakeDependencies();
-  return { ...dependencies, platform: { ...dependencies.platform, os }, dryRun: false };
+  return { ...dependencies, platform: { ...dependencies.platform, os }, dryRun: false, nonInteractive: false };
 }
 
 test("foundation catalog exposes only implemented Stage 1 groups", () => {
-  expect(foundationTasks().map(({ id }) => id)).toEqual(["core-tools", "homebrew-packages", "shell", "git"]);
+  const tasks = foundationTasks();
+  expect(tasks.map(({ id }) => id)).toEqual(["core-tools", "homebrew-packages", "shell", "git"]);
+  expect(tasks.every(({ platforms }) => platforms.includes("debian"))).toBe(true);
 });
 
 describe("homebrew-packages", () => {
@@ -37,8 +39,8 @@ describe("homebrew-packages", () => {
     dependencies.process.whichResults.set("brew", null);
     dependencies.process.results.push(
       { exitCode: 1, stdout: "", stderr: "" },
-      { exitCode: 0, stdout: "", stderr: "" },
-      { exitCode: 0, stdout: "", stderr: "" },
+      { exitCode: 0, stdout: "install ok installed", stderr: "" },
+      { exitCode: 0, stdout: "install ok installed", stderr: "" },
       { exitCode: 0, stdout: "", stderr: "" },
       { exitCode: 0, stdout: "", stderr: "" },
       { exitCode: 0, stdout: "", stderr: "" },
@@ -52,6 +54,23 @@ describe("homebrew-packages", () => {
       { executable: "sudo", args: ["apt-get", "install", "-y", "build-essential"] },
     ]);
     expect(dependencies.process.commands.filter(({ executable }) => executable !== "sudo").every(({ executable }) => executable !== "apt-get")).toBe(true);
+  });
+
+  test("uses the Linuxbrew prefix on Debian", async () => {
+    const dependencies = context("debian");
+    dependencies.process.whichResults.set("brew", null);
+    dependencies.process.results.push(
+      { exitCode: 0, stdout: "install ok installed", stderr: "" },
+      { exitCode: 0, stdout: "install ok installed", stderr: "" },
+      { exitCode: 0, stdout: "install ok installed", stderr: "" },
+      { exitCode: 0, stdout: "", stderr: "" },
+      { exitCode: 0, stdout: "", stderr: "" },
+      { exitCode: 0, stdout: "", stderr: "" },
+    );
+
+    await createHomebrewTask().apply(dependencies);
+
+    expect(dependencies.process.commands.at(-1)?.executable).toBe("/home/linuxbrew/.linuxbrew/bin/brew");
   });
 });
 
@@ -67,4 +86,13 @@ test("shell asks separately before changing the Linux login shell", async () => 
     args: ["-s", "/home/linuxbrew/.linuxbrew/bin/zsh"],
     stdin: "inherit",
   });
+});
+
+test("shell never changes the Linux login shell non-interactively", async () => {
+  const dependencies = { ...context("ubuntu"), nonInteractive: true };
+  dependencies.process.whichResults.set("zsh", "/home/linuxbrew/.linuxbrew/bin/zsh");
+
+  await createShellTask().apply(dependencies);
+
+  expect(dependencies.process.commands).toEqual([]);
 });

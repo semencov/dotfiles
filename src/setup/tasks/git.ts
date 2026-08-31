@@ -14,7 +14,7 @@ export function createGitTask(): SetupTask {
   return {
     id: "git",
     title: "Git",
-    platforms: ["macos", "ubuntu"],
+    platforms: ["macos", "ubuntu", "debian"],
     dependencies: ["core-tools"],
     defaultSelected: true,
     risk: "low",

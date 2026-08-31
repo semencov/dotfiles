@@ -8,7 +8,7 @@ import { task } from "./helpers";
 test("prepareSetupPlan returns 130 on cancellation and performs no process mutation", async () => {
   const dependencies = createFakeDependencies();
   dependencies.prompts.confirmResult = false;
-  const context: TaskContext = { ...dependencies, dryRun: false };
+  const context: TaskContext = { ...dependencies, dryRun: false, nonInteractive: false };
 
   const result = await prepareSetupPlan([
     task("core", { defaultSelected: true, risk: "medium", privilege: "command-sudo" }),

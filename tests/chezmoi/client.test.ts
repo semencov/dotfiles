@@ -46,7 +46,7 @@ describe("ChezmoiClient", () => {
     const { client, process, configPath, sourceDir } = await harness();
     await client.verifyTemplates();
     expect(process.commands[0]?.args).toEqual([
-      "--config", configPath, "--source", sourceDir, "apply", "--dry-run", "--no-tty",
+      "--config", configPath, "--source", sourceDir, "apply", "--dry-run", "--force", "--no-tty",
     ]);
   });
 

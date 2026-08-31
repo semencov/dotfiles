@@ -7,6 +7,7 @@ export type CheckResult =
 
 export interface TaskContext extends CliDependencies {
   readonly dryRun: boolean;
+  readonly nonInteractive: boolean;
 }
 
 export interface SetupTask {

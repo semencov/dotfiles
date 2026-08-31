@@ -36,7 +36,11 @@ export async function runSetupCommand(
 ): Promise<number> {
   try {
     const saved = await loadSavedSelections(dependencies);
-    const context: TaskContext = { ...dependencies, dryRun: options.dryRun };
+    const context: TaskContext = {
+      ...dependencies,
+      dryRun: options.dryRun,
+      nonInteractive: options.nonInteractive,
+    };
     const plan = await prepareSetupPlan(foundationTasks(), {
       ...(saved === undefined ? {} : { saved }),
       selected: options.select,

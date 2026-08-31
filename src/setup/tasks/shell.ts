@@ -1,24 +1,37 @@
 import type { CheckResult, SetupTask, TaskContext } from "../types";
 
+async function zshExecutable(context: TaskContext): Promise<string | null> {
+  return await context.process.which("zsh")
+    ?? (context.platform.os === "macos" ? null : "/home/linuxbrew/.linuxbrew/bin/zsh");
+}
+
 async function zshAvailable(context: TaskContext): Promise<CheckResult> {
-  return await context.process.which("zsh") === null
-    ? { ok: false, detail: "zsh is unavailable after package setup" }
-    : { ok: true };
+  const executable = await zshExecutable(context);
+  if (executable === null) return { ok: false, detail: "zsh is unavailable after package setup" };
+  const result = await context.process.run({ executable, args: ["--version"] });
+  return result.exitCode === 0
+    ? { ok: true }
+    : { ok: false, detail: "zsh does not respond after package setup" };
 }
 
 export function createShellTask(): SetupTask {
   return {
     id: "shell",
     title: "Shell",
-    platforms: ["macos", "ubuntu"],
+    platforms: ["macos", "ubuntu", "debian"],
     dependencies: ["homebrew-packages"],
     defaultSelected: true,
     risk: "medium",
     privilege: "user",
-    preflight: async () => ({ ok: true }),
+    preflight: async (context) => {
+      if (context.platform.os === "macos" || context.nonInteractive) return { ok: true };
+      return await context.process.which("chsh") === null
+        ? { ok: false, detail: "chsh is required for an interactive Linux login-shell change" }
+        : { ok: true };
+    },
     apply: async (context) => {
-      if (context.platform.os !== "ubuntu" || context.dryRun) return;
-      const zsh = await context.process.which("zsh");
+      if (context.platform.os === "macos" || context.dryRun || context.nonInteractive) return;
+      const zsh = await zshExecutable(context);
       if (zsh === null) throw new Error("zsh is unavailable after package setup");
       const confirmed = await context.prompts.confirm({
         message: `Change the login shell to ${zsh}?`,

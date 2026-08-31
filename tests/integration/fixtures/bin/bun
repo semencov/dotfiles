@@ -1,0 +1,9 @@
+#!/bin/bash
+set -euo pipefail
+
+if [ "${1-}" = install ]; then
+  printf '%s\n' 'bun-install' >>"$INTEGRATION_LOG"
+  exit 0
+fi
+
+exec "$REAL_BUN" "$@"

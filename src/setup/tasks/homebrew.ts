@@ -4,9 +4,10 @@ import type { CommandResult } from "../../lib/process";
 import type { CheckResult, SetupTask, TaskContext } from "../types";
 
 const INSTALL_URL = "https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh";
+const LINUX_BOOTSTRAP_PACKAGES = ["build-essential", "procps", "file"] as const;
 
 function brewPath(context: TaskContext): string {
-  if (context.platform.os === "ubuntu") return "/home/linuxbrew/.linuxbrew/bin/brew";
+  if (context.platform.os !== "macos") return "/home/linuxbrew/.linuxbrew/bin/brew";
   return context.platform.arch === "arm64" ? "/opt/homebrew/bin/brew" : "/usr/local/bin/brew";
 }
 
@@ -30,11 +31,15 @@ function assertSuccess(operation: string, result: CommandResult): void {
 }
 
 async function installUbuntuPrerequisites(context: TaskContext): Promise<void> {
-  const status = await context.process.run({
-    executable: "dpkg-query",
-    args: ["-W", "-f=${Status}", "build-essential"],
-  });
-  if (status.exitCode === 0 && status.stdout.includes("install ok installed")) return;
+  const missing: string[] = [];
+  for (const name of LINUX_BOOTSTRAP_PACKAGES) {
+    const status = await context.process.run({
+      executable: "dpkg-query",
+      args: ["-W", "-f=${Status}", name],
+    });
+    if (status.exitCode !== 0 || !status.stdout.includes("install ok installed")) missing.push(name);
+  }
+  if (missing.length === 0) return;
 
   assertSuccess("apt-get update", await context.process.run({
     executable: "sudo",
@@ -42,12 +47,12 @@ async function installUbuntuPrerequisites(context: TaskContext): Promise<void> {
   }));
   assertSuccess("apt-get install", await context.process.run({
     executable: "sudo",
-    args: ["apt-get", "install", "-y", "build-essential"],
+    args: ["apt-get", "install", "-y", ...missing],
   }));
 }
 
 async function installHomebrew(context: TaskContext): Promise<string> {
-  if (context.platform.os === "ubuntu") await installUbuntuPrerequisites(context);
+  if (context.platform.os !== "macos") await installUbuntuPrerequisites(context);
 
   await context.fs.mkdir(context.paths.state, 0o700);
   const temporaryDirectory = await context.fs.mkdtemp(join(context.paths.state, "homebrew-install-"));
@@ -72,7 +77,7 @@ async function installHomebrew(context: TaskContext): Promise<string> {
 async function preflight(context: TaskContext): Promise<CheckResult> {
   if (await context.process.which("brew") !== null) return { ok: true };
 
-  const required = context.platform.os === "ubuntu"
+  const required = context.platform.os !== "macos"
     ? ["curl", "/bin/bash", "sudo", "apt-get", "dpkg-query"]
     : ["curl", "/bin/bash"];
   const missing: string[] = [];
@@ -88,7 +93,7 @@ export function createHomebrewTask(): SetupTask {
   return {
     id: "homebrew-packages",
     title: "Homebrew packages",
-    platforms: ["macos", "ubuntu"],
+    platforms: ["macos", "ubuntu", "debian"],
     dependencies: ["core-tools"],
     defaultSelected: true,
     risk: "medium",

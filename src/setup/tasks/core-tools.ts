@@ -21,7 +21,7 @@ export function createCoreToolsTask(): SetupTask {
   return {
     id: "core-tools",
     title: "Core tools",
-    platforms: ["macos", "ubuntu"],
+    platforms: ["macos", "ubuntu", "debian"],
     dependencies: [],
     defaultSelected: true,
     risk: "low",

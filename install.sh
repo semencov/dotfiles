@@ -263,6 +263,9 @@ else
   git clone "$DOTFILES_REMOTE" "$DOTFILES_DIR"
 fi
 
+log "Installing locked CLI dependencies"
+"$BUN_BIN" install --cwd "$DOTFILES_DIR" --frozen-lockfile
+
 SETUP_ARGUMENTS=(setup)
 if [ "$NON_INTERACTIVE" -eq 1 ]; then
   SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]=--non-interactive

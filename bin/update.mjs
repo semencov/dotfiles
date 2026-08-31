@@ -8,7 +8,7 @@ await spinner("Updating dotfiles...",
   () => within(async () => {
     cd(`${$.env.HOME}/.dotfiles`);
     await $`pull`;
-    return $`python3 ./sync.py`;
+    return $`bun ./bin/dotfiles apply`;
   })
 );
 

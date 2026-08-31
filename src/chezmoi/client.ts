@@ -62,11 +62,11 @@ export class ChezmoiClient {
   }
 
   public async apply(): Promise<CommandResult> {
-    return this.#execute("apply", ["--no-tty"]);
+    return this.#execute("apply", ["--force", "--no-tty"]);
   }
 
   public async verifyTemplates(): Promise<CommandResult> {
-    return this.#execute("apply", ["--dry-run", "--no-tty"]);
+    return this.#execute("apply", ["--dry-run", "--force", "--no-tty"]);
   }
 
   public async executeWithGitDisabled(command: string, args: readonly string[] = []): Promise<CommandResult> {
