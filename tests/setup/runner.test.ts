@@ -42,6 +42,22 @@ describe("SetupRunner", () => {
     expect(events).toEqual(["checked"]);
   });
 
+  test("dry-run stops after the complete preflight barrier", async () => {
+    const events: string[] = [];
+    const tasks = [task("planned", {
+      preflight: async () => { events.push("preflight"); return { ok: true }; },
+      apply: async () => { events.push("apply"); },
+      verify: async () => { events.push("verify"); return { ok: true }; },
+    })];
+
+    const result = await new SetupRunner().run(tasks, { ...createFakeDependencies(), dryRun: true }, {
+      beforeApply: async () => { events.push("beforeApply"); },
+    });
+
+    expect(result.ok).toBe(true);
+    expect(events).toEqual(["preflight"]);
+  });
+
   test("stops at the first apply failure", async () => {
     const events: string[] = [];
     const tasks = [

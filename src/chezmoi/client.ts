@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 
 import type { FileSystem } from "../lib/filesystem";
 import type { CommandResult, ProcessRunner } from "../lib/process";
+import type { RenderedTarget } from "../backups/types";
 import { parseManagedTargets } from "./targets";
 
 export interface ChezmoiClientOptions {
@@ -36,6 +37,22 @@ export class ChezmoiClient {
     const result = await this.#execute("managed", ["--nul-path-separator", "--path-style", "absolute"]);
     this.#assertSuccess("managed", result);
     return parseManagedTargets(result.stdout);
+  }
+
+  public async renderedTargets(): Promise<readonly RenderedTarget[]> {
+    const managed = await this.#execute("managed", [
+      "--include", "files",
+      "--nul-path-separator",
+      "--path-style", "absolute",
+    ]);
+    this.#assertSuccess("managed", managed);
+    const targets = parseManagedTargets(managed.stdout);
+
+    return Promise.all(targets.map(async (target): Promise<RenderedTarget> => {
+      const rendered = await this.#execute("cat", [target]);
+      this.#assertSuccess("cat", rendered);
+      return { target, type: "file", contents: new TextEncoder().encode(rendered.stdout) };
+    }));
   }
 
   public async diff(): Promise<string> {

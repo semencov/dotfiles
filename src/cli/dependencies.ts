@@ -5,12 +5,21 @@ import type { SupportedPlatform } from "../lib/platform";
 import type { ProcessRunner } from "../lib/process";
 import type { PromptAdapter } from "../lib/prompts";
 
-export type FoundationCommandHandler = () => Promise<number>;
+export interface SetupCommandOptions {
+  readonly nonInteractive: boolean;
+  readonly select: readonly string[];
+  readonly skip: readonly string[];
+  readonly dryRun: boolean;
+}
+
+export interface ApplyCommandOptions {
+  readonly dryRun: boolean;
+}
 
 export interface FoundationCommandHandlers {
-  readonly setup: FoundationCommandHandler;
-  readonly apply: FoundationCommandHandler;
-  readonly edit: FoundationCommandHandler;
+  readonly setup: (options: SetupCommandOptions) => Promise<number>;
+  readonly apply: (options: ApplyCommandOptions) => Promise<number>;
+  readonly edit: () => Promise<number>;
 }
 
 export interface CliDependencies {

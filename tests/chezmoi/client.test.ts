@@ -50,6 +50,34 @@ describe("ChezmoiClient", () => {
     ]);
   });
 
+  test("renders managed files for byte-level conflict discovery", async () => {
+    const { client, process, configPath, sourceDir } = await harness();
+    process.results.push(
+      { exitCode: 0, stdout: "/home/yuri/.gitconfig\0", stderr: "" },
+      { exitCode: 0, stdout: "[user]\n", stderr: "" },
+    );
+
+    await expect(client.renderedTargets()).resolves.toEqual([{
+      target: "/home/yuri/.gitconfig",
+      type: "file",
+      contents: new TextEncoder().encode("[user]\n"),
+    }]);
+    expect(process.commands).toEqual([
+      {
+        executable: "chezmoi",
+        args: [
+          "--config", configPath,
+          "--source", sourceDir,
+          "managed", "--include", "files", "--nul-path-separator", "--path-style", "absolute",
+        ],
+      },
+      {
+        executable: "chezmoi",
+        args: ["--config", configPath, "--source", sourceDir, "cat", "/home/yuri/.gitconfig"],
+      },
+    ]);
+  });
+
   test("uses an invocation-local config with Git automation disabled and removes it afterward", async () => {
     const { client, process, configPath } = await harness();
     let invocationConfig = "";

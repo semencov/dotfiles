@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 
-import type { CliDependencies, FoundationCommandHandler } from "./dependencies";
+import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions } from "./dependencies";
 
 class CommandFailedError extends Error {
   public constructor(public readonly exitCode: number) {
@@ -9,9 +9,9 @@ class CommandFailedError extends Error {
   }
 }
 
-function invoke(handler: FoundationCommandHandler): () => Promise<void> {
-  return async () => {
-    const exitCode = await handler();
+function invoke<T>(handler: (options: T) => Promise<number>): (options: T) => Promise<void> {
+  return async (options) => {
+    const exitCode = await handler(options);
 
     if (exitCode !== 0) {
       throw new CommandFailedError(exitCode);
@@ -28,9 +28,27 @@ export function createProgram(dependencies: CliDependencies): Command {
     writeErr: (output) => dependencies.logger.error(output.trimEnd()),
   });
 
-  program.command("setup").description("Set up or reconfigure this machine").action(invoke(dependencies.commands.setup));
-  program.command("apply").description("Apply managed home state").action(invoke(dependencies.commands.apply));
-  program.command("edit").description("Open the dotfiles repository").action(invoke(dependencies.commands.edit));
+  program.command("setup")
+    .description("Set up or reconfigure this machine")
+    .option("--non-interactive", "Do not prompt")
+    .option("--select <task...>", "Select setup tasks")
+    .option("--skip <task...>", "Skip setup tasks")
+    .option("--dry-run", "Show the plan without mutating the machine")
+    .action(invoke<SetupCommandOptions>(async (options) => dependencies.commands.setup({
+      nonInteractive: options.nonInteractive ?? false,
+      select: options.select ?? [],
+      skip: options.skip ?? [],
+      dryRun: options.dryRun ?? false,
+    })));
+  program.command("apply")
+    .description("Apply managed home state")
+    .option("--dry-run", "Validate and show the pending diff")
+    .action(invoke<ApplyCommandOptions>(async (options) => dependencies.commands.apply({
+      dryRun: options.dryRun ?? false,
+    })));
+  program.command("edit")
+    .description("Open the dotfiles repository")
+    .action(invoke<void>(dependencies.commands.edit));
 
   return program;
 }

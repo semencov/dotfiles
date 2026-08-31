@@ -3,6 +3,10 @@ import type { CheckResult, SetupPhase, SetupRunResult, SetupTask, SetupTaskTimin
 type Clock = () => number;
 type FailedCheckResult = Extract<CheckResult, { ok: false }>;
 
+export interface SetupRunOptions {
+  readonly beforeApply?: () => Promise<void>;
+}
+
 function failedCheck(error: unknown): FailedCheckResult {
   return {
     ok: false,
@@ -14,7 +18,11 @@ function failedCheck(error: unknown): FailedCheckResult {
 export class SetupRunner {
   public constructor(private readonly now: Clock = () => performance.now()) {}
 
-  public async run(tasks: readonly SetupTask[], context: TaskContext): Promise<SetupRunResult> {
+  public async run(
+    tasks: readonly SetupTask[],
+    context: TaskContext,
+    options: SetupRunOptions = {},
+  ): Promise<SetupRunResult> {
     const timings: SetupTaskTiming[] = [];
     const preflightFailures: { task: SetupTask; result: FailedCheckResult }[] = [];
 
@@ -27,6 +35,10 @@ export class SetupRunner {
     if (preflightFailure !== undefined) {
       return this.#failure(preflightFailure.task, "preflight", preflightFailure.result, timings);
     }
+
+    if (context.dryRun) return { ok: true, timings };
+
+    if (options.beforeApply !== undefined) await options.beforeApply();
 
     for (const task of tasks) {
       const applyStarted = this.now();

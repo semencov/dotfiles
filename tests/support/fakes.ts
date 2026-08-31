@@ -7,6 +7,7 @@ import type { ConfirmPrompt, MultiSelectPrompt, PromptAdapter } from "../../src/
 export class FakeProcessRunner implements ProcessRunner {
   public readonly commands: CommandSpec[] = [];
   public readonly results: CommandResult[] = [];
+  public readonly whichResults = new Map<string, string | null>();
   public failAfterRun: Error | undefined;
   public onRun: ((spec: CommandSpec) => void | Promise<void>) | undefined;
 
@@ -22,6 +23,7 @@ export class FakeProcessRunner implements ProcessRunner {
   }
 
   public async which(executable: string): Promise<string | null> {
+    if (this.whichResults.has(executable)) return this.whichResults.get(executable) ?? null;
     return `/fake/bin/${executable}`;
   }
 }
@@ -82,7 +84,9 @@ export interface FakeCliDependencies extends CliDependencies {
   readonly logger: FakeLogger;
 }
 
-export function createFakeDependencies(): FakeCliDependencies {
+export function createFakeDependencies(
+  commandOverrides: Partial<FoundationCommandHandlers> = {},
+): FakeCliDependencies {
   return {
     process: new FakeProcessRunner(),
     fs: new FakeFileSystem(),
@@ -97,6 +101,6 @@ export function createFakeDependencies(): FakeCliDependencies {
       chezmoiConfig: "/Users/test/.config/chezmoi/chezmoi.json",
       localConfig: "/Users/test/.config/dotfiles/local.json",
     },
-    commands: successfulCommands(),
+    commands: { ...successfulCommands(), ...commandOverrides },
   };
 }

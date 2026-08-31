@@ -1,26 +1,21 @@
-import type { CliDependencies, FoundationCommandHandler } from "./dependencies";
+import type { CliDependencies } from "./dependencies";
+import { runApplyCommand } from "../commands/apply";
+import { runEditCommand } from "../commands/edit";
+import { runSetupCommand } from "../commands/setup";
 import { NodeFileSystem } from "../lib/filesystem";
 import { DurableLogger } from "../lib/logger";
 import { createDotfilesPaths } from "../lib/paths";
 import { detectPlatform } from "../lib/platform";
 import { BunProcessRunner } from "../lib/process";
 import { ClackPromptAdapter } from "../lib/prompts";
-import { CommandUnavailableError } from "../lib/errors";
-
-function unavailable(command: string, logger: DurableLogger): FoundationCommandHandler {
-  return async () => {
-    const error = new CommandUnavailableError(command);
-    logger.error(error.message, { exitCode: error.exitCode, command });
-    return error.exitCode;
-  };
-}
 
 export async function createProductionDependencies(): Promise<CliDependencies> {
   const platform = await detectPlatform();
   const paths = createDotfilesPaths(platform.homeDir);
   const logger = DurableLogger.create({ logsDirectory: paths.logs });
 
-  return {
+  let dependencies: CliDependencies;
+  dependencies = {
     process: new BunProcessRunner(logger),
     fs: new NodeFileSystem(),
     prompts: new ClackPromptAdapter(),
@@ -28,9 +23,10 @@ export async function createProductionDependencies(): Promise<CliDependencies> {
     platform,
     paths,
     commands: {
-      setup: unavailable("setup", logger),
-      apply: unavailable("apply", logger),
-      edit: unavailable("edit", logger),
+      setup: (options) => runSetupCommand(dependencies, options),
+      apply: (options) => runApplyCommand(dependencies, options),
+      edit: () => runEditCommand(dependencies),
     },
   };
+  return dependencies;
 }
