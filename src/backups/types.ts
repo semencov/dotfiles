@@ -47,4 +47,9 @@ export type RenderedTarget =
     readonly target: string;
     readonly type: "directory";
     readonly reason?: BackupReason;
+  }
+  | {
+    readonly target: string;
+    readonly type: "absent";
+    readonly reason?: BackupReason;
   };

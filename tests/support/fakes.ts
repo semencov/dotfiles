@@ -6,16 +6,19 @@ import type { ConfirmPrompt, MultiSelectPrompt, PromptAdapter } from "../../src/
 
 export class FakeProcessRunner implements ProcessRunner {
   public readonly commands: CommandSpec[] = [];
+  public readonly results: CommandResult[] = [];
   public failAfterRun: Error | undefined;
+  public onRun: ((spec: CommandSpec) => void | Promise<void>) | undefined;
 
   public async run(spec: CommandSpec): Promise<CommandResult> {
     this.commands.push(spec);
+    await this.onRun?.(spec);
     if (this.failAfterRun !== undefined) {
       const error = this.failAfterRun;
       this.failAfterRun = undefined;
       throw error;
     }
-    return { exitCode: 0, stdout: "", stderr: "" };
+    return this.results.shift() ?? { exitCode: 0, stdout: "", stderr: "" };
   }
 
   public async which(executable: string): Promise<string | null> {
