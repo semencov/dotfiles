@@ -1,0 +1,16 @@
+[
+  { "target": ".Brewfile", "source": "dot_Brewfile", "legacy": "shell/.Brewfile" },
+  { "target": ".bash_profile", "source": "dot_bash_profile", "legacy": "shell/.bash_profile" },
+  { "target": ".editorconfig", "source": "dot_editorconfig", "legacy": "shell/.editorconfig" },
+  { "target": ".gitattributes", "source": "dot_gitattributes", "legacy": "shell/.gitattributes", "compatibility": "copy" },
+  { "target": ".gitconfig", "source": "dot_gitconfig", "legacy": "shell/.gitconfig" },
+  { "target": ".gitignore", "source": "dot_gitignore", "legacy": "shell/.gitignore", "compatibility": "copy" },
+  { "target": ".hushlogin", "source": "dot_hushlogin", "legacy": "shell/.hushlogin" },
+  { "target": ".inputrc", "source": "dot_inputrc", "legacy": "shell/.inputrc" },
+  { "target": ".mackup", "source": "dot_mackup", "legacy": "shell/.mackup" },
+  { "target": ".mackup.cfg", "source": "dot_mackup.cfg", "legacy": "shell/.mackup.cfg" },
+  { "target": ".ripgreprc", "source": "dot_ripgreprc", "legacy": "shell/.ripgreprc" },
+  { "target": ".starship.toml", "source": "dot_starship.toml", "legacy": "shell/.starship.toml" },
+  { "target": ".tldrrc", "source": "dot_tldrrc", "legacy": "shell/.tldrrc" },
+  { "target": ".zshrc", "source": "dot_zshrc", "legacy": "shell/.zshrc" }
+]

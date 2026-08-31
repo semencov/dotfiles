@@ -1,0 +1,42 @@
+format = """\
+  $os\
+  $username\
+  $hostname\
+  $directory\
+  $custom\
+  $git_simple\
+  $nodejs\
+  $line_break\
+  $character\
+  """
+command_timeout = 2000
+
+[os]
+disabled = true
+format = "[$symbol]($style) "
+style = "white"
+
+[os.symbols]
+Linux = ""
+Macos = ""
+
+[username]
+format = "[$user]($style) "
+style_user = "white dimmed"
+aliases = { "yuri.sementsov@usgroup.loc" = "Yuri.Sementsov" }
+
+[hostname]
+ssh_symbol = "@"
+format = "[$ssh_symbol$hostname]($style) in "
+style = "yellow"
+
+[directory]
+style = "cyan"
+
+[custom.git_simple]
+command = "starship-git-simple"
+when = "true"
+style = ""
+
+[nodejs]
+format = '[[ 󰎙 ($version) ](fg:#5c5c5c)]($style)'

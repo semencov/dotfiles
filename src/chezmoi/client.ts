@@ -33,7 +33,7 @@ export class ChezmoiClient {
   }
 
   public async managedTargets(): Promise<readonly string[]> {
-    const result = await this.#execute("managed", ["--format", "json", "--path-style", "absolute"]);
+    const result = await this.#execute("managed", ["--nul-path-separator", "--path-style", "absolute"]);
     this.#assertSuccess("managed", result);
     return parseManagedTargets(result.stdout);
   }

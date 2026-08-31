@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { ChezmoiClient } from "../../src/chezmoi/client";
+import { parseManagedTargets } from "../../src/chezmoi/targets";
 import { NodeFileSystem } from "../../src/lib/filesystem";
 import { FakeProcessRunner } from "../support/fakes";
 
@@ -26,14 +27,18 @@ async function harness() {
 }
 
 describe("ChezmoiClient", () => {
+  test("parses the newline-delimited output emitted by chezmoi v2.72", () => {
+    expect(parseManagedTargets(".gitconfig\n.zshrc\n")).toEqual([".gitconfig", ".zshrc"]);
+  });
+
   test("passes explicit config/source flags and parses managed targets", async () => {
     const { client, process, configPath, sourceDir } = await harness();
-    process.results.push({ exitCode: 0, stdout: '["/home/yuri/.gitconfig","/home/yuri/.zshrc"]\n', stderr: "" });
+    process.results.push({ exitCode: 0, stdout: "/home/yuri/.gitconfig\0/home/yuri/.zshrc\0", stderr: "" });
 
     await expect(client.managedTargets()).resolves.toEqual(["/home/yuri/.gitconfig", "/home/yuri/.zshrc"]);
     expect(process.commands[0]).toEqual({
       executable: "chezmoi",
-      args: ["--config", configPath, "--source", sourceDir, "managed", "--format", "json", "--path-style", "absolute"],
+      args: ["--config", configPath, "--source", sourceDir, "managed", "--nul-path-separator", "--path-style", "absolute"],
     });
   });
 
