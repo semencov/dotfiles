@@ -6,9 +6,15 @@ import type { ConfirmPrompt, MultiSelectPrompt, PromptAdapter } from "../../src/
 
 export class FakeProcessRunner implements ProcessRunner {
   public readonly commands: CommandSpec[] = [];
+  public failAfterRun: Error | undefined;
 
   public async run(spec: CommandSpec): Promise<CommandResult> {
     this.commands.push(spec);
+    if (this.failAfterRun !== undefined) {
+      const error = this.failAfterRun;
+      this.failAfterRun = undefined;
+      throw error;
+    }
     return { exitCode: 0, stdout: "", stderr: "" };
   }
 
@@ -51,9 +57,12 @@ export class FakeLogger implements Logger {
 }
 
 export class FakePromptAdapter implements PromptAdapter {
-  public async confirm(_prompt: ConfirmPrompt): Promise<boolean> { return true; }
+  public confirmResult = true;
+  public multiselectResult: readonly string[] | undefined;
+
+  public async confirm(_prompt: ConfirmPrompt): Promise<boolean> { return this.confirmResult; }
   public async multiselect<T extends string>(prompt: MultiSelectPrompt<T>): Promise<readonly T[]> {
-    return prompt.initialValues ?? [];
+    return (this.multiselectResult ?? prompt.initialValues ?? []) as readonly T[];
   }
 }
 
