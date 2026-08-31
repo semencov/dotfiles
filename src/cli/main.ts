@@ -19,6 +19,10 @@ function invoke<T>(handler: (options: T) => Promise<number>): (options: T) => Pr
   };
 }
 
+function setupTaskIds(values: readonly string[] | undefined): readonly string[] {
+  return (values ?? []).flatMap((value) => value.split(",").map((id) => id.trim()).filter(Boolean));
+}
+
 export function createProgram(dependencies: CliDependencies): Command {
   const program = new Command("dotfiles");
 
@@ -36,8 +40,8 @@ export function createProgram(dependencies: CliDependencies): Command {
     .option("--dry-run", "Show the plan without mutating the machine")
     .action(invoke<SetupCommandOptions>(async (options) => dependencies.commands.setup({
       nonInteractive: options.nonInteractive ?? false,
-      select: options.select ?? [],
-      skip: options.skip ?? [],
+      select: setupTaskIds(options.select),
+      skip: setupTaskIds(options.skip),
       dryRun: options.dryRun ?? false,
     })));
   program.command("apply")

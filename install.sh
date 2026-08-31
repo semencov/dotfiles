@@ -1,215 +1,287 @@
 #!/bin/bash
-set -u
+set -euo pipefail
 
+DOTFILES_REMOTE="https://github.com/semencov/dotfiles.git"
 DOTFILES_DIR="${HOME}/.dotfiles"
-DOTFILES_REMOTE="git@github.com:semencov/dotfiles.git"
+STATE_DIR="${HOME}/.local/state/dotfiles"
+BACKUP_ROOT="${STATE_DIR}/backups"
+USER_BIN="${HOME}/.local/bin"
+CHEZMOI_INSTALL_URL="https://get.chezmoi.io"
+BUN_INSTALL_URL="https://bun.sh/install"
 
-tty_escape() { printf "\033[%sm" "$1"; }
-tty_mkbold() { tty_escape "1;$1"; }
-tty_underline="$(tty_escape "4;39")"
-tty_gray="$(tty_mkbold 30)"
-tty_blue="$(tty_mkbold 34)"
-tty_red="$(tty_mkbold 31)"
-tty_bold="$(tty_mkbold 39)"
-tty_reset="$(tty_escape 0)"
-
-have_sudo_access() {
-    local -a args
-    if [[ -n "${SUDO_ASKPASS-}" ]]; then
-        args=("-A")
-    fi
-
-    if [[ -z "${HAVE_SUDO_ACCESS-}" ]]; then
-        if [[ -n "${args[*]-}" ]]; then
-            /usr/bin/sudo "${args[@]}" -l mkdir &>/dev/null
-        else
-            /usr/bin/sudo -l mkdir &>/dev/null
-        fi
-        HAVE_SUDO_ACCESS="$?"
-    fi
-
-    if [[ "$HAVE_SUDO_ACCESS" -ne 0 ]]; then
-        abort "Need sudo access on macOS (e.g. the user $USER to be an Administrator)!"
-    fi
-
-    return "$HAVE_SUDO_ACCESS"
-}
-
-shell_join() {
-    local arg
-    printf "%s" "$1"
-    shift
-    for arg in "$@"; do
-        printf " "
-        printf "%s" "${arg// /\ }"
-    done
-}
-
-chomp() {
-    printf "%s" "${1/"$'\n'"/}"
-}
+NON_INTERACTIVE=0
+DRY_RUN=0
+SELECTED_TASKS=()
+SKIPPED_TASKS=()
+SELECTED_COUNT=0
+SKIPPED_COUNT=0
+TEMPORARY_FILES=("")
 
 log() {
-    printf "${tty_gray}==> %s${tty_reset}\n" "$(shell_join "$@")"
+  printf '==> %s\n' "$*"
 }
 
-warn() {
-    printf "${tty_red}WARN${tty_reset} %s\n" "$(chomp "$1")"
+fail() {
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 1
 }
 
-abort() {
-    printf "${tty_red}ERROR${tty_reset} %s\n" "$(chomp "$1")"
-    exit 1
-}
-
-execute() {
-    local -a args=("$@")
-    log "${args[@]}"
-    if ! "$@"; then
-        abort "$(printf "Failed during: %s" "$(shell_join "$@")")"
+cleanup() {
+  local path
+  for path in "${TEMPORARY_FILES[@]}"; do
+    if [ -n "$path" ] && [ "${path#"$STATE_DIR"/}" != "$path" ]; then
+      rm -f "$path"
     fi
+  done
 }
 
-execute_sudo() {
-    local -a args=("$@")
-    if [[ -n "${SUDO_ASKPASS-}" ]]; then
-        args=("-A" "${args[@]}")
-    fi
-    if have_sudo_access; then
-        execute "/usr/bin/sudo" "${args[@]}"
+trap cleanup EXIT
+
+append_task_values() {
+  local destination="$1"
+  local remaining="$2"
+  local value
+
+  while :; do
+    case "$remaining" in
+      *,*)
+        value="${remaining%%,*}"
+        remaining="${remaining#*,}"
+        ;;
+      *)
+        value="$remaining"
+        remaining=""
+        ;;
+    esac
+    [ -n "$value" ] || fail "Task identifiers must not be empty"
+    if [ "$destination" = select ]; then
+      SELECTED_TASKS[SELECTED_COUNT]="$value"
+      SELECTED_COUNT=$((SELECTED_COUNT + 1))
     else
-        execute "${args[@]}"
+      SKIPPED_TASKS[SKIPPED_COUNT]="$value"
+      SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
     fi
+    [ -z "$remaining" ] && break
+  done
 }
 
-getc() {
-    local save_state
-    save_state=$(/bin/stty -g)
-    /bin/stty raw -echo
-    IFS= read -r -n 1 -d '' "$@"
-    /bin/stty "$save_state"
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --non-interactive)
+      NON_INTERACTIVE=1
+      ;;
+    --dry-run)
+      DRY_RUN=1
+      ;;
+    --select | --skip)
+      [ "$#" -ge 2 ] || fail "$1 requires a task identifier"
+      case "$2" in
+        --*) fail "$1 requires a task identifier" ;;
+      esac
+      if [ "$1" = --select ]; then
+        append_task_values select "$2"
+      else
+        append_task_values skip "$2"
+      fi
+      shift
+      ;;
+    --help | -h)
+      printf '%s\n' \
+        'Usage: install.sh [--non-interactive] [--select <id[,id...]>] [--skip <id[,id...]>] [--dry-run]'
+      exit 0
+      ;;
+    *)
+      fail "Unknown argument: $1"
+      ;;
+  esac
+  shift
+done
+
+[ "$EUID" -ne 0 ] || fail "Do not run this installer as root"
+EFFECTIVE_UID="${DOTFILES_TEST_EUID:-$EUID}"
+[ "$EFFECTIVE_UID" -ne 0 ] || fail "Do not run this installer as root"
+[ -n "${HOME:-}" ] && [ "$HOME" != / ] || fail "HOME must be a non-root absolute path"
+case "$HOME" in
+  /*) ;;
+  *) fail "HOME must be an absolute path" ;;
+esac
+
+if [ "$NON_INTERACTIVE" -eq 0 ] && { [ ! -t 0 ] || [ ! -t 1 ]; }; then
+  fail "An interactive terminal is required; pass --non-interactive for CI or headless setup"
+fi
+
+KERNEL="$(uname -s)"
+MACHINE="$(uname -m)"
+case "$MACHINE" in
+  arm64 | aarch64) ARCH=arm64 ;;
+  x86_64) ARCH=x64 ;;
+  *) fail "Unsupported architecture: $MACHINE" ;;
+esac
+
+case "$KERNEL" in
+  Darwin)
+    PLATFORM=macos
+    ;;
+  Linux)
+    OS_RELEASE_FILE="${DOTFILES_OS_RELEASE_FILE:-/etc/os-release}"
+    [ -r "$OS_RELEASE_FILE" ] || fail "Cannot read $OS_RELEASE_FILE"
+    PLATFORM_ID="$(sed -n 's/^ID=//p' "$OS_RELEASE_FILE" | head -n 1)"
+    PLATFORM_ID="${PLATFORM_ID#\"}"
+    PLATFORM_ID="${PLATFORM_ID%\"}"
+    PLATFORM_ID="${PLATFORM_ID#\'}"
+    PLATFORM_ID="${PLATFORM_ID%\'}"
+    case "$PLATFORM_ID" in
+      ubuntu | debian) PLATFORM="$PLATFORM_ID" ;;
+      *) fail "Unsupported Linux distribution: ${PLATFORM_ID:-unknown}" ;;
+    esac
+    ;;
+  *)
+    fail "Unsupported operating system: $KERNEL"
+    ;;
+esac
+
+log "Detected $PLATFORM/$ARCH"
+
+install_linux_prerequisites() {
+  local packages=()
+  local package_count=0
+  if ! command -v curl >/dev/null 2>&1; then
+    packages[package_count]=curl
+    package_count=$((package_count + 1))
+    packages[package_count]=ca-certificates
+    package_count=$((package_count + 1))
+  fi
+  if ! command -v git >/dev/null 2>&1; then
+    packages[package_count]=git
+    package_count=$((package_count + 1))
+  fi
+  if ! command -v unzip >/dev/null 2>&1; then
+    packages[package_count]=unzip
+    package_count=$((package_count + 1))
+  fi
+  [ "$package_count" -gt 0 ] || return 0
+
+  command -v sudo >/dev/null 2>&1 || fail "sudo is required to install: ${packages[*]}"
+  command -v apt-get >/dev/null 2>&1 || fail "apt-get is required to install: ${packages[*]}"
+  log "Installing bootstrap prerequisites: ${packages[*]}"
+  sudo apt-get update
+  sudo apt-get install -y "${packages[@]}"
 }
 
-major_minor() {
-    echo "${1%%.*}.$(x="${1#*.}"; echo "${x%%.*}")"
+if [ "$PLATFORM" = ubuntu ] || [ "$PLATFORM" = debian ]; then
+  install_linux_prerequisites
+else
+  command -v curl >/dev/null 2>&1 || fail "curl is required on macOS"
+  command -v unzip >/dev/null 2>&1 || fail "unzip is required on macOS"
+  if ! command -v git >/dev/null 2>&1; then
+    command -v xcode-select >/dev/null 2>&1 || fail "xcode-select is required to install Git"
+    log "Requesting installation of Apple Command Line Tools"
+    xcode-select --install
+    fail "Complete the Apple Command Line Tools installation, then rerun this command"
+  fi
+fi
+
+command -v curl >/dev/null 2>&1 || fail "curl is unavailable after prerequisite installation"
+command -v git >/dev/null 2>&1 || fail "Git is unavailable after prerequisite installation"
+git --version >/dev/null 2>&1 || fail "Git does not respond successfully"
+
+mkdir -p "$STATE_DIR" "$USER_BIN"
+chmod 700 "$STATE_DIR" "$USER_BIN"
+
+download_installer() {
+  local url="$1"
+  local destination="$2"
+  log "Downloading $url"
+  curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 --output "$destination" "$url"
 }
 
-macos_version="$(major_minor "$(/usr/bin/sw_vers -productVersion)")"
-
-version_gt() {
-    [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -gt "${2#*.}" ]]
+install_chezmoi() {
+  local installer="$STATE_DIR/chezmoi-install.$$.sh"
+  TEMPORARY_FILES[${#TEMPORARY_FILES[@]}]="$installer"
+  download_installer "$CHEZMOI_INSTALL_URL" "$installer"
+  /bin/sh "$installer" -b "$USER_BIN"
 }
 
-version_ge() {
-    [[ "${1%.*}" -gt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -ge "${2#*.}" ]]
+install_bun() {
+  local installer="$STATE_DIR/bun-install.$$.sh"
+  TEMPORARY_FILES[${#TEMPORARY_FILES[@]}]="$installer"
+  download_installer "$BUN_INSTALL_URL" "$installer"
+  BUN_INSTALL="$HOME/.bun" /bin/bash "$installer"
 }
 
-version_lt() {
-    [[ "${1%.*}" -lt "${2%.*}" ]] || [[ "${1%.*}" -eq "${2%.*}" && "${1#*.}" -lt "${2#*.}" ]]
+if ! command -v chezmoi >/dev/null 2>&1; then
+  log "Installing chezmoi"
+  install_chezmoi
+fi
+if ! command -v bun >/dev/null 2>&1; then
+  log "Installing Bun"
+  install_bun
+fi
+
+PATH="$USER_BIN:$HOME/.bun/bin:$PATH"
+export PATH
+hash -r
+
+CHEZMOI_BIN="$(command -v chezmoi || true)"
+BUN_BIN="$(command -v bun || true)"
+[ -n "$CHEZMOI_BIN" ] || fail "chezmoi is unavailable after installation"
+[ -n "$BUN_BIN" ] || fail "Bun is unavailable after installation"
+"$CHEZMOI_BIN" --version >/dev/null || fail "chezmoi does not respond successfully"
+"$BUN_BIN" --version >/dev/null || fail "Bun does not respond successfully"
+
+is_expected_checkout() {
+  local prefix
+  local remote
+  [ -d "$DOTFILES_DIR" ] || return 1
+  [ ! -L "$DOTFILES_DIR" ] || return 1
+  git -C "$DOTFILES_DIR" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+  prefix="$(git -C "$DOTFILES_DIR" rev-parse --show-prefix 2>/dev/null || true)"
+  [ -z "$prefix" ] || return 1
+  remote="$(git -C "$DOTFILES_DIR" config --get remote.origin.url 2>/dev/null || true)"
+  [ "$remote" = "$DOTFILES_REMOTE" ]
 }
 
-should_install_git() {
-    if [[ $(command -v git) ]]; then
-        return 1
-    fi
+backup_unrelated_checkout() {
+  local timestamp
+  local archive
+  timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
+  archive="$BACKUP_ROOT/bootstrap-${timestamp}-$$"
+  mkdir -p "$archive"
+  chmod 700 "$BACKUP_ROOT" "$archive"
+  mv "$DOTFILES_DIR" "$archive/dotfiles"
+  log "Preserved unrelated checkout at $archive/dotfiles"
 }
 
-should_install_command_line_tools() {
-    if version_gt "$macos_version" "10.13"; then
-        ! [[ -e "/Library/Developer/CommandLineTools/usr/bin/git" ]]
-    else
-        ! [[ -e "/Library/Developer/CommandLineTools/usr/bin/git" ]] ||
-            ! [[ -e "/usr/include/iconv.h" ]]
-    fi
-}
+if [ -e "$DOTFILES_DIR" ] || [ -L "$DOTFILES_DIR" ]; then
+  if is_expected_checkout; then
+    log "Preserving existing dotfiles checkout"
+  else
+    backup_unrelated_checkout
+    git clone "$DOTFILES_REMOTE" "$DOTFILES_DIR"
+  fi
+else
+  git clone "$DOTFILES_REMOTE" "$DOTFILES_DIR"
+fi
 
-install_command_line_tools() {
-    if should_install_command_line_tools && version_ge "$macos_version" "10.13"; then
-        log "Searching online for the Command Line Tools"
-        # This temporary file prompts the 'softwareupdate' utility to list the Command Line Tools
-        clt_placeholder="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
-        execute_sudo "/usr/bin/touch" "$clt_placeholder"
+SETUP_ARGUMENTS=(setup)
+if [ "$NON_INTERACTIVE" -eq 1 ]; then
+  SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]=--non-interactive
+fi
+if [ "$SELECTED_COUNT" -gt 0 ]; then
+  SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]=--select
+  for task in "${SELECTED_TASKS[@]}"; do
+    SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]="$task"
+  done
+fi
+if [ "$SKIPPED_COUNT" -gt 0 ]; then
+  SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]=--skip
+  for task in "${SKIPPED_TASKS[@]}"; do
+    SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]="$task"
+  done
+fi
+if [ "$DRY_RUN" -eq 1 ]; then
+  SETUP_ARGUMENTS[${#SETUP_ARGUMENTS[@]}]=--dry-run
+fi
 
-        clt_label_command="/usr/sbin/softwareupdate -l |
-                            grep -B 1 -E 'Command Line Tools' |
-                            awk -F'*' '/^ *\\*/ {print \$2}' |
-                            sed -e 's/^ *Label: //' -e 's/^ *//' |
-                            sort -V |
-                            tail -n1"
-        clt_label="$(chomp "$(/bin/bash -c "$clt_label_command")")"
-
-        if [[ -n "$clt_label" ]]; then
-            log "Installing $clt_label"
-            execute_sudo "/usr/sbin/softwareupdate" "-i" "$clt_label"
-            execute_sudo "/bin/rm" "-f" "$clt_placeholder"
-            execute_sudo "/usr/bin/xcode-select" "--switch" "/Library/Developer/CommandLineTools"
-        fi
-    fi
-
-    # Headless install may have failed, so fallback to original 'xcode-select' method
-    if should_install_command_line_tools && test -t 0; then
-        log "Installing the Command Line Tools (expect a GUI popup):"
-        execute_sudo "/usr/bin/xcode-select" "--install"
-        echo "Press any key when the installation has completed."
-        getc
-        execute_sudo "/usr/bin/xcode-select" "--switch" "/Library/Developer/CommandLineTools"
-    fi
-}
-
-install_homebrew() {
-    log "Installing the Homebrew:"
-    execute "/bin/bash" "-c" "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-}
-
-clone_dotfiles() {
-    if [[ -d $DOTFILES_DIR ]]; then
-        warn "Directory ${DOTFILES_DIR} already exists"
-    else
-        execute "git" "clone" "${DOTFILES_REMOTE}" "${DOTFILES_DIR}"
-    fi
-
-    execute "cd" "${DOTFILES_DIR}"
-}
-
-setup_osx() {
-    execute_sudo "bash" "-x" "${DOTFILES_DIR}/setup/osx.sh"
-}
-
-setup_ssd() {
-    execute_sudo "bash" "-x" "${DOTFILES_DIR}/setup/ssd.sh"
-}
-
-sync_dotfiles() {
-    execute "python" "${DOTFILES_DIR}/sync.py"
-}
-
-bundle_homebrew() {
-    execute "brew" "bundle" "--global"
-}
-
-restore_mackup() {
-    execute "mackup" "restore" "-f"
-}
-
-install_node() {
-    execute_sudo "chown" "-R" "$USER" "/usr/local"
-    execute "bash" "-x" "${DOTFILES_DIR}/setup/node.sh"
-}
-
-(
-    install_command_line_tools
-    install_homebrew
-    clone_dotfiles
-    sync_dotfiles
-    bundle_homebrew
-    install_node
-
-    if [[ "$(uname)" = "Darwin" ]]; then
-        setup_ssd
-        setup_osx
-    fi
-
-    # restore_mackup
-
-    log "Setup complete. Please restart and continue manual setup."
-) || exit 1
+log "Launching dotfiles setup"
+"$BUN_BIN" "$DOTFILES_DIR/bin/dotfiles" "${SETUP_ARGUMENTS[@]}"

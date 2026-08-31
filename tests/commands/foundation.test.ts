@@ -29,6 +29,27 @@ test("CLI forwards setup selections and dry-run without executing a subprocess",
   expect(dependencies.process.commands).toEqual([]);
 });
 
+test("CLI accepts comma-separated setup selections from the bootstrap", async () => {
+  let received: SetupCommandOptions | undefined;
+  const dependencies = createFakeDependencies({
+    setup: async (options) => { received = options; return 0; },
+  });
+
+  await expect(runCli([
+    "bun",
+    "dotfiles",
+    "setup",
+    "--non-interactive",
+    "--select",
+    "core-tools,shell,git",
+    "--skip",
+    "homebrew-packages",
+  ], dependencies)).resolves.toBe(0);
+
+  expect(received?.select).toEqual(["core-tools", "shell", "git"]);
+  expect(received?.skip).toEqual(["homebrew-packages"]);
+});
+
 test("apply validates, diffs, backs up conflicts, applies, then verifies convergence", async () => {
   const events: string[] = [];
   const services: ApplyServices = {
