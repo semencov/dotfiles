@@ -3,10 +3,21 @@
   "compilerOptions": {
     "noEmit": true,
     "skipLibCheck": true,
-    "allowJs": false
+    "allowJs": false,
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "useUnknownInCatchVariables": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": [
+      "bun"
+    ]
   },
   "include": [
-    "bin"
+    "src/**/*.ts",
+    "tests/**/*.ts",
+    "bin/**/*.ts"
   ],
   "exclude": [
     "node_modules",
