@@ -34,6 +34,16 @@ dotfiles edit
 
 `apply` validates source state/templates, shows the pending diff, archives conflicting targets, forces the already-backed-up convergence, and requires an empty post-apply diff. `edit` chooses `$GUI_EDITOR`, `$VISUAL`, `$EDITOR`, then `code`, and launches it without a shell.
 
+## Existing-machine migration
+
+Before updating an older checkout past the commit that removes `shell/`, run:
+
+```sh
+dotfiles setup --non-interactive --select core-tools,git --skip homebrew-packages,shell
+```
+
+The first apply archives each legacy HOME symlink before replacing it with a direct chezmoi-managed file or directory. Confirm convergence with two consecutive `dotfiles apply` runs; neither should create another backup. Recover only through the archive's recorded `manifest.json`, as described in [recovery](recovery.md).
+
 Homebrew reconciliation is install-only: `brew bundle check` followed, only when required, by `brew bundle install --no-upgrade`. Linux elevation is scoped to individual APT prerequisite commands. A Linux login-shell change has a separate confirmation and is never performed by a noninteractive dry-run.
 
 ## Machine-local state

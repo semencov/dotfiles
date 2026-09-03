@@ -31,6 +31,8 @@ cp -p ~/.local/state/dotfiles/backups/<archive>/.gitconfig ~/.gitconfig
 
 For an archived symlink, recreate the link itself from the manifest/archive; do not copy the external file it pointed to. For a directory, restore only the required subtree rather than replacing a newer directory wholesale.
 
+Legacy `shell/` migration archives use `reason: "legacy-symlink"`. Treat the manifest as authoritative: restore the listed relative path from its `backupPath`, never from a removed repository compatibility path.
+
 To return to managed state after extracting needed local values:
 
 ```sh

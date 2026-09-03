@@ -1,12 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { lstat, readFile, readdir, realpath } from "node:fs/promises";
+import { lstat, readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 
 interface ManagedTargetFixture {
   readonly target: string;
   readonly source: string;
-  readonly legacy: string;
-  readonly compatibility?: "copy";
 }
 
 const repository = join(import.meta.dir, "..", "..");
@@ -23,21 +21,16 @@ async function sourceFiles(path: string): Promise<readonly string[]> {
 }
 
 describe("chezmoi source state", () => {
-  test("maps every legacy sync.py target to one source and compatibility symlink", async () => {
+  test("maps every managed target to one home source without compatibility paths", async () => {
     expect(new Set(targets.map(({ target }) => target)).size).toBe(targets.length);
     expect(new Set(targets.map(({ source }) => source)).size).toBe(targets.length);
 
-    for (const target of targets) {
-      const source = join(repository, "home", target.source);
-      const legacy = join(repository, target.legacy);
-      if (target.compatibility === "copy") {
-        expect((await lstat(legacy)).isFile()).toBe(true);
-        expect(await readFile(legacy)).toEqual(await readFile(source));
-      } else {
-        expect((await lstat(legacy)).isSymbolicLink()).toBe(true);
-        expect(await realpath(legacy)).toBe(await realpath(source));
-      }
+    for (const { target, source } of targets) {
+      const metadata = await lstat(join(repository, "home", source));
+      expect(metadata.isFile() || metadata.isDirectory()).toBe(true);
+      expect(target.startsWith(".")).toBe(true);
     }
+    await expect(lstat(join(repository, "shell"))).rejects.toMatchObject({ code: "ENOENT" });
     await expect(lstat(join(repository, "sync.py"))).rejects.toMatchObject({ code: "ENOENT" });
   });
 
