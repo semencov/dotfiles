@@ -52,6 +52,10 @@ test("CLI accepts comma-separated setup selections from the bootstrap", async ()
 
 test("apply validates, diffs, backs up conflicts, applies, then verifies convergence", async () => {
   const events: string[] = [];
+  const dependencies = createFakeDependencies({}, {
+    "/Users/test/.config/chezmoi/chezmoi.json": JSON.stringify({ sourceDir: "/Users/test/.dotfiles" }),
+    "/Users/test/.dotfiles/.chezmoiroot": "home\n",
+  });
   const services: ApplyServices = {
     verifyTemplates: async () => { events.push("templates"); return { exitCode: 0, stdout: "", stderr: "" }; },
     diff: async () => { events.push("diff"); return events.filter((event) => event === "diff").length === 1 ? "changes" : ""; },
@@ -59,8 +63,18 @@ test("apply validates, diffs, backs up conflicts, applies, then verifies converg
     apply: async () => { events.push("apply"); return { exitCode: 0, stdout: "", stderr: "" }; },
   };
 
-  await expect(runApplyCommand(createFakeDependencies(), { dryRun: false }, services)).resolves.toBe(0);
+  await expect(runApplyCommand(dependencies, { dryRun: false }, services)).resolves.toBe(0);
   expect(events).toEqual(["templates", "diff", "backup", "apply", "diff"]);
+});
+
+test("apply stops before commands or backup mutation when chezmoi is not configured", async () => {
+  const dependencies = createFakeDependencies();
+
+  await expect(runApplyCommand(dependencies, { dryRun: false })).resolves.toBe(1);
+
+  expect(dependencies.process.commands).toEqual([]);
+  expect(dependencies.fs.createdDirectories).toEqual([]);
+  expect(JSON.stringify(dependencies.logger.entries)).toContain("dotfiles setup");
 });
 
 describe("edit", () => {

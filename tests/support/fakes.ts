@@ -29,13 +29,33 @@ export class FakeProcessRunner implements ProcessRunner {
 }
 
 export class FakeFileSystem implements FileSystem {
-  public async exists(_path: string): Promise<boolean> { return false; }
-  public async lstat(_path: string): Promise<FileMetadata | null> { return null; }
-  public async readText(_path: string): Promise<string> { throw new Error("File not found"); }
-  public async readBytes(_path: string): Promise<Uint8Array> { throw new Error("File not found"); }
-  public async writeTextAtomic(_path: string, _contents: string, _mode?: number): Promise<void> {}
-  public async writeBytesAtomic(_path: string, _contents: Uint8Array, _mode?: number): Promise<void> {}
-  public async mkdir(_path: string, _mode?: number): Promise<void> {}
+  public readonly textFiles: Map<string, string>;
+  public readonly createdDirectories: string[] = [];
+
+  public constructor(seed: Readonly<Record<string, string>> = {}) {
+    this.textFiles = new Map(Object.entries(seed));
+  }
+
+  public async exists(path: string): Promise<boolean> { return this.textFiles.has(path); }
+  public async lstat(path: string): Promise<FileMetadata | null> {
+    const contents = this.textFiles.get(path);
+    return contents === undefined ? null : { type: "file", mode: 0o600, size: contents.length };
+  }
+  public async readText(path: string): Promise<string> {
+    const contents = this.textFiles.get(path);
+    if (contents === undefined) throw new Error("File not found");
+    return contents;
+  }
+  public async readBytes(path: string): Promise<Uint8Array> {
+    return new TextEncoder().encode(await this.readText(path));
+  }
+  public async writeTextAtomic(path: string, contents: string, _mode?: number): Promise<void> {
+    this.textFiles.set(path, contents);
+  }
+  public async writeBytesAtomic(path: string, contents: Uint8Array, _mode?: number): Promise<void> {
+    this.textFiles.set(path, new TextDecoder().decode(contents));
+  }
+  public async mkdir(path: string, _mode?: number): Promise<void> { this.createdDirectories.push(path); }
   public async rename(_source: string, _destination: string): Promise<void> {}
   public async copyFile(_source: string, _destination: string): Promise<void> {}
   public async chmod(_path: string, _mode: number): Promise<void> {}
@@ -86,10 +106,11 @@ export interface FakeCliDependencies extends CliDependencies {
 
 export function createFakeDependencies(
   commandOverrides: Partial<FoundationCommandHandlers> = {},
+  files: Readonly<Record<string, string>> = {},
 ): FakeCliDependencies {
   return {
     process: new FakeProcessRunner(),
-    fs: new FakeFileSystem(),
+    fs: new FakeFileSystem(files),
     prompts: new FakePromptAdapter(),
     logger: new FakeLogger(),
     platform: { os: "macos", arch: "arm64", homeDir: "/Users/test" },

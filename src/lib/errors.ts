@@ -25,6 +25,13 @@ export class CommandUnavailableError extends DotfilesError {
   }
 }
 
+export class ChezmoiNotConfiguredError extends DotfilesError {
+  public constructor(message = "Run `dotfiles setup` first") {
+    super(message, 1);
+    this.name = "ChezmoiNotConfiguredError";
+  }
+}
+
 export function publicErrorMessage(error: unknown): string {
   return error instanceof DotfilesError ? error.message : "Unexpected dotfiles error";
 }

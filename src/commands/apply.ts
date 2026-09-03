@@ -1,7 +1,9 @@
 import { BackupService, discoverChezmoiConflicts } from "../backups/service";
 import { ChezmoiClient } from "../chezmoi/client";
 import { validateSourceRepository } from "../chezmoi/config";
+import { assertChezmoiReady } from "../chezmoi/readiness";
 import type { ApplyCommandOptions, CliDependencies } from "../cli/dependencies";
+import { ChezmoiNotConfiguredError } from "../lib/errors";
 import type { CommandResult } from "../lib/process";
 
 export interface ApplyServices {
@@ -48,6 +50,18 @@ export async function runApplyCommand(
   options: ApplyCommandOptions,
   services: ApplyServices = createApplyServices(dependencies),
 ): Promise<number> {
+  try {
+    await assertChezmoiReady({
+      configPath: dependencies.paths.chezmoiConfig,
+      expectedRepo: dependencies.paths.repo,
+      fs: dependencies.fs,
+    });
+  } catch (error) {
+    if (!(error instanceof ChezmoiNotConfiguredError)) throw error;
+    dependencies.logger.error(error.message);
+    return error.exitCode;
+  }
+
   const templates = await services.verifyTemplates();
   if (templates.exitCode !== 0) {
     dependencies.logger.error("Chezmoi template validation failed", { exitCode: templates.exitCode });
