@@ -8,13 +8,14 @@
 
 **Tech Stack:** Bun, strict TypeScript, chezmoi, macOS Keychain `security`, OpenSSH, GnuPG, Mackup for one final uninstall, Bun test, GitHub Actions, ShellCheck.
 
-**Spec:** `docs/superpowers/specs/2026-08-27-dotfiles-refactor-foundation-design.md`
+**Spec:** `docs/superpowers/specs/2026-09-02-repository-cleanup-design.md` (extends `docs/superpowers/specs/2026-08-27-dotfiles-refactor-foundation-design.md`)
 
 ## Prerequisites
 
 Complete and verify:
 
 - `docs/superpowers/plans/2026-08-31-bootstrap-setup-foundation.md`
+- `docs/superpowers/plans/2026-09-02-foundation-activation-transition-cleanup.md`
 - `docs/superpowers/plans/2026-08-31-state-sync-update.md`
 
 This plan consumes the shared adapters, backup service, policy registry, normalizers, inventory providers, security validator, and setup task model from those plans.
@@ -81,7 +82,7 @@ export interface HomeStateLedger {
 
 - [ ] Implement a strict schema parser that rejects unknown keys, absolute tracked paths, `..`, duplicate IDs/sources/destinations, missing rationale/verification, `git` entries marked secret, and `keychain` entries without a Keychain service identifier.
 - [ ] Implement bounded scanner roots:
-  - Mackup's configured iCloud storage plus every application/custom config named by `shell/.mackup.cfg` and `shell/.mackup/*.cfg`.
+  - Mackup's configured iCloud storage plus every application/custom config named by `home/dot_mackup.cfg` and `home/dot_mackup/*.cfg`.
   - Existing top-level candidates `CLAUDE.md`, `biome.json`, `.gitlocal`, `.zshlocal`, `.ssh`, `.gnupg`, and declared tool configuration directories.
   - Direct children and registered descendants of `~/.config`, never unrestricted recursion.
   - Registered high-value paths below `~/Library/Application Support` and `~/Library/Preferences` for installed applications only.
@@ -208,8 +209,8 @@ export const TOKEN_SERVICES = {
 - Add: ledger-approved files under `home/`
 - Modify: `config/sync-policy.json`
 - Modify: `config/home-state.json`
-- Delete after verification: `shell/.mackup.cfg`
-- Delete after verification: `shell/.mackup/*.cfg`
+- Delete after verification: `home/dot_mackup.cfg`
+- Delete after verification: `home/dot_mackup/*.cfg`
 - Create: `tests/home-state/migrator.test.ts`
 - Create: `tests/integration/home-state-migration.test.ts`
 
@@ -222,7 +223,7 @@ export const TOKEN_SERVICES = {
 - [ ] Enforce special cases: OpenLogi manages the complete canonical `config.toml` and preserves device IDs; its lock/backups are excluded. CHIRP config and radio images are excluded entirely. macOS plist intent becomes typed reversible setup tasks; no whole plist enters `home/`.
 - [ ] Preserve `.gitlocal` as an unmanaged optional override after public name/email defaults migrate. Preserve the non-secret remainder of `.zshlocal` unmanaged after Task 3.
 - [ ] After all entries apply, verify destination existence/type/mode/content policy, zero chezmoi drift, zero ledger gaps, zero secret findings, and unchanged SSH/GPG private material.
-- [ ] Only after successful verification run `mackup uninstall` in the normal supported mode. Re-run verification, retain the iCloud Mackup directory untouched as rollback material, then delete repository `shell/.mackup.cfg` and `shell/.mackup/*.cfg` and remove Mackup from the managed Brewfile/inventory.
+- [ ] Only after successful verification run `mackup uninstall` in the normal supported mode. Re-run verification, retain the iCloud Mackup directory untouched as rollback material, then delete repository `home/dot_mackup.cfg` and `home/dot_mackup/*.cfg` and remove Mackup from the managed Brewfile/inventory.
 - [ ] Integration-test migration from a fixture HOME containing Mackup symlinks, conflicting iCloud copies, excluded auth/session files, SSH keys, and an interruption after half the entries; rerun converges and preserves all excluded/private bytes.
 - [ ] Run `bun test tests/home-state tests/integration/home-state-migration.test.ts && bun run typecheck`; run `dotfiles audit --strict` against the fixture and require zero findings.
 - [ ] Stage `src/home-state`, the setup task/catalog, the two exact policy files, Mackup deletions, tests, and only the exact `home/` paths printed by the verified migrator; inspect the staged list before committing.

@@ -8,11 +8,13 @@
 
 **Tech Stack:** Bun, strict TypeScript, Commander, chezmoi, Git, Homebrew, uv, GitHub CLI, editor CLIs, Mac App Store CLI, Bun test.
 
-**Spec:** `docs/superpowers/specs/2026-08-27-dotfiles-refactor-foundation-design.md`
+**Spec:** `docs/superpowers/specs/2026-09-02-repository-cleanup-design.md` (extends `docs/superpowers/specs/2026-08-27-dotfiles-refactor-foundation-design.md`)
 
 ## Prerequisite
 
 Complete and verify `docs/superpowers/plans/2026-08-31-bootstrap-setup-foundation.md`. This plan consumes its `CliDependencies`, `FileSystem`, `ProcessRunner`, `ChezmoiClient`, `BackupService`, setup command, and CLI entry point without redefining them.
+
+Also complete `docs/superpowers/plans/2026-09-02-foundation-activation-transition-cleanup.md` so batch operations start from the authoritative chezmoi source rather than transitional HOME links.
 
 ## Global Constraints
 
