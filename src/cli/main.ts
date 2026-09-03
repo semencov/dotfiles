@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 
-import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions } from "./dependencies";
+import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions, SyncCommandOptions } from "./dependencies";
 import { runInternalValidate, type InternalValidateOptions } from "../commands/internal-validate";
 
 class CommandFailedError extends Error {
@@ -54,6 +54,16 @@ export function createProgram(dependencies: CliDependencies): Command {
   program.command("edit")
     .description("Open the dotfiles repository")
     .action(invoke<void>(dependencies.commands.edit));
+  program.command("sync")
+    .description("Capture and publish managed home state")
+    .option("--no-push", "Create the local sync commit without pushing")
+    .option("--dry-run", "Fetch and preview without merging or changing source")
+    .option("--message <text>", "Commit message", "sync: managed state")
+    .action(invoke<SyncCommandOptions>(async (options) => dependencies.commands.sync({
+      push: options.push ?? true,
+      dryRun: options.dryRun ?? false,
+      message: options.message,
+    })));
   const internal = program.command("internal", { hidden: true });
   internal.command("validate")
     .option("--staged", "Validate the Git index")

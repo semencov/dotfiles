@@ -10,6 +10,7 @@ describe("createProgram", () => {
       "setup",
       "apply",
       "edit",
+      "sync",
       "internal",
     ]);
   });

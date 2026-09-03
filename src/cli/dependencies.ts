@@ -16,10 +16,17 @@ export interface ApplyCommandOptions {
   readonly dryRun: boolean;
 }
 
+export interface SyncCommandOptions {
+  readonly push: boolean;
+  readonly dryRun: boolean;
+  readonly message: string;
+}
+
 export interface FoundationCommandHandlers {
   readonly setup: (options: SetupCommandOptions) => Promise<number>;
   readonly apply: (options: ApplyCommandOptions) => Promise<number>;
   readonly edit: () => Promise<number>;
+  readonly sync: (options: SyncCommandOptions) => Promise<number>;
 }
 
 export interface CliDependencies {
