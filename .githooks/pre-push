@@ -1,0 +1,28 @@
+#!/usr/bin/env bun
+
+import { resolve } from "node:path";
+
+import { PolicyRegistry } from "../src/policy/registry";
+import { BunProcessRunner } from "../src/lib/process";
+import type { Logger } from "../src/lib/logger";
+import { validateRepository } from "../src/security/validate-repository";
+
+const logger: Logger = {
+  debug: () => undefined,
+  info: (message) => process.stdout.write(`${message}\n`),
+  warn: (message) => process.stderr.write(`${message}\n`),
+  error: (message) => process.stderr.write(`${message}\n`),
+};
+const repository = resolve(import.meta.dir, "..");
+const processRunner = new BunProcessRunner(logger);
+const policy = await PolicyRegistry.load(resolve(repository, "config/sync-policy.json"));
+const input = await Bun.stdin.text();
+const refs = [...new Set(input.trim().split("\n").filter(Boolean).map((line) => line.split(/\s+/)[1]).filter((ref): ref is string => ref !== undefined && !/^0+$/.test(ref)))];
+if (refs.length === 0) refs.push("HEAD");
+let failed = false;
+for (const ref of refs) {
+  const findings = await validateRepository({ repository, policy, process: processRunner, mode: { kind: "tree", ref } });
+  for (const finding of findings) process.stderr.write(`${finding.rule}: ${finding.path}${finding.line === undefined ? "" : `:${finding.line}`}\n`);
+  failed ||= findings.length > 0;
+}
+process.exitCode = failed ? 1 : 0;

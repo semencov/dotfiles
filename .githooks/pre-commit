@@ -1,0 +1,21 @@
+#!/usr/bin/env bun
+
+import { resolve } from "node:path";
+
+import { PolicyRegistry } from "../src/policy/registry";
+import { BunProcessRunner } from "../src/lib/process";
+import type { Logger } from "../src/lib/logger";
+import { validateRepository } from "../src/security/validate-repository";
+
+const logger: Logger = {
+  debug: () => undefined,
+  info: (message) => process.stdout.write(`${message}\n`),
+  warn: (message) => process.stderr.write(`${message}\n`),
+  error: (message) => process.stderr.write(`${message}\n`),
+};
+const repository = resolve(import.meta.dir, "..");
+const processRunner = new BunProcessRunner(logger);
+const policy = await PolicyRegistry.load(resolve(repository, "config/sync-policy.json"));
+const findings = await validateRepository({ repository, policy, process: processRunner, mode: { kind: "staged" } });
+for (const finding of findings) process.stderr.write(`${finding.rule}: ${finding.path}${finding.line === undefined ? "" : `:${finding.line}`}\n`);
+process.exitCode = findings.length === 0 ? 0 : 1;

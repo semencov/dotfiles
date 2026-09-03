@@ -1,0 +1,1 @@
+machine example.test login user pass{{WORD}} {{PASSWORD}}

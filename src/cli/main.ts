@@ -1,6 +1,7 @@
 import { Command, CommanderError } from "commander";
 
 import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions } from "./dependencies";
+import { runInternalValidate, type InternalValidateOptions } from "../commands/internal-validate";
 
 class CommandFailedError extends Error {
   public constructor(public readonly exitCode: number) {
@@ -53,6 +54,14 @@ export function createProgram(dependencies: CliDependencies): Command {
   program.command("edit")
     .description("Open the dotfiles repository")
     .action(invoke<void>(dependencies.commands.edit));
+  const internal = program.command("internal", { hidden: true });
+  internal.command("validate")
+    .option("--staged", "Validate the Git index")
+    .option("--tree <ref>", "Validate a Git tree")
+    .action(invoke<InternalValidateOptions>(async (options) => runInternalValidate(dependencies, {
+      staged: options.staged ?? false,
+      ...(options.tree === undefined ? {} : { tree: options.tree }),
+    })));
 
   return program;
 }
