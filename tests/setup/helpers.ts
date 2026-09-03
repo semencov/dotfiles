@@ -12,6 +12,7 @@ export function task(
     defaultSelected: false,
     risk: "low",
     privilege: "user",
+    mutations: [],
     preflight: async () => ({ ok: true }),
     apply: async () => undefined,
     verify: async () => ({ ok: true }),

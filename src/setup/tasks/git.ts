@@ -19,6 +19,7 @@ export function createGitTask(): SetupTask {
     defaultSelected: true,
     risk: "low",
     privilege: "user",
+    mutations: ["configure repository hooks and GitHub credentials"],
     preflight: async (context) => await context.process.which("git") === null
       ? { ok: false, detail: "Git is unavailable" }
       : { ok: true },

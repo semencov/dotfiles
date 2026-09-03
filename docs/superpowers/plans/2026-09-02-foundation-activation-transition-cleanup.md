@@ -61,6 +61,7 @@ test("renders selected tasks with dependencies, risk, privilege, platform, and m
   expect(output).toContain("homebrew-packages");
   expect(output).toContain("medium");
   expect(output).toContain("user");
+  expect(output).toContain("After tasks: archive conflicts, apply chezmoi HOME state, verify convergence");
 });
 ```
 
@@ -105,6 +106,12 @@ core-tools: validation only
 homebrew-packages: install missing Homebrew/Brewfile packages
 shell: optionally change Linux login shell
 git: configure repository hooks and GitHub credentials
+```
+
+Append this fixed lifecycle line after the task table so dry-run describes work outside individual tasks:
+
+```text
+After tasks: archive conflicts, apply chezmoi HOME state, verify convergence
 ```
 
 Add `mutations: []` to the default returned by `tests/setup/helpers.ts::task`.

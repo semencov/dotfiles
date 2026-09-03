@@ -18,6 +18,7 @@ export interface SetupTask {
   readonly defaultSelected: boolean;
   readonly risk: "low" | "medium" | "high";
   readonly privilege: "user" | "command-sudo";
+  readonly mutations: readonly string[];
   preflight(context: TaskContext): Promise<CheckResult>;
   apply(context: TaskContext): Promise<void>;
   verify(context: TaskContext): Promise<CheckResult>;

@@ -23,6 +23,7 @@ export function createShellTask(): SetupTask {
     defaultSelected: true,
     risk: "medium",
     privilege: "user",
+    mutations: ["optionally change Linux login shell"],
     preflight: async (context) => {
       if (context.platform.os === "macos" || context.nonInteractive) return { ok: true };
       return await context.process.which("chsh") === null

@@ -26,6 +26,7 @@ export function createCoreToolsTask(): SetupTask {
     defaultSelected: true,
     risk: "low",
     privilege: "user",
+    mutations: [],
     preflight: checkRequiredTools,
     apply: async () => undefined,
     verify: checkRequiredTools,

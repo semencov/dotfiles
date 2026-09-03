@@ -98,6 +98,7 @@ export function createHomebrewTask(): SetupTask {
     defaultSelected: true,
     risk: "medium",
     privilege: "command-sudo",
+    mutations: ["install missing Homebrew/Brewfile packages"],
     preflight,
     apply: async (context) => {
       if (context.dryRun) {

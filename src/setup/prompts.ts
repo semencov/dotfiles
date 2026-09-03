@@ -1,4 +1,5 @@
 import { UserCancelledError } from "../lib/errors";
+import { renderSetupPlan } from "./presenter";
 import { resolveSelection, resolveSetupTasks, type SelectionInput } from "./selection";
 import type { SetupTask, TaskContext } from "./types";
 
@@ -7,12 +8,14 @@ export type SetupPlanResult =
   | { readonly ok: false; readonly exitCode: 130 };
 
 function logPlan(tasks: readonly SetupTask[], context: TaskContext): void {
-  context.logger.info("Resolved setup plan", {
+  context.logger.info(renderSetupPlan(tasks, context.platform, context.dryRun));
+  context.logger.debug("Resolved setup plan", {
     tasks: tasks.map((task) => ({
       id: task.id,
       dependencies: task.dependencies,
       risk: task.risk,
       privilege: task.privilege,
+      mutations: task.mutations,
     })),
   });
 }
