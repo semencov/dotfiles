@@ -1,4 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import {
   chmod,
   copyFile,
@@ -16,6 +17,8 @@ import {
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
+import { seedLegacyHomeLinks } from "./fixtures/legacy-home-links";
+
 interface CommandOutput {
   readonly exitCode: number;
   readonly stdout: string;
@@ -24,6 +27,7 @@ interface CommandOutput {
 
 interface ManagedTargetFixture {
   readonly target: string;
+  readonly source: string;
 }
 
 const repoRoot = resolve(import.meta.dir, "../..");
@@ -72,6 +76,31 @@ async function commandFailureDetail(output: CommandOutput, home: string): Promis
   return [output.stdout, output.stderr, ...durable].join("\n");
 }
 
+async function fileHash(path: string): Promise<string> {
+  return createHash("sha256").update(await readFile(path)).digest("hex");
+}
+
+async function snapshotPath(path: string, prefix: string): Promise<Readonly<Record<string, string>>> {
+  const metadata = await lstat(path);
+  if (metadata.isFile()) return { [prefix]: await fileHash(path) };
+  if (!metadata.isDirectory()) return { [prefix]: `non-regular:${metadata.mode}` };
+
+  const entries = await readdir(path);
+  const children = await Promise.all(entries.sort().map((entry) => snapshotPath(
+    join(path, entry),
+    join(prefix, entry),
+  )));
+  return Object.assign({}, ...children) as Readonly<Record<string, string>>;
+}
+
+async function snapshotManagedState(
+  root: string,
+  targets: readonly ManagedTargetFixture[],
+): Promise<Readonly<Record<string, string>>> {
+  const snapshots = await Promise.all(targets.map(({ target }) => snapshotPath(join(root, target), target)));
+  return Object.assign({}, ...snapshots) as Readonly<Record<string, string>>;
+}
+
 test("local bootstrap converges an isolated HOME and preserves conflicts exactly once", async () => {
   const actualBun = Bun.which("bun");
   const actualChezmoi = Bun.which("chezmoi");
@@ -97,6 +126,12 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
     copyFile(join(repoRoot, "bin", "dotfiles"), join(checkout, "bin", "dotfiles")),
     copyFile(join(repoRoot, ".chezmoiroot"), join(checkout, ".chezmoiroot")),
   ]);
+  await rm(join(checkout, "shell"), { recursive: true, force: true });
+
+  const targets = JSON.parse(
+    await readFile(join(repoRoot, "tests", "fixtures", "expected-managed-targets.json"), "utf8"),
+  ) as readonly ManagedTargetFixture[];
+  await seedLegacyHomeLinks(home, checkout, targets);
 
   await mkdir(fakeBin);
   for (const executable of ["bun", "gh"] as const) {
@@ -107,11 +142,6 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
   await symlink(actualChezmoi, join(fakeBin, "chezmoi"));
   await symlink(join(repoRoot, "node_modules"), join(checkout, "node_modules"));
   await writeFile(integrationLog, "");
-
-  await writeFile(join(home, ".gitconfig"), "[user]\n\tname = Private\n", { mode: 0o640 });
-  const legacyTarget = join(root, "legacy-zshrc");
-  await writeFile(legacyTarget, "legacy zsh\n");
-  await symlink(legacyTarget, join(home, ".zshrc"));
 
   const path = [fakeBin, dirname(actualGit), "/usr/bin", "/bin"].join(":");
   const environment = {
@@ -133,13 +163,21 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
   const first = await run("/bin/bash", installArgs, { env: environment });
   expect(first.exitCode, await commandFailureDetail(first, home)).toBe(0);
 
-  const targets = JSON.parse(
-    await readFile(join(repoRoot, "tests", "fixtures", "expected-managed-targets.json"), "utf8"),
-  ) as readonly ManagedTargetFixture[];
   for (const { target } of targets) {
     const metadata = await lstat(join(home, target));
-    if (target === ".mackup") expect(metadata.isDirectory(), target).toBe(true);
-    else expect(metadata.isFile(), target).toBe(true);
+    expect(metadata.isSymbolicLink(), target).toBe(false);
+    if (target === ".mackup") {
+      expect(metadata.isDirectory(), target).toBe(true);
+      continue;
+    }
+    expect(metadata.isFile(), target).toBe(true);
+    const rendered = await run(actualChezmoi, [
+      "--config", join(home, ".config", "chezmoi", "chezmoi.json"),
+      "--source", checkout,
+      "cat", join(home, target),
+    ], { env: environment });
+    expect(rendered.exitCode, rendered.stderr).toBe(0);
+    expect(await readFile(join(home, target), "utf8"), target).toBe(rendered.stdout);
   }
 
   const backupRoot = join(home, ".local", "state", "dotfiles", "backups");
@@ -148,26 +186,42 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
   const initialManifest = JSON.parse(await readFile(initialManifests[0]!, "utf8")) as {
     readonly entries: readonly { readonly relativePath: string; readonly type: string }[];
   };
-  expect(initialManifest.entries.map(({ relativePath, type }) => ({ relativePath, type }))).toContainEqual({
-    relativePath: ".gitconfig",
-    type: "file",
-  });
-  expect(initialManifest.entries.map(({ relativePath, type }) => ({ relativePath, type }))).toContainEqual({
-    relativePath: ".zshrc",
-    type: "symlink",
-  });
+  expect(initialManifest.entries.map(({ relativePath, type }) => ({ relativePath, type })).sort((left, right) =>
+    left.relativePath.localeCompare(right.relativePath),
+  )).toEqual(targets.map(({ target }) => ({ relativePath: target, type: "symlink" })).sort((left, right) =>
+    left.relativePath.localeCompare(right.relativePath),
+  ));
   expect((await stat(dirname(initialManifests[0]!))).mode & 0o777).toBe(0o700);
   expect((await stat(initialManifests[0]!)).mode & 0o777).toBe(0o600);
 
-  const second = await run("/bin/bash", installArgs, { env: environment });
+  const initialHomeHashes = await snapshotManagedState(home, targets);
+  const initialRepoHashes = await snapshotManagedState(
+    join(checkout, "home"),
+    targets.map(({ source }) => ({ target: source, source })),
+  );
+  const apply = async (): Promise<CommandOutput> => run(
+    join(checkout, "bin", "dotfiles"),
+    ["apply"],
+    { env: environment },
+  );
+
+  const second = await apply();
   expect(second.exitCode, await commandFailureDetail(second, home)).toBe(0);
   expect(await manifestPaths(backupRoot)).toHaveLength(1);
+  expect(await snapshotManagedState(home, targets)).toEqual(initialHomeHashes);
+  expect(await snapshotManagedState(
+    join(checkout, "home"),
+    targets.map(({ source }) => ({ target: source, source })),
+  )).toEqual(initialRepoHashes);
 
-  await writeFile(join(home, ".gitconfig"), "[user]\n\tname = Mutated\n");
-  const third = await run("/bin/bash", installArgs, { env: environment });
+  const third = await apply();
   expect(third.exitCode, await commandFailureDetail(third, home)).toBe(0);
-  expect(await manifestPaths(backupRoot)).toHaveLength(2);
-  expect(await readFile(join(home, ".gitconfig"), "utf8")).toBe(await readFile(join(checkout, "home", "dot_gitconfig"), "utf8"));
+  expect(await manifestPaths(backupRoot)).toHaveLength(1);
+  expect(await snapshotManagedState(home, targets)).toEqual(initialHomeHashes);
+  expect(await snapshotManagedState(
+    join(checkout, "home"),
+    targets.map(({ source }) => ({ target: source, source })),
+  )).toEqual(initialRepoHashes);
   expect(await readFile(integrationLog, "utf8")).not.toContain("brew");
 });
 

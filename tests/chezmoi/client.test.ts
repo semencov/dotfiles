@@ -53,16 +53,28 @@ describe("ChezmoiClient", () => {
   test("renders managed files for byte-level conflict discovery", async () => {
     const { client, process, configPath, sourceDir } = await harness();
     process.results.push(
+      { exitCode: 0, stdout: "/home/yuri/.config\0", stderr: "" },
       { exitCode: 0, stdout: "/home/yuri/.gitconfig\0", stderr: "" },
       { exitCode: 0, stdout: "[user]\n", stderr: "" },
     );
 
-    await expect(client.renderedTargets()).resolves.toEqual([{
-      target: "/home/yuri/.gitconfig",
-      type: "file",
-      contents: new TextEncoder().encode("[user]\n"),
-    }]);
+    await expect(client.renderedTargets()).resolves.toEqual([
+      { target: "/home/yuri/.config", type: "directory" },
+      {
+        target: "/home/yuri/.gitconfig",
+        type: "file",
+        contents: new TextEncoder().encode("[user]\n"),
+      },
+    ]);
     expect(process.commands).toEqual([
+      {
+        executable: "chezmoi",
+        args: [
+          "--config", configPath,
+          "--source", sourceDir,
+          "managed", "--include", "dirs", "--nul-path-separator", "--path-style", "absolute",
+        ],
+      },
       {
         executable: "chezmoi",
         args: [

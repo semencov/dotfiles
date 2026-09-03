@@ -40,6 +40,12 @@ export class ChezmoiClient {
   }
 
   public async renderedTargets(): Promise<readonly RenderedTarget[]> {
+    const managedDirectories = await this.#execute("managed", [
+      "--include", "dirs",
+      "--nul-path-separator",
+      "--path-style", "absolute",
+    ]);
+    this.#assertSuccess("managed", managedDirectories);
     const managed = await this.#execute("managed", [
       "--include", "files",
       "--nul-path-separator",
@@ -48,11 +54,14 @@ export class ChezmoiClient {
     this.#assertSuccess("managed", managed);
     const targets = parseManagedTargets(managed.stdout);
 
-    return Promise.all(targets.map(async (target): Promise<RenderedTarget> => {
+    const files = await Promise.all(targets.map(async (target): Promise<RenderedTarget> => {
       const rendered = await this.#execute("cat", [target]);
       this.#assertSuccess("cat", rendered);
       return { target, type: "file", contents: new TextEncoder().encode(rendered.stdout) };
     }));
+    const directories: readonly RenderedTarget[] = parseManagedTargets(managedDirectories.stdout)
+      .map((target) => ({ target, type: "directory" }));
+    return [...directories, ...files];
   }
 
   public async diff(): Promise<string> {

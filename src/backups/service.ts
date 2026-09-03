@@ -66,8 +66,15 @@ export async function discoverChezmoiConflicts(
   homeDir: string,
 ): Promise<readonly BackupCandidate[]> {
   const conflicts: BackupCandidate[] = [];
+  const orderedTargets = [...targets].sort((left, right) => {
+    if (left.type !== "directory" && right.type !== "directory") return 0;
+    if (left.type !== "directory") return 1;
+    if (right.type !== "directory") return -1;
+    return relative(homeDir, left.target).split(sep).length - relative(homeDir, right.target).split(sep).length;
+  });
 
-  for (const target of targets) {
+  for (const target of orderedTargets) {
+    if (conflicts.some(({ source }) => isContained(source, target.target))) continue;
     const relativePath = lexicalRelativePath(homeDir, target.target);
     const metadata = await fs.lstat(target.target);
     if (metadata === null) continue;

@@ -70,6 +70,27 @@ describe("BackupService", () => {
     expect(conflicts).toEqual([]);
   });
 
+  test("archives a legacy directory symlink once without adding managed descendants", async () => {
+    const home = await temporaryHome();
+    const source = join(home, ".dotfiles", "home", "dot_mackup");
+    await mkdir(source, { recursive: true });
+    await writeFile(join(source, "tool.cfg"), "legacy");
+    await symlink(source, join(home, ".mackup"));
+
+    const conflicts = await discoverChezmoiConflicts([
+      {
+        target: join(home, ".mackup", "tool.cfg"),
+        type: "file",
+        contents: new TextEncoder().encode("managed"),
+      },
+      { target: join(home, ".mackup"), type: "directory" },
+    ], new NodeFileSystem(), home);
+
+    expect(conflicts.map(({ relativePath, type }) => ({ relativePath, type }))).toEqual([
+      { relativePath: ".mackup", type: "symlink" },
+    ]);
+  });
+
   test("allocates distinct archives for multiple conflicts in the same second", async () => {
     const home = await temporaryHome();
     const fs = new NodeFileSystem();
