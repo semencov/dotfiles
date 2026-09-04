@@ -1,4 +1,4 @@
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 import type { CliDependencies } from "../cli/dependencies";
 import { PolicyRegistry } from "../policy/registry";
@@ -20,9 +20,10 @@ export async function runInternalValidate(
   const mode: RepositoryValidationMode = options.staged
     ? { kind: "staged" }
     : { kind: "tree", ref: options.tree! };
-  const policy = await PolicyRegistry.load(join(dependencies.paths.repo, "config", "sync-policy.json"));
+  const repository = resolve(import.meta.dir, "../..");
+  const policy = await PolicyRegistry.load(join(repository, "config", "sync-policy.json"));
   const findings = await validateRepository({
-    repository: dependencies.paths.repo,
+    repository,
     policy,
     process: dependencies.process,
     mode,

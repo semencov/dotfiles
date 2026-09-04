@@ -25,6 +25,16 @@ For headless setup, pass arguments after the Bash `--` separator:
 
 Rerun the installer or use `dotfiles setup` to reconfigure the machine. Use `dotfiles apply --dry-run` to inspect managed-home changes and `dotfiles apply` to converge them. See [setup](docs/setup.md) and [recovery](docs/recovery.md).
 
+## Commands
+
+- `dotfiles setup` — install/reconfigure selected machine subsystems.
+- `dotfiles apply [--dry-run]` — converge managed HOME state.
+- `dotfiles sync [--dry-run] [--no-push]` — capture, merge, validate and publish managed state.
+- `dotfiles update [--dry-run] [--no-push]` — update selected tools inside the same state transaction.
+- `dotfiles edit` — open the repository in the configured editor.
+
+See [synchronization](docs/sync.md) and [environment updates](docs/update.md). Public inventories are install-only: additions can install missing software on another matching machine; removals never uninstall anything.
+
 Existing checkouts from before the chezmoi migration must run `dotfiles setup` before updating past the removal of `shell/`. That activation archives legacy HOME symlinks, replaces them with direct chezmoi-managed files, and records recovery metadata in the backup manifest.
 
 The scripts under `setup/` are deprecated compatibility references. The typed setup CLI is authoritative; do not use legacy scripts for new-machine provisioning.
