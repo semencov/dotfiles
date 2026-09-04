@@ -1,16 +1,20 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Add remote upstream
+import { $ } from "bun";
+import { basename } from "node:path";
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { validGitHubOwner } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-# Usage:
-#   git-fork <original-author>
-#
-
-user=$1
-
-if [[ "$user" == "" ]]; then
-	echo "Usage: git-fork <original-author>"
-else
-	repo=`basename "$(pwd)"`
-	git remote add upstream "git@github.com:$user/$repo.git"
-fi
+const usage = "Usage: git-fork <original-owner>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 1, usage);
+  const owner = args[0]!;
+  if (!validGitHubOwner(owner)) throw new UtilityUsageError("Invalid GitHub owner");
+  await requireTools(["git"]);
+  const repository = basename(process.cwd());
+  const result = await $`git remote add upstream ${`git@github.com:${owner}/${repository}.git`}`.nothrow();
+  if (result.exitCode !== 0) childExit("git remote add", result.exitCode);
+});

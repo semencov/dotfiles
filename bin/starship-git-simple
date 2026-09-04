@@ -1,39 +1,17 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-#
-# Simplified Git branch and status
-# Based on https://github.com/denysdovhan/spaceship-prompt/
-#
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-GIT_SIMPLE_CLEAN_SYMBOL=""
-GIT_SIMPLE_DIRTY_SYMBOL=""
-GIT_SIMPLE_CLEAN_COLOR="\033[32m" # Bold green
-GIT_SIMPLE_DIRTY_COLOR="\033[31m" # Bold red
-GIT_SIMPLE_RESET_COLOR="\033[0m"
-
-# Check if the current directory is in a Git repository.
-is_git() {
-  [[ $(command git rev-parse --is-inside-work-tree 2>/dev/null) == true ]]
-}
-
-git_simple() {
-  is_git || return
-
-  # Get the branch name
-  local git_current_branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null)
-  [[ -z "$git_current_branch" ]] && return
-
-  # Check if the repo is dirty
-  local is_dirty=$(git status -s --ignore-submodules=dirty 2> /dev/null)
-
-  local color="$GIT_SIMPLE_CLEAN_COLOR"
-  local symbol="$GIT_SIMPLE_CLEAN_SYMBOL"
-  if [[ -n "$is_dirty" ]]; then
-    color="$GIT_SIMPLE_DIRTY_COLOR"
-    symbol="$GIT_SIMPLE_DIRTY_SYMBOL"
-  fi
-
-  echo -e "$color $symbol $git_current_branch$GIT_SIMPLE_RESET_COLOR"
-}
-
-git_simple
+const usage = "Usage: starship-git-simple";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  if ((await $`git rev-parse --is-inside-work-tree`.nothrow().quiet()).exitCode !== 0) return;
+  const branch = (await $`git branch --show-current`.quiet().text()).trim();
+  if (branch.length === 0) return;
+  const dirty = (await $`git status --short --ignore-submodules=dirty`.quiet().text()).trim().length > 0;
+  process.stdout.write(`${dirty ? "\x1b[31m" : "\x1b[32m"}  ${branch}\x1b[0m\n`);
+});

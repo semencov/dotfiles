@@ -1,45 +1,35 @@
-#!/usr/bin/env zsh
-#
-# Show / Set current Git repo user name and email
-#
+#!/usr/bin/env bun
 
-RESET="$(tput sgr0)"
-RED="$(tput setaf 1)"
-CYAN="$(tput setaf 6)"
-UNDERLINE="$(tput sgr 0 1)"
+import { $ } from "bun";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-set_gituser() {
-    git config user.name "$1"
-    git config user.email "$2"
+const usage = "Usage: git-fix-user [-n <name>] [-e <email>]";
+function option(args: readonly string[], flag: string): string | undefined {
+  const index = args.indexOf(flag);
+  if (index < 0) return undefined;
+  const value = args[index + 1];
+  if (value === undefined) throw new UtilityUsageError(usage);
+  return value;
 }
 
-get_gituser() {
-    local name=$(git config user.name)
-    local email=$(git config user.email)
-    echo "$name <$email>"
-}
-
-for d in */ ; do
-    pushd "$d"
-    echo "$CYAN$PWD$RESET"
-
-    if git rev-parse --git-dir >/dev/null 2>&1; then
-        while getopts "n:e:" flag; do
-            case $flag in
-            n) name=${OPTARG} ;;
-            e) email=${OPTARG} ;;
-            esac
-        done
-
-        if [[ -z "${name}" && -z "${email}" ]]; then
-            get_gituser
-        else
-            set_gituser "${name:-$(git config user.name)}" "${email:-$(git config user.email)}"
-        fi
-    else
-        echo "Not a Git repository"
-    fi
-
-    echo
-    popd
-done
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const name = option(args, "-n");
+  const email = option(args, "-e");
+  const recognized = new Set(["-n", "-e", name, email].filter((value): value is string => value !== undefined));
+  if (args.some((argument) => !recognized.has(argument))) throw new UtilityUsageError(usage);
+  for (const entry of await readdir(process.cwd(), { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const cwd = join(process.cwd(), entry.name);
+    if ((await $`git rev-parse --git-dir`.cwd(cwd).nothrow().quiet()).exitCode !== 0) continue;
+    if (name !== undefined && (await $`git config user.name ${name}`.cwd(cwd).nothrow()).exitCode !== 0) continue;
+    if (email !== undefined && (await $`git config user.email ${email}`.cwd(cwd).nothrow()).exitCode !== 0) continue;
+    const currentName = await $`git config user.name`.cwd(cwd).quiet().text();
+    const currentEmail = await $`git config user.email`.cwd(cwd).quiet().text();
+    process.stdout.write(`${cwd}\n${currentName.trim()} <${currentEmail.trim()}>\n`);
+  }
+});

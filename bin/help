@@ -1,25 +1,22 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-// Tldr wrapper to show docs from ~/dotfiles/docs
-//
-// Usage:
-//   help command
-//
-// See more:
-// https://github.com/tldr-pages/tldr-node-client
-//
+import { join, resolve } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { CommandCatalog } from "../src/utilities/catalog";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-process.env.FORCE_COLOR = "1";
-
-const {
-	_: [command = ""],
-} = argv;
-
-const root = path.resolve(__dirname, "..");
-const mdFile = path.join(root, "docs", `${command}.md`);
-
-if (await fs.pathExists(mdFile)) {
-	echo(await $`tldr --render ${mdFile}`);
-} else {
-	echo(await $`tldr ${argv._.join(" ")}`);
-}
+const usage = "Usage: help [command]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  const repository = resolve(import.meta.dir, "..");
+  const catalog = await CommandCatalog.load(join(repository, "config", "commands.json"));
+  if (args[0] !== undefined) {
+    const command = catalog.get(args[0]);
+    if (command === undefined) throw new UtilityUsageError(`Unknown command: ${args[0]}`);
+    process.stdout.write(`${command.name}: ${command.summary}\n`);
+    return;
+  }
+  for (const command of catalog.commands) process.stdout.write(`${command.name.padEnd(22)} ${command.summary}\n`);
+});

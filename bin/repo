@@ -1,58 +1,13 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 
-/* eslint-disable security/detect-non-literal-regexp */
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { findProject, projectRootsFromLocalConfig } from "../src/utilities/projects";
+import { runUtility } from "../src/utilities/runtime";
 
-// Magic project opener: opens repository using fuzzy search.
-//
-// Should be used via Bash alias like this:
-//   function proj { cd "$("$HOME/.dotfiles/bin/repo" $1)"; }
-//
-// Author: Artem Sapegin, sapegin.me
-// License: MIT
-// https://github.com/sapegin/dotfiles
-//
-
-import { readdirSync, statSync } from 'fs';
-import { join, basename } from 'path';
-
-const PROJECTS_DIR = join(process.env.HOME, '_');
-
-const getDirs = (d) =>
-	readdirSync(d).filter((f) => statSync(join(d, f)).isDirectory());
-
-const length = (r) => basename(r).length;
-
-const args = process.argv.splice(2);
-if (args.length !== 1) {
-	console.log('Usage: repo <name>');
-	process.exit(1);
-}
-
-const repo = find(getDirs(PROJECTS_DIR), args[0]);
-if (repo)  {
-	console.log(join(PROJECTS_DIR, repo));
-}
-
-function find (repos, name) {
-	// Fuzzy search
-	const nameRegexp = new RegExp(
-		name
-			.replace(/[^a-z0-9]/gi, '')
-			.split('')
-			.join('.*'),
-		'i'
-	);
-	repos = repos.filter((r) => nameRegexp.test(r));
-
-	// Found?
-	if (!repos.length) {
-		console.log('Repository not found');
-		process.exit(1);
-	}
-
-	// Order by repo name length
-	repos.sort((a, b) => length(a) > length(b));
-
-	// Return the most probable result
-	return repos[0];
-}
+const usage = "Usage: repo <name>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 1, usage);
+  process.stdout.write(`${await findProject(await projectRootsFromLocalConfig(), args[0]!)}\n`);
+});

@@ -1,16 +1,26 @@
-#!/usr/bin/env zx
-import { fs, path, $, argv } from "zx";
-import spinner from "./spinningPromise.mjs";
+#!/usr/bin/env bun
 
-const { _: folders, remove = false } = argv;
-const DEST_DIR = `${$.env.HOME}/Projects/.archive`;
+import { $ } from "bun";
+import { mkdir, rm } from "node:fs/promises";
+import { homedir } from "node:os";
+import { basename, join, resolve } from "node:path";
+import { hasHelp, parseOperands, requireOperandCount } from "../src/utilities/arguments";
+import { childExit, requireTools, runUtility } from "../src/utilities/runtime";
 
-for (const folder of folders) {
-  await spinner(`Archiving ${folder}`, async () => {
-    const basename = path.basename(folder);
-    const archiveName = `${basename}.7z`;
-    const archivePath = path.join(DEST_DIR, archiveName);
-    await $`7z a ${archivePath} ${folder}`;
-    await fs.remove(folder);
-  });
-}
+const usage = "Usage: pj-archive [--remove] <folder ...>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--remove"]);
+  requireOperandCount(operands, [1, Number.MAX_SAFE_INTEGER], usage);
+  await requireTools(["7z"]);
+  const destination = join(homedir(), "Projects", ".archive");
+  await mkdir(destination, { recursive: true, mode: 0o700 });
+  for (const folder of operands) {
+    const source = resolve(folder);
+    const archive = join(destination, `${basename(source)}.7z`);
+    const result = await $`7z a ${archive} ${source}`.nothrow();
+    if (result.exitCode !== 0) childExit("7z", result.exitCode);
+    if (options.includes("--remove")) await rm(source, { recursive: true });
+  }
+});

@@ -1,102 +1,26 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Removes old Git branches and does other cleanup
-#
-# Usage:
-#   git-cleanup [--force]
-#
-# See explanation here: http://erikaybar.name/git-deleting-old-local-branches/
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
+import { $ } from "bun";
+import { hasHelp, parseOperands } from "../src/utilities/arguments";
+import { cleanupCandidates } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-# Exit on any failed command
-set -e
-
-CYAN="$(tput setaf 6)"
-UNDERLINE="$(tput sgr 0 1)"
-NOCOLOR="$(tput sgr0)"
-
-function header() { echo -e "\n$UNDERLINE$CYAN$1$NOCOLOR\n"; }
-
-function current_branch() {
-	git symbolic-ref --quiet --short HEAD 2>/dev/null || true
-}
-
-function cutoff_timestamp() {
-	date -v-3m +%s 2>/dev/null || date -d "3 months ago" +%s
-}
-
-function gone_branches() {
-	local current
-	current="$(current_branch)"
-
-	git for-each-ref --format='%(refname:short)%09%(upstream:track)' refs/heads |
-		while IFS=$'\t' read -r branch upstream_status; do
-			if [[ "$branch" != "$current" && "$upstream_status" == "[gone]" ]]; then
-				echo "$branch"
-			fi
-		done
-}
-
-function old_synced_branches() {
-	local current cutoff
-	current="$(current_branch)"
-	cutoff="$(cutoff_timestamp)"
-
-	git for-each-ref --format='%(refname:short)%09%(upstream:short)%09%(committerdate:unix)' refs/heads |
-		while IFS=$'\t' read -r branch upstream last_commit_timestamp; do
-			if [[ "$branch" == "$current" || -z "$upstream" || "$last_commit_timestamp" -ge "$cutoff" ]]; then
-				continue
-			fi
-
-			if ! git rev-parse --verify --quiet "$upstream^{commit}" >/dev/null; then
-				continue
-			fi
-
-			if git merge-base --is-ancestor "$branch" "$upstream"; then
-				echo "$branch"
-			fi
-		done
-}
-
-function branches() {
-	{
-		gone_branches
-		old_synced_branches
-	} | awk '!seen[$0]++'
-}
-
-function delete_branches() {
-	local branch
-
-	while IFS= read -r branch; do
-		if [[ -n "$branch" ]]; then
-			git branch -D "$branch"
-		fi
-	done
-}
-
-if [[ "$1" != "--force" ]]; then
-	branches
-	exit 1
-fi
-
-# Delete all unreachable objects from the object database
-header "Deleting unreachable objects..."
-git prune
-
-# Delete all stale remote-tracking branches, these branches have already been
-# removed from the remote repository, but are still locally available in "remotes/".
-header "Deleting stale remote-tracking branches..."
-git remote prune origin
-echo "Done."
-
-# Delete branches for which remote branches were removed
-header "Deleting branches with no longer existing remote branches..."
-gone_branches | delete_branches
-
-# Delete local branches older than three months if they have no local-only commits
-header "Deleting old local branches that are synced with their upstream..."
-old_synced_branches | delete_branches
+const usage = "Usage: git-cleanup [--force]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  if (operands.length > 0) throw new UtilityUsageError(usage);
+  await requireTools(["git"]);
+  const candidates = await cleanupCandidates(process.cwd(), new Date());
+  for (const candidate of candidates) process.stdout.write(`${candidate.name}\t${candidate.reason}\n`);
+  if (!options.includes("--force")) return;
+  for (const operation of [$`git prune`.nothrow(), $`git remote prune origin`.nothrow()]) {
+    const result = await operation;
+    if (result.exitCode !== 0) childExit("git cleanup", result.exitCode);
+  }
+  for (const { name } of candidates) {
+    const result = await $`git branch -D ${name}`.nothrow();
+    if (result.exitCode !== 0) childExit("git branch", result.exitCode);
+  }
+});

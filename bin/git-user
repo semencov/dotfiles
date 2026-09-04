@@ -1,37 +1,38 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-import { $, argv } from "zx";
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { assertGitRepository } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-const setGituser = async (name, email) => {
-	await $`git config user.name ${name}`;
-	await $`git config user.email ${email}`;
-};
+const usage = "Usage: git-user [-n <name>] [-e <email>]";
+function parse(args: readonly string[]): { name?: string; email?: string } {
+  const result: { name?: string; email?: string } = {};
+  for (let index = 0; index < args.length; index += 2) {
+    const flag = args[index];
+    const value = args[index + 1];
+    if (value === undefined || (flag !== "-n" && flag !== "-e")) throw new UtilityUsageError(usage);
+    if (flag === "-n") result.name = value;
+    else result.email = value;
+  }
+  return result;
+}
 
-const getGituser = async () => {
-	const name = await $`git config user.name`;
-	const email = await $`git config user.email`;
-	echo(`${name.stdout.trim()} <${email.stdout.trim()}>`);
-};
-
-const main = async () => {
-	try {
-		await $`git rev-parse --git-dir`;
-
-		const { n: name, e: email } = argv;
-
-		if (!name && !email) {
-			await getGituser();
-		} else {
-			const currentName = await $`git config user.name`;
-			const currentEmail = await $`git config user.email`;
-			await setGituser(
-				name || currentName.stdout.trim(),
-				email || currentEmail.stdout.trim(),
-			);
-		}
-	} catch (error) {
-		console.error("Not a Git repository");
-	}
-};
-
-main();
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  await requireTools(["git"]);
+  await assertGitRepository(process.cwd());
+  const { name, email } = parse(args);
+  if (name !== undefined) {
+    const result = await $`git config user.name ${name}`.nothrow();
+    if (result.exitCode !== 0) childExit("git config", result.exitCode);
+  }
+  if (email !== undefined) {
+    const result = await $`git config user.email ${email}`.nothrow();
+    if (result.exitCode !== 0) childExit("git config", result.exitCode);
+  }
+  const currentName = (await $`git config user.name`.quiet().text()).trim();
+  const currentEmail = (await $`git config user.email`.quiet().text()).trim();
+  process.stdout.write(`${currentName} <${currentEmail}>\n`);
+});

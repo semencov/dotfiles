@@ -1,12 +1,23 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Sync branch with upstream
-#
-# Usage:
-#   git-upstream [branch]
-#
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { discoverDefaultBranch } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-branch=${1-master}
-git fetch upstream
-git checkout $branch
-git rebase upstream/$branch
+const usage = "Usage: git-upstream [branch]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  await requireTools(["git"]);
+  const branch = args[0] ?? await discoverDefaultBranch(process.cwd());
+  for (const operation of [
+    () => $`git fetch upstream`.nothrow(),
+    () => $`git checkout ${branch}`.nothrow(),
+    () => $`git rebase ${`upstream/${branch}`}`.nothrow(),
+  ]) {
+    const result = await operation();
+    if (result.exitCode !== 0) childExit("git-upstream", result.exitCode);
+  }
+});

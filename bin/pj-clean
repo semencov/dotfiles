@@ -1,35 +1,34 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-import spinner from "./spinningPromise.mjs";
+import { $ } from "bun";
+import { resolve } from "node:path";
+import { hasHelp, parseOperands, requireOperandCount } from "../src/utilities/arguments";
+import { generatedProjectArtifacts, removeProjectArtifacts } from "../src/utilities/projects";
+import { childExit, runUtility } from "../src/utilities/runtime";
 
-const { _: folders, force = false } = argv;
-
-for (const folder of folders) {
-  await spinner(`Cleaning up ${folder}`, async () => {
-    return within(async () => {
-      cd(folder);
-
-      try {
-        if (force) {
-          await $`git clean -fdx`;
-          await $`git reset --hard`;
-        }
-
-        await $`git prune`;
-      } catch (err) {}
-
-      await $`find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +`;
-      await $`find . -name '.cache' -type d -prune -exec rm -rf '{}' +`;
-      await $`find . -name '.idea' -type d -prune -exec rm -rf '{}' +`;
-      await $`rm -rf ./vendor 2>/dev/null`;
-      await $`find . -name '.DS_Store' -type f -delete`;
-      await $`find . -name 'Thumbs.db' -type f -delete`;
-      await $`find . -name '._*' -type f -delete`;
-      await $`find . -name '*.log' -type f -delete`;
-      await $`find . -name '.Spotlight-V100' -type d -prune -exec rm -rf '{}' +`;
-      await $`find . -name '.Trashes' -type d -prune -exec rm -rf '{}' +`;
-      await $`find . -name '.fseventsd' -type d -prune -exec rm -rf '{}' +`;
-      await $`find . -name '.TemporaryItems' -type d -prune -exec rm -rf '{}' +`;
-    });
-  });
-}
+const usage = "Usage: pj-clean [--force] <folder ...>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  requireOperandCount(operands, [1, Number.MAX_SAFE_INTEGER], usage);
+  const force = options.includes("--force");
+  for (const folder of operands) {
+    const root = resolve(folder);
+    const artifacts = await generatedProjectArtifacts(root);
+    for (const path of artifacts) process.stdout.write(`${path}\n`);
+    if (!force) continue;
+    const repository = await $`git rev-parse --git-dir`.cwd(root).nothrow().quiet();
+    if (repository.exitCode === 0) {
+      for (const operation of [
+        () => $`git clean -fdx`.cwd(root).nothrow(),
+        () => $`git reset --hard`.cwd(root).nothrow(),
+        () => $`git prune`.cwd(root).nothrow(),
+      ]) {
+        const result = await operation();
+        if (result.exitCode !== 0) childExit("git", result.exitCode);
+      }
+    }
+    await removeProjectArtifacts(artifacts);
+  }
+});

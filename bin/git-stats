@@ -1,0 +1,20 @@
+#!/usr/bin/env bun
+
+import { $ } from "bun";
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { discoverDefaultBranch } from "../src/utilities/git";
+import { childExit, requireTools, runUtility } from "../src/utilities/runtime";
+
+const usage = "Usage: git-stats <start-date> <end-date>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 2, usage);
+  await requireTools(["cloc", "git"]);
+  const branch = await discoverDefaultBranch(process.cwd());
+  const start = (await $`git rev-list -n1 ${`--before=${args[0]!}`} ${branch}`.quiet().text()).trim();
+  const end = (await $`git rev-list -n1 ${`--before=${args[1]!}`} ${branch}`.quiet().text()).trim();
+  process.stdout.write(`Start commit for ${args[0]} is ${start}\nEnd commit for ${args[1]} is ${end}\n`);
+  const result = await $`cloc --git --diff ${start} ${end}`.nothrow();
+  if (result.exitCode !== 0) childExit("cloc", result.exitCode);
+});

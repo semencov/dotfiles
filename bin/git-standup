@@ -1,19 +1,18 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Shows my commits since yesterday or since last Friday.
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
-#
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { previousWorkday } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-function yesterworkday() {
-	if [[ "1" == "$(date +%u)" ]]
-	then
-		echo "last friday"
-	else
-		echo "yesterday"
-	fi
-}
-
-git log --no-merges --pretty=format:'%C(bold)%s%C(reset)  %cd, %h' --date=local --since="$(yesterworkday)" --author="$(git config user.name)"
+const usage = "Usage: git-standup";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  await requireTools(["git"]);
+  const author = await $`git config user.name`.quiet().text();
+  const since = previousWorkday(new Date()).toISOString();
+  const result = await $`git log --no-merges ${"--pretty=format:%C(bold)%s%C(reset)  %cd, %h"} --date=local ${`--since=${since}`} ${`--author=${author.trim()}`}`.nothrow();
+  if (result.exitCode !== 0) childExit("git log", result.exitCode);
+});

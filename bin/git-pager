@@ -1,15 +1,15 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Pager for git diff with diff-so-fancy and pagination
-# https://github.com/so-fancy/diff-so-fancy
-#
-# Add this to ~/.gitconfig:
-#   [core]
-#	    pager = git-pager
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
-#
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-~/.dotfiles/node_modules/diff-so-fancy/diff-so-fancy | less --chop-long-lines --quit-if-one-screen --no-init --tabs=1,5 -R
+const usage = "Usage: git-pager";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  await requireTools(["diff-so-fancy", "less"]);
+  const result = await $`diff-so-fancy | less --chop-long-lines --quit-if-one-screen --no-init --tabs=1,5 -R`.nothrow();
+  if (result.exitCode !== 0) childExit("git-pager", result.exitCode);
+});

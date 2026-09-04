@@ -1,117 +1,66 @@
 #!/usr/bin/env bun
 
 import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { validateCommitMessage } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityCancelledError, UtilityOperationalError, UtilityUsageError } from "../src/utilities/runtime";
 
-const styles = {
-  dim: (value: string) => `\x1b[2m${value}\x1b[0m`,
-  error: (value: string) => `\x1b[31;4m${value}\x1b[0m`,
-};
+const usage = "Usage: yolo";
+const dim = (value: string) => `\x1b[2m${value}\x1b[0m`;
 
 async function spinner<T>(message: string, task: () => Promise<T>): Promise<T> {
-  if (!process.stderr.isTTY) {
-    console.error(styles.dim(message));
-    return task();
-  }
-
+  if (!process.stderr.isTTY) return task();
   const frames = ["-", "\\", "|", "/"];
   let index = 0;
-  const interval = setInterval(() => {
-    process.stderr.write(`\r${styles.dim(`${frames[index++ % frames.length]} ${message}`)}`);
-  }, 80);
-
+  const interval = setInterval(() => process.stderr.write(`\r${dim(`${frames[index++ % frames.length]} ${message}`)}`), 80);
   try {
     return await task();
   } finally {
     clearInterval(interval);
-    process.stderr.write(`\r${' '.repeat(message.length + 2)}\r`);
+    process.stderr.write(`\r${" ".repeat(message.length + 2)}\r`);
   }
 }
 
-function visibleLength(value: string): number {
-  return value.replace(/\x1b\[[0-9;]*m/g, "").length;
-}
-
-async function editableQuestion(query: string, value: string): Promise<string> {
-  return new Promise<string>((resolve) => {
-    let answer = value;
-    let cursor = value.length;
-    const promptLength = visibleLength(query);
-
-    function redraw() {
-      process.stdout.write(`\r\x1b[2K${query}${answer}`);
-      process.stdout.write(`\r\x1b[${promptLength + cursor}C`);
-    }
-
-    function cleanup() {
+async function editableQuestion(query: string, initial: string): Promise<string> {
+  if (!process.stdin.isTTY) throw new UtilityOperationalError("yolo requires an interactive terminal");
+  return new Promise<string>((resolve, reject) => {
+    let answer = initial;
+    let cursor = initial.length;
+    const visibleLength = query.replace(/\x1b\[[0-9;]*m/g, "").length;
+    const redraw = () => {
+      process.stdout.write(`\r\x1b[2K${query}${answer}\r\x1b[${visibleLength + cursor}C`);
+    };
+    const cleanup = () => {
       process.stdin.setRawMode(false);
       process.stdin.pause();
       process.stdin.off("data", onData);
-    }
-
-    function onData(data: Buffer) {
+    };
+    const onData = (data: Buffer) => {
       const input = data.toString("utf8");
-
-      if (input === '\u0003') {
+      if (input === "\u0003") {
         cleanup();
-        process.stdout.write('\n');
-        process.exit(130);
-      }
-
-      if (input === '\r' || input === '\n') {
+        process.stdout.write("\n");
+        reject(new UtilityCancelledError());
+      } else if (input === "\r" || input === "\n") {
         cleanup();
-        process.stdout.write('\n');
+        process.stdout.write("\n");
         resolve(answer);
-        return;
-      }
-
-      if (input === '\u007f') {
-        if (cursor > 0) {
-          answer = answer.slice(0, cursor - 1) + answer.slice(cursor);
-          cursor -= 1;
-          redraw();
-        }
-        return;
-      }
-
-      if (input === '\x1b[D') {
+      } else if (input === "\u007f" && cursor > 0) {
+        answer = answer.slice(0, cursor - 1) + answer.slice(cursor);
+        cursor -= 1;
+        redraw();
+      } else if (input === "\x1b[D") {
         cursor = Math.max(0, cursor - 1);
         redraw();
-        return;
-      }
-
-      if (input === '\x1b[C') {
+      } else if (input === "\x1b[C") {
         cursor = Math.min(answer.length, cursor + 1);
         redraw();
-        return;
-      }
-
-      if (input === '\x1b[H' || input === '\x1b[1~') {
-        cursor = 0;
-        redraw();
-        return;
-      }
-
-      if (input === '\x1b[F' || input === '\x1b[4~') {
-        cursor = answer.length;
-        redraw();
-        return;
-      }
-
-      if (input === '\x1b[3~') {
-        if (cursor < answer.length) {
-          answer = answer.slice(0, cursor) + answer.slice(cursor + 1);
-          redraw();
-        }
-        return;
-      }
-
-      if (input.length === 1 && input >= ' ') {
+      } else if (input.length === 1 && input >= " ") {
         answer = answer.slice(0, cursor) + input + answer.slice(cursor);
-        cursor += input.length;
+        cursor += 1;
         redraw();
       }
-    }
-
+    };
     process.stdin.setRawMode(true);
     process.stdin.resume();
     process.stdin.on("data", onData);
@@ -119,42 +68,24 @@ async function editableQuestion(query: string, value: string): Promise<string> {
   });
 }
 
-const diff = await $`git diff --cached`.text();
-const branch = await $`git branch --show-current`.quiet().text().catch(() => "");
-const jiraKey = branch.match(/[A-Z]+-[0-9]+/)?.[0];
-
-if (!diff.trim()) {
-  console.error(styles.error('error: no staged changes'));
-  process.exit(1);
-}
-
-const stagedFiles = await $`git diff --cached --name-status`.text();
-
-console.log(styles.dim("Staged files:"));
-console.log(stagedFiles.trim());
-console.log();
-
-const formatInstruction = jiraKey
-  ? `Prefix the message with '${jiraKey}: ' (e.g. '${jiraKey}: Add login button')`
-  : 'Use conventional commits format: type(scope): Description. Types: feat|fix|refactor|docs|style|test|chore|perf|ci|revert. Scope is optional short lowercase noun for affected area.';
-
-const prompt = `Generate a git commit message for the staged changes.
-${formatInstruction}
-Rules: imperative mood, capitalize first word, no period, under 256 chars.
-Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
-
-const message: unknown = await spinner("Generating commit message...", () =>
-  $`fx ask ${prompt} --no-save --json`.json(),
-);
-
-const generatedMessage = typeof message === "object" && message !== null && "output" in message && typeof message.output === "string"
-  ? message.output
-  : `${jiraKey ?? ""}: `;
-const commitMessage = (await editableQuestion(styles.dim("Commit message: "), generatedMessage)).trim();
-
-if (!commitMessage) {
-  console.error(styles.error("error: empty commit message"));
-  process.exit(1);
-}
-
-await $`git commit -m ${commitMessage}`;
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  await requireTools(["fx", "git"]);
+  const diff = await $`git diff --cached`.quiet().text();
+  if (diff.trim().length === 0) throw new UtilityOperationalError("No staged changes");
+  const branch = await $`git branch --show-current`.quiet().text();
+  const jiraKey = branch.match(/[A-Z]+-[0-9]+/)?.[0];
+  const instruction = jiraKey === undefined
+    ? "Use conventional commits format with an optional short lowercase scope."
+    : `Prefix the message with '${jiraKey}: '.`;
+  const prompt = `Generate one imperative Git commit message under 256 characters. ${instruction} Output only the message.\n\n${diff}`;
+  const response: unknown = await spinner("Generating commit message...", () => $`fx ask ${prompt} --no-save --json`.json());
+  const generated = typeof response === "object" && response !== null && "output" in response && typeof response.output === "string"
+    ? response.output
+    : jiraKey === undefined ? "" : `${jiraKey}: `;
+  const message = validateCommitMessage(await editableQuestion(dim("Commit message: "), generated));
+  const result = await $`git commit -m ${message}`.nothrow();
+  if (result.exitCode !== 0) childExit("git commit", result.exitCode);
+});

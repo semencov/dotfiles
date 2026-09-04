@@ -1,20 +1,31 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Setup syncronization of the current Git repo with GitHub repo of the same name
-#
-# Usage:
-#   git-github [repo]
-#
+import { $ } from "bun";
+import { basename } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { validGitHubOwner } from "../src/utilities/git";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-if [[ -z $GITHUB_USER ]]; then
-	echo "\$GITHUB_USER is not defined."
-	exit 1
-fi
-
-repo=`basename "$(pwd)"`
-gh repo create $GITHUB_USER/$repo --private
-git init -b master
-git add .
-git commit -am "Initial commit"
-git remote add origin "git@github.com:$GITHUB_USER/$repo.git"
-git push -u origin master
+const usage = "Usage: git-github [repository]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  const owner = process.env.GITHUB_USER;
+  if (owner === undefined || !validGitHubOwner(owner)) throw new UtilityUsageError("GITHUB_USER is missing or invalid");
+  const repository = args[0] ?? basename(process.cwd());
+  if (!/^[A-Za-z0-9._-]+$/.test(repository)) throw new UtilityUsageError("Invalid repository name");
+  await requireTools(["gh", "git"]);
+  const commands = [
+    () => $`gh repo create ${`${owner}/${repository}`} --private`.nothrow(),
+    () => $`git init -b master`.nothrow(),
+    () => $`git add .`.nothrow(),
+    () => $`git commit -m ${"Initial commit"}`.nothrow(),
+    () => $`git remote add origin ${`git@github.com:${owner}/${repository}.git`}`.nothrow(),
+    () => $`git push -u origin master`.nothrow(),
+  ];
+  for (const operation of commands) {
+    const result = await operation();
+    if (result.exitCode !== 0) childExit("git-github", result.exitCode);
+  }
+});
