@@ -3,7 +3,7 @@ import { mkdir, mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { auditBinMigration } from "../../src/utilities/catalog";
+import { assertMigratedBinContract, auditBinMigration } from "../../src/utilities/catalog";
 import { typecheckBin } from "../../src/utilities/typecheck-bin";
 
 const repo = new URL("../..", import.meta.url).pathname;
@@ -12,7 +12,11 @@ test("every bin entry has an explicit retained or deleted outcome", async () => 
   const result = await auditBinMigration(repo);
 
   expect(result.unclassified).toEqual([]);
-  expect(result.pending.length).toBeGreaterThan(0);
+  expect(result.pending).toEqual([]);
+});
+
+test("final bin tree satisfies the strict Bun contract", async () => {
+  await expect(assertMigratedBinContract(repo)).resolves.toBeUndefined();
 });
 
 test("extensionless Bun programs are parsed as strict TypeScript", async () => {

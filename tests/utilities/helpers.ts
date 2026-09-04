@@ -25,7 +25,7 @@ export async function captureUtility(operation: () => Promise<void>): Promise<{
   } finally {
     process.stdout.write = stdoutWrite;
     process.stderr.write = stderrWrite;
-    process.exitCode = previousExitCode;
+    process.exitCode = previousExitCode ?? 0;
   }
 }
 
