@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 
 import { UpdateRunner } from "../../src/update/runner";
+import { UpdateCancelledError } from "../../src/update/errors";
 import type { TaskContext } from "../../src/setup/types";
 import { createFakeDependencies } from "../support/fakes";
 import { updateTarget } from "./helpers";
@@ -36,4 +37,20 @@ test("marks unavailable preflights without failing independent updates", async (
   const result = await runner.run(context);
   expect(result.exitCode).toBe(0);
   expect(result.summary.map(({ status }) => status)).toEqual(["unavailable", "updated"]);
+});
+
+test("cancellation stops later targets and returns 130", async () => {
+  const events: string[] = [];
+  const dependencies = createFakeDependencies();
+  const context: TaskContext = { ...dependencies, dryRun: false, nonInteractive: false };
+  const runner = new UpdateRunner([
+    updateTarget("system", { update: async () => { throw new UpdateCancelledError(); } }),
+    updateTarget("later", { update: async () => { events.push("later"); } }),
+  ]);
+
+  const result = await runner.run(context);
+
+  expect(result.exitCode).toBe(130);
+  expect(events).toEqual([]);
+  expect(result.summary).toEqual([{ id: "system", status: "failed", detail: "Operation cancelled" }]);
 });

@@ -30,3 +30,35 @@ test("rejects cycles, unknown dependencies, and skipped required dependencies", 
     updateTarget("b", { dependencies: ["a"], defaultSelected: true }),
   ], { platform: "macos", selected: [], skipped: ["a"] })).toThrow("required");
 });
+
+test("ignores platform-incompatible default targets but rejects explicit incompatible selections", () => {
+  const targets = [
+    updateTarget("portable", { defaultSelected: true }),
+    updateTarget("mac-only", { defaultSelected: true, platforms: ["macos"] }),
+  ];
+
+  expect(resolveUpdateTargets(targets, {
+    platform: "ubuntu",
+    selected: [],
+    skipped: [],
+  }).map(({ id }) => id)).toEqual(["portable"]);
+
+  expect(() => resolveUpdateTargets(targets, {
+    platform: "ubuntu",
+    selected: ["mac-only"],
+    skipped: [],
+  })).toThrow("unavailable on ubuntu");
+});
+
+test("orders dependencies before dependents regardless of catalog order", () => {
+  const targets = [
+    updateTarget("packages", { dependencies: ["runtime"], defaultSelected: true }),
+    updateTarget("runtime"),
+  ];
+
+  expect(resolveUpdateTargets(targets, {
+    platform: "macos",
+    selected: [],
+    skipped: [],
+  }).map(({ id }) => id)).toEqual(["runtime", "packages"]);
+});
