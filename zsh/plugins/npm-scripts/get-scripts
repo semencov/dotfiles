@@ -1,0 +1,27 @@
+#!/usr/bin/env bun
+
+interface PackageJson {
+  readonly scripts?: Readonly<Record<string, string>>;
+}
+
+const path = Bun.argv[2];
+if (path === undefined) {
+  process.stderr.write("Usage: get-scripts <package.json>\n");
+  process.exitCode = 2;
+} else {
+  const value: unknown = await Bun.file(path).json();
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    process.stderr.write("Invalid package.json\n");
+    process.exitCode = 1;
+  } else {
+    const scripts = "scripts" in value && typeof value.scripts === "object" && value.scripts !== null && !Array.isArray(value.scripts)
+      ? Object.entries(value.scripts).filter((entry): entry is [string, string] => typeof entry[1] === "string")
+      : [];
+    const escape = (input: string) => input.replace(/[$:]/g, "\\$&");
+    const output = scripts
+      .filter(([name]) => /^\w/.test(name))
+      .map(([name, command]) => `${escape(name)}:$ ${escape(command)}`)
+      .join("\n");
+    if (output.length > 0) process.stdout.write(`${output}\n`);
+  }
+}

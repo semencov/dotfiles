@@ -25,7 +25,6 @@ corepack enable pnpm
 
 # Npm
 npm install --global \
-  zx \
   tsx \
   qnm \
   tldr \

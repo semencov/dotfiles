@@ -16,6 +16,8 @@ export async function typecheckBin(repository: string): Promise<readonly ts.Diag
     const contents = await Bun.file(path).text();
     if (contents.startsWith("#!/usr/bin/env bun\n")) virtualFiles.set(`${path}.ts`, path);
   }
+  const completionHelper = join(repository, "zsh", "plugins", "npm-scripts", "get-scripts");
+  if (await Bun.file(completionHelper).exists()) virtualFiles.set(`${completionHelper}.ts`, completionHelper);
   const rootNames = [...virtualFiles.keys()];
   const host = ts.createCompilerHost(parsed.options);
   const getSourceFile = host.getSourceFile.bind(host);
