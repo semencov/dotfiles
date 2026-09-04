@@ -127,13 +127,34 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
     copyFile(join(repoRoot, ".chezmoiroot"), join(checkout, ".chezmoiroot")),
   ]);
   await rm(join(checkout, "shell"), { recursive: true, force: true });
+  expect((await run(actualGit, ["-C", checkout, "checkout", "-B", "master"])).exitCode).toBe(0);
+  expect((await run(actualGit, ["-C", checkout, "add", "--all"])).exitCode).toBe(0);
+  const fixtureCommit = await run(actualGit, [
+    "-C", checkout,
+    "-c", "user.name=Dotfiles Test",
+    "-c", "user.email=dotfiles-test@example.invalid",
+    "commit", "--allow-empty", "-m", "test: seed current worktree",
+  ]);
+  expect(fixtureCommit.exitCode, fixtureCommit.stderr).toBe(0);
+  const pushRemote = join(root, "push.git");
+  expect((await run(actualGit, ["init", "--bare", pushRemote])).exitCode).toBe(0);
+  expect((await run(actualGit, ["-C", checkout, "remote", "set-url", "--push", "origin", pushRemote])).exitCode).toBe(0);
 
   const targets = JSON.parse(
     await readFile(join(repoRoot, "tests", "fixtures", "expected-managed-targets.json"), "utf8"),
   ) as readonly ManagedTargetFixture[];
   await seedLegacyHomeLinks(home, checkout, targets);
+  await writeFile(join(checkout, ".git", "info", "exclude"), "shell/\n", { flag: "a" });
 
   await mkdir(fakeBin);
+  const gitWrapper = join(fakeBin, "git");
+  await writeFile(gitWrapper, `#!/usr/bin/env bun
+const args = Bun.argv.slice(2);
+if (args.includes("fetch")) process.exit(0);
+const result = Bun.spawnSync([process.env.REAL_GIT!, ...args], { stdin: "inherit", stdout: "inherit", stderr: "inherit" });
+process.exit(result.exitCode);
+`);
+  await chmod(gitWrapper, 0o755);
   for (const executable of ["bun", "gh"] as const) {
     const destination = join(fakeBin, executable);
     await copyFile(join(fixtureBin, executable), destination);
@@ -149,6 +170,7 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
     HOME: home,
     PATH: path,
     REAL_BUN: actualBun,
+    REAL_GIT: actualGit,
     INTEGRATION_LOG: integrationLog,
   } as Record<string, string>;
   delete environment.DOTFILES_TEST_EUID;
@@ -223,7 +245,7 @@ test("local bootstrap converges an isolated HOME and preserves conflicts exactly
     targets.map(({ source }) => ({ target: source, source })),
   )).toEqual(initialRepoHashes);
   expect(await readFile(integrationLog, "utf8")).not.toContain("brew");
-});
+}, 20_000);
 
 const realChezmoi = Bun.which("chezmoi");
 if (realChezmoi === null) {

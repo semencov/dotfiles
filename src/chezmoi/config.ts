@@ -12,7 +12,35 @@ export interface MachineConfig {
   readonly sourceDir: string;
   readonly platform: OperatingSystem;
   readonly selectedTasks: readonly string[];
+  readonly selectedUpdates: readonly string[];
   readonly git: { readonly autoCommit: true; readonly autoPush: true };
+}
+
+export interface MachineSelections {
+  readonly selectedTasks: readonly string[] | undefined;
+  readonly selectedUpdates: readonly string[] | undefined;
+}
+
+function stringArray(value: unknown): readonly string[] | undefined {
+  return Array.isArray(value) && value.every((item) => typeof item === "string") ? value : undefined;
+}
+
+export function machineSelectionsFromConfig(value: unknown): MachineSelections {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    return { selectedTasks: undefined, selectedUpdates: undefined };
+  }
+  const data = Reflect.get(value, "data");
+  if (data === null || typeof data !== "object" || Array.isArray(data)) {
+    return { selectedTasks: undefined, selectedUpdates: undefined };
+  }
+  const dotfiles = Reflect.get(data, "dotfiles");
+  if (dotfiles === null || typeof dotfiles !== "object" || Array.isArray(dotfiles)) {
+    return { selectedTasks: undefined, selectedUpdates: undefined };
+  }
+  return {
+    selectedTasks: stringArray(Reflect.get(dotfiles, "selectedTasks")),
+    selectedUpdates: stringArray(Reflect.get(dotfiles, "selectedUpdates")),
+  };
 }
 
 export function serializeChezmoiConfig(machine: MachineConfig): string {
@@ -26,6 +54,7 @@ export function serializeChezmoiConfig(machine: MachineConfig): string {
         version: machine.version,
         platform: machine.platform,
         selectedTasks: machine.selectedTasks,
+        selectedUpdates: machine.selectedUpdates,
       },
     },
   }, null, 2)}\n`;
@@ -100,12 +129,14 @@ export function machineConfigFromPaths(
   paths: DotfilesPaths,
   platform: OperatingSystem,
   selectedTasks: readonly string[],
+  selectedUpdates: readonly string[] = [],
 ): MachineConfig {
   return {
     version: 1,
     sourceDir: paths.repo,
     platform,
     selectedTasks,
+    selectedUpdates,
     git: { autoCommit: true, autoPush: true },
   };
 }

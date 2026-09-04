@@ -43,11 +43,13 @@ describe("GitClient", () => {
       { exitCode: 0, stdout: "# branch.oid abc\n# branch.head master\n# branch.ab +2 -3\n1 .M N... home/dot_zshrc\n", stderr: "" },
       { exitCode: 0, stdout: "home/dot_zshrc\0docs/setup.md\0", stderr: "" },
       { exitCode: 0, stdout: "home/dot_gitconfig\0", stderr: "" },
+      { exitCode: 0, stdout: " M home/dot_zshrc\0?? inventories/new.json\0", stderr: "" },
     );
 
     await expect(client(process).status()).resolves.toEqual({ clean: false, ahead: 2, behind: 3 });
     await expect(client(process).stagedPaths()).resolves.toEqual(["home/dot_zshrc", "docs/setup.md"]);
     await expect(client(process).conflicts()).resolves.toEqual(["home/dot_gitconfig"]);
+    await expect(client(process).worktreePaths()).resolves.toEqual(["home/dot_zshrc", "inventories/new.json"]);
   });
 
   test("uses a normal no-rewrite upstream merge and detects unchanged state", async () => {

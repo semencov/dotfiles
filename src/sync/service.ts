@@ -8,8 +8,10 @@ export interface SyncTransactionServices {
   merge(): Promise<MergeStartResult>;
   resolveRegisteredConflicts(): Promise<void>;
   applySnapshot(snapshot: LiveSnapshot, dryRun: boolean): Promise<readonly string[]>;
+  afterApplySnapshot?(): Promise<readonly string[]>;
+  stageChanges?(changedSources: readonly string[]): Promise<void>;
   validate(): Promise<void>;
-  commit(message: string): Promise<string>;
+  commit(message: string, changedSources: readonly string[]): Promise<string>;
   push(): Promise<void>;
   abortMerge(): Promise<void>;
 }
@@ -30,11 +32,14 @@ export async function runSyncTransaction(
 
     merge = await services.merge();
     await services.resolveRegisteredConflicts();
-    const changedSources = await services.applySnapshot(snapshot, false);
+    const snapshotChanges = await services.applySnapshot(snapshot, false);
+    const additionalChanges = await services.afterApplySnapshot?.() ?? [];
+    const changedSources = [...new Set([...snapshotChanges, ...additionalChanges])].sort();
+    await services.stageChanges?.(changedSources);
     await services.validate();
     const commit = merge === "unchanged" && changedSources.length === 0
       ? null
-      : await services.commit(options.message);
+      : await services.commit(options.message, changedSources);
     if (!options.push || commit === null) return { changedSources, commit, pushed: false, warnings: [] };
 
     try {

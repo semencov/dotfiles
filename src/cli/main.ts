@@ -1,6 +1,6 @@
 import { Command, CommanderError } from "commander";
 
-import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions, SyncCommandOptions } from "./dependencies";
+import type { ApplyCommandOptions, CliDependencies, SetupCommandOptions, SyncCommandOptions, UpdateCommandOptions } from "./dependencies";
 import { runInternalValidate, type InternalValidateOptions } from "../commands/internal-validate";
 
 class CommandFailedError extends Error {
@@ -63,6 +63,20 @@ export function createProgram(dependencies: CliDependencies): Command {
       push: options.push ?? true,
       dryRun: options.dryRun ?? false,
       message: options.message,
+    })));
+  program.command("update")
+    .description("Update the environment and publish managed state")
+    .option("--non-interactive", "Do not prompt")
+    .option("--select <target...>", "Select update targets")
+    .option("--skip <target...>", "Skip update targets")
+    .option("--dry-run", "Show the full plan without mutation")
+    .option("--no-push", "Create the local update commit without pushing")
+    .action(invoke<UpdateCommandOptions>(async (options) => dependencies.commands.update({
+      nonInteractive: options.nonInteractive ?? false,
+      select: setupTaskIds(options.select),
+      skip: setupTaskIds(options.skip),
+      dryRun: options.dryRun ?? false,
+      push: options.push ?? true,
     })));
   const internal = program.command("internal", { hidden: true });
   internal.command("validate")

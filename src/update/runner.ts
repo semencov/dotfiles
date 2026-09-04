@@ -1,4 +1,5 @@
 import type { TaskContext } from "../setup/types";
+import { UpdateCancelledError } from "./errors";
 import type { UpdateRunResult, UpdateSummaryEntry, UpdateTarget } from "./types";
 
 function message(error: unknown): string {
@@ -47,6 +48,7 @@ export class UpdateRunner {
         const entry = { id: target.id, status: "failed" as const, detail: message(error) };
         summary.push(entry);
         statuses.set(target.id, entry.status);
+        if (error instanceof UpdateCancelledError) return { exitCode: 130, summary };
       }
     }
 

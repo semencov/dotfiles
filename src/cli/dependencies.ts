@@ -22,11 +22,20 @@ export interface SyncCommandOptions {
   readonly message: string;
 }
 
+export interface UpdateCommandOptions {
+  readonly nonInteractive: boolean;
+  readonly select: readonly string[];
+  readonly skip: readonly string[];
+  readonly dryRun: boolean;
+  readonly push: boolean;
+}
+
 export interface FoundationCommandHandlers {
   readonly setup: (options: SetupCommandOptions) => Promise<number>;
   readonly apply: (options: ApplyCommandOptions) => Promise<number>;
   readonly edit: () => Promise<number>;
   readonly sync: (options: SyncCommandOptions) => Promise<number>;
+  readonly update: (options: UpdateCommandOptions) => Promise<number>;
 }
 
 export interface CliDependencies {

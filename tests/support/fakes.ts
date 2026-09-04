@@ -96,6 +96,7 @@ const successfulCommands = (): FoundationCommandHandlers => ({
   apply: async () => 0,
   edit: async () => 0,
   sync: async () => 0,
+  update: async () => 0,
 });
 
 export interface FakeCliDependencies extends CliDependencies {

@@ -6,4 +6,8 @@ if [ "${1-}" = install ]; then
   exit 0
 fi
 
+if [ "${1-}" = pm ] && [ "${2-}" = ls ] && [ "${3-}" = -g ]; then
+  exit 0
+fi
+
 exec "$REAL_BUN" "$@"

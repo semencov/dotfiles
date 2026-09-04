@@ -2,4 +2,7 @@
 set -euo pipefail
 
 printf 'gh=%s\n' "$*" >>"$INTEGRATION_LOG"
+if [ "${1-}" = extension ] && [ "${2-}" = list ]; then
+  exit 0
+fi
 exit 1

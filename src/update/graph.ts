@@ -19,11 +19,18 @@ export function resolveUpdateTargets(
   for (const id of [...input.selected, ...input.skipped, ...(input.saved ?? [])]) {
     if (!byId.has(id)) throw new UpdateGraphError(`Unknown update target: ${id}`);
   }
+  for (const id of selected) {
+    const target = byId.get(id);
+    if (target !== undefined && !target.platforms.includes(input.platform)) {
+      throw new UpdateGraphError(`Update target ${id} is unavailable on ${input.platform}`);
+    }
+  }
   const roots = targets.filter((target) => !skipped.has(target.id) && (
     selected.has(target.id) || (saved === undefined ? target.defaultSelected : saved.has(target.id))
-  ));
+  ) && target.platforms.includes(input.platform));
   const included = new Set<string>();
   const visiting = new Set<string>();
+  const ordered: UpdateTarget[] = [];
 
   const visit = (id: string): void => {
     if (included.has(id)) return;
@@ -36,7 +43,8 @@ export function resolveUpdateTargets(
     for (const dependency of target.dependencies) visit(dependency);
     visiting.delete(id);
     included.add(id);
+    ordered.push(target);
   };
   for (const root of roots) visit(root.id);
-  return targets.filter(({ id }) => included.has(id));
+  return ordered;
 }

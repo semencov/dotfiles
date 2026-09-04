@@ -51,7 +51,9 @@ export async function createSyncServices(dependencies: CliDependencies): Promise
       });
       await git.assertExpectedRepository();
       const status = await git.status();
-      if (!status.clean) throw new Error("Repository must be clean before sync");
+      if (!status.clean) {
+        throw new Error(`Repository must be clean before sync: ${(await git.worktreePaths()).join(", ")}`);
+      }
       if (await git.hooksPath() !== ".githooks") throw new Error("Repository hooks are not configured; run `dotfiles setup`");
     },
     capture: () => snapshotService.capture(policy.entries),
@@ -78,6 +80,7 @@ export async function createSyncServices(dependencies: CliDependencies): Promise
       if (!dryRun) await git.stage(changed);
       return changed;
     },
+    stageChanges: (sources: readonly string[]) => git.stage(sources),
     validate: async () => {
       const findings = await validateRepository({
         repository: dependencies.paths.repo,
@@ -89,8 +92,8 @@ export async function createSyncServices(dependencies: CliDependencies): Promise
       const templates = await chezmoi.verifyTemplates();
       if (templates.exitCode !== 0) throw new Error("Chezmoi template validation failed");
     },
-    commit: async (message: string) => {
-      await git.stage(changedSources);
+    commit: async (message: string, sources: readonly string[]) => {
+      await git.stage([...new Set([...changedSources, ...sources])]);
       await git.commit(message);
       return git.head();
     },

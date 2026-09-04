@@ -20,7 +20,7 @@ export interface UpdateSummaryEntry {
 }
 
 export interface UpdateRunResult {
-  readonly exitCode: 0 | 1;
+  readonly exitCode: 0 | 1 | 130;
   readonly summary: readonly UpdateSummaryEntry[];
 }
 

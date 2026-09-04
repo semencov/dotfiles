@@ -3,6 +3,7 @@ import { runApplyCommand } from "../commands/apply";
 import { runEditCommand } from "../commands/edit";
 import { runSetupCommand } from "../commands/setup";
 import { runSyncCommand } from "../commands/sync";
+import { runUpdateCommand } from "../commands/update";
 import { NodeFileSystem } from "../lib/filesystem";
 import { DurableLogger } from "../lib/logger";
 import { createDotfilesPaths } from "../lib/paths";
@@ -28,6 +29,7 @@ export async function createProductionDependencies(): Promise<CliDependencies> {
       apply: (options) => runApplyCommand(dependencies, options),
       edit: () => runEditCommand(dependencies),
       sync: (options) => runSyncCommand(dependencies, options),
+      update: (options) => runUpdateCommand(dependencies, options),
     },
   };
   return dependencies;

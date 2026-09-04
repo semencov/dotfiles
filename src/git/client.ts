@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { realpathSync } from "node:fs";
 
 import type { ProcessRunner } from "../lib/process";
 import type { ConflictSide, GitStatus, MergeStartResult } from "./types";
@@ -21,6 +22,14 @@ function nulPaths(value: string): readonly string[] {
   return value.split("\0").filter((path) => path.length > 0);
 }
 
+function canonicalPath(path: string): string {
+  try {
+    return realpathSync(path);
+  } catch {
+    return resolve(path);
+  }
+}
+
 export class GitClient {
   readonly #process: ProcessRunner;
   readonly #repository: string;
@@ -29,14 +38,14 @@ export class GitClient {
 
   public constructor(options: GitClientOptions) {
     this.#process = options.process;
-    this.#repository = resolve(options.repository);
+    this.#repository = canonicalPath(options.repository);
     this.#expectedRemote = options.expectedRemote;
     this.#branch = options.branch;
   }
 
   public async assertExpectedRepository(): Promise<void> {
     const root = await this.#run("resolve repository", ["rev-parse", "--show-toplevel"]);
-    if (resolve(root.stdout.trim()) !== this.#repository) throw new GitClientError("repository root validation");
+    if (canonicalPath(root.stdout.trim()) !== this.#repository) throw new GitClientError("repository root validation");
     const remote = await this.#run("read origin", ["remote", "get-url", "origin"]);
     if (remote.stdout.trim() !== this.#expectedRemote) throw new GitClientError("origin validation");
     const branch = await this.#run("read branch", ["branch", "--show-current"]);
@@ -56,6 +65,12 @@ export class GitClient {
 
   public async stagedPaths(): Promise<readonly string[]> {
     return nulPaths((await this.#run("list staged paths", ["diff", "--cached", "--name-only", "-z"])).stdout);
+  }
+
+  public async worktreePaths(): Promise<readonly string[]> {
+    return nulPaths((await this.#run("list worktree paths", [
+      "status", "--porcelain=v1", "--untracked-files=all", "-z",
+    ])).stdout).map((entry) => entry.slice(3)).filter(Boolean).sort();
   }
 
   public async fetch(): Promise<void> {

@@ -11,6 +11,7 @@ describe("createProgram", () => {
       "apply",
       "edit",
       "sync",
+      "update",
       "internal",
     ]);
   });
@@ -20,5 +21,33 @@ describe("createProgram", () => {
 
     await expect(runCli(["node", "dotfiles", "unknown"], dependencies)).resolves.toBe(1);
     expect(dependencies.process.commands).toEqual([]);
+  });
+
+  test("forwards normalized update selections and publication options", async () => {
+    const calls: unknown[] = [];
+    const dependencies = createFakeDependencies({
+      update: async (options) => { calls.push(options); return 0; },
+    });
+
+    await expect(runCli([
+      "node",
+      "dotfiles",
+      "update",
+      "--non-interactive",
+      "--select",
+      "homebrew,bun-globals",
+      "--skip",
+      "mas-apps",
+      "--dry-run",
+      "--no-push",
+    ], dependencies)).resolves.toBe(0);
+
+    expect(calls).toEqual([{
+      nonInteractive: true,
+      select: ["homebrew", "bun-globals"],
+      skip: ["mas-apps"],
+      dryRun: true,
+      push: false,
+    }]);
   });
 });

@@ -43,6 +43,22 @@ test("dry-run fetches and previews without merging or mutating source", async ()
   expect(events).toEqual(["preconditions", "capture", "fetch", "apply-snapshot", "cleanup"]);
 });
 
+test("stages hook-produced sources before candidate validation", async () => {
+  const staged: readonly string[][] = [];
+  const { events, services } = harness({
+    afterApplySnapshot: async () => { events.push("after-apply"); return ["inventories/bun.json"]; },
+    stageChanges: async (paths: readonly string[]) => {
+      (staged as string[][]).push([...paths]);
+      events.push("stage");
+    },
+  } as Partial<SyncTransactionServices>);
+
+  await runSyncTransaction({ push: false, dryRun: false, message: "sync" }, services);
+
+  expect(staged).toEqual([["home/dot_zshrc", "inventories/bun.json"]]);
+  expect(events.indexOf("stage")).toBeLessThan(events.indexOf("validate"));
+});
+
 test("retains a valid commit and reports push failure as a warning", async () => {
   const { services } = harness({ push: async () => { throw new Error("offline"); } });
   const result = await runSyncTransaction({ push: true, dryRun: false, message: "sync" }, services);

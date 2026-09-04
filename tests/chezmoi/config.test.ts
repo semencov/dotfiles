@@ -6,6 +6,7 @@ import { dirname, join } from "node:path";
 import { BackupService } from "../../src/backups/service";
 import {
   installChezmoiConfiguration,
+  machineSelectionsFromConfig,
   serializeChezmoiConfig,
   validateSourceRepository,
   type MachineConfig,
@@ -32,6 +33,7 @@ function machine(sourceDir: string): MachineConfig {
     sourceDir,
     platform: "macos",
     selectedTasks: ["core-tools", "shell"],
+    selectedUpdates: ["homebrew", "bun-globals"],
     git: { autoCommit: true, autoPush: true },
   };
 }
@@ -47,8 +49,24 @@ test("serializeChezmoiConfig emits the exact strict file-mode JSON", () => {
         version: 1,
         platform: "macos",
         selectedTasks: ["core-tools", "shell"],
+        selectedUpdates: ["homebrew", "bun-globals"],
       },
     },
+  });
+});
+
+test("machineSelectionsFromConfig reads setup and update selections independently", () => {
+  expect(machineSelectionsFromConfig({
+    data: {
+      dotfiles: {
+        selectedTasks: ["shell"],
+        selectedUpdates: ["homebrew", "uv-tools"],
+      },
+    },
+  })).toEqual({ selectedTasks: ["shell"], selectedUpdates: ["homebrew", "uv-tools"] });
+  expect(machineSelectionsFromConfig({ data: { dotfiles: { selectedTasks: [42] } } })).toEqual({
+    selectedTasks: undefined,
+    selectedUpdates: undefined,
   });
 });
 

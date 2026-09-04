@@ -11,8 +11,10 @@ export async function snapshotInventories(providers: readonly InventoryProvider[
     assertPublicInventory(items);
     const document: InventoryDocument = { version: 1, provider: provider.id, items };
     const path = join(context.paths.repo, "inventories", `${provider.id}.json`);
+    const contents = `${JSON.stringify(document, null, 2)}\n`;
+    if (await context.fs.exists(path) && await context.fs.readText(path) === contents) continue;
     await context.fs.mkdir(join(context.paths.repo, "inventories"), 0o755);
-    await context.fs.writeTextAtomic(path, `${JSON.stringify(document, null, 2)}\n`, 0o644);
+    await context.fs.writeTextAtomic(path, contents, 0o644);
     written.push(path);
   }
   return written;
