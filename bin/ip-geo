@@ -1,33 +1,24 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-const { _: [host = ''] } = argv
+import { $ } from "bun";
+import { hasHelp, parseOperands } from "../src/utilities/arguments";
+import { fetchIpDetails, renderIpDetails } from "../src/utilities/network";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-const resp = await fetch(`http://ip-api.com/json/${host}`)
-
-if (resp.ok) {
-	const data = await resp.json()
-
-	if (data?.status === 'success') {
-		const result = {
-			ip: data.query ?? data.ip,
-			as: data.as,
-			isp: `${data.isp ?? 'N/A'}${data.isp !== data.org ? ` / ${data.org}` : ''}`,
-			address: [data.city, data.regionName, data.country].filter(Boolean),
-			timezone: data.timezone ?? 'N/A',
-			lat: data.lat ?? 'N/A',
-			lon: data.lon ?? 'N/A',
-		}
-
-		echo(chalk.gray("      IP:"), chalk.cyan(result.ip))
-		echo(chalk.gray(" ISP/Org:"), result.isp)
-		echo(chalk.gray("      AS:"), result.as)
-		echo(chalk.gray(" Address:"), result.address.join(', '))
-		echo(chalk.gray("Timezone:"), result.timezone)
-		echo(chalk.gray("Location:"), `${result.lat}, ${result.lon}`)
-
-		if (argv.m || argv.map) {
-      const { default: open } = await import('open');
-      open(`https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`)
-		}
-	}
-}
+const usage = "Usage: ip-geo [--map] [IP]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--map", "-m"]);
+  if (operands.length > 1) throw new UtilityUsageError(usage);
+  const endpoint = process.env.IP_GEO_ENDPOINT ?? "http://ip-api.com/json/";
+  const details = await fetchIpDetails(`${endpoint}${encodeURIComponent(operands[0] ?? "")}`);
+  process.stdout.write(`${renderIpDetails(details)}\n`);
+  if (options.includes("--map") || options.includes("-m")) {
+    const url = `https://www.google.com/maps/search/?api=1&query=${details.lat},${details.lon}`;
+    const tool = process.platform === "darwin" ? "open" : "xdg-open";
+    await requireTools([tool]);
+    const result = tool === "open" ? await $`open ${url}`.nothrow() : await $`xdg-open ${url}`.nothrow();
+    if (result.exitCode !== 0) childExit(tool, result.exitCode);
+  }
+});

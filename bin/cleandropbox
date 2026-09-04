@@ -1,21 +1,26 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Prints/removes conflicted copies inside Dropbox folder.
-# 
-# Usage:
-#   cleandropbox [--remove]
-#
-# Based on https://coderwall.com/p/tzjorw
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
-#
+import { lstat, rm } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { hasHelp, parseOperands } from "../src/utilities/arguments";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-MASK="*(*'s conflicted copy [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*"
-
-if [ "$1" == "--remove" ] || [ "$1" == "--force" ]; then
-	find ~/Dropbox/ -path "$MASK" -exec rm -f {} \;
-else
-	find ~/Dropbox/ -path "$MASK" -print
-fi
+const usage = "Usage: cleandropbox [--remove]";
+const conflict = /\([^/]*'s conflicted copy \d{4}-\d{2}-\d{2}[^/]*\)/i;
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--remove"]);
+  if (operands.length > 0) throw new UtilityUsageError(usage);
+  const root = join(homedir(), "Dropbox");
+  if (!await Bun.file(root).exists()) return;
+  const glob = new Bun.Glob("**/*");
+  for await (const relative of glob.scan({ cwd: root, dot: true, onlyFiles: true, followSymlinks: false })) {
+    if (!conflict.test(relative)) continue;
+    const path = join(root, relative);
+    if ((await lstat(path)).isSymbolicLink()) continue;
+    process.stdout.write(`${path}\n`);
+    if (options.includes("--remove")) await rm(path);
+  }
+});

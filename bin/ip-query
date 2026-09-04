@@ -1,39 +1,16 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-const {
-  _: [host = ""],
-} = argv;
+import { hasHelp } from "../src/utilities/arguments";
+import { fetchIpDetails, renderIpDetails } from "../src/utilities/network";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-const resp = await fetch(`http://api.ipquery.io/${host}?format=json`);
-
-if (resp.ok) {
-  const data = await resp.json();
-
-  console.log(data);
-
-  if (data?.status === "success") {
-    const result = {
-      ip: data.query ?? data.ip,
-      as: data.as,
-      isp: `${data.isp ?? "N/A"}${data.isp !== data.org ? ` / ${data.org}` : ""}`,
-      address: [data.city, data.regionName, data.country].filter(Boolean),
-      timezone: data.timezone ?? "N/A",
-      lat: data.lat ?? "N/A",
-      lon: data.lon ?? "N/A",
-    };
-
-    echo(chalk.gray("      IP:"), chalk.cyan(result.ip));
-    echo(chalk.gray(" ISP/Org:"), result.isp);
-    echo(chalk.gray("      AS:"), result.as);
-    echo(chalk.gray(" Address:"), result.address.join(", "));
-    echo(chalk.gray("Timezone:"), result.timezone);
-    echo(chalk.gray("Location:"), `${result.lat}, ${result.lon}`);
-
-    if (argv.m || argv.map) {
-      const { default: open } = await import("open");
-      open(
-        `https://www.google.com/maps/search/?api=1&query=${result.lat},${result.lon}`,
-      );
-    }
-  }
-}
+const usage = "Usage: ip-query [IP]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  const endpoint = process.env.IP_QUERY_ENDPOINT ?? "https://api.ipquery.io/";
+  const separator = endpoint.includes("?") ? "&" : "?";
+  const details = await fetchIpDetails(`${endpoint}${encodeURIComponent(args[0] ?? "")}${separator}format=json`);
+  process.stdout.write(`${renderIpDetails(details)}\n`);
+});

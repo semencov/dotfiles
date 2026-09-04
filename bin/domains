@@ -1,0 +1,25 @@
+#!/usr/bin/env bun
+
+import { hasHelp } from "../src/utilities/arguments";
+import { mapConcurrent, resolveDomain } from "../src/utilities/network";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: domains [suffix]";
+const prefixes = ["yotta", "zetta", "exa", "peta", "tera", "giga", "mega", "kilo", "hecto", "deca", "deci", "centi", "milli", "micro", "nano", "pico", "femto", "atto", "zepto", "yocto"];
+const units = ["meter", "gram", "second", "ampere", "kelvin", "mole", "candela", "radian", "steradian", "hertz", "newton", "pascal", "joule", "watt", "coulomb", "volt", "farad", "ohm", "siemens", "weber", "tesla", "henry", "lumen", "lux", "becquerel"];
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1 || (args[0] !== undefined && !/^[a-z]{2,24}$/i.test(args[0]))) throw new UtilityUsageError(usage);
+  const suffix = args[0] ?? "com";
+  const names = prefixes.flatMap((prefix) => units.map((unit) => `${prefix}${unit}.${suffix}`));
+  const results = await mapConcurrent(names, 16, async (domain) => {
+    try {
+      return `${domain}\t${(await resolveDomain(domain)).join(", ")}`;
+    } catch (error) {
+      const code = error instanceof Error && "code" in error ? String(error.code) : error instanceof Error ? error.message : "DNS error";
+      return `${domain}\t<${code}>`;
+    }
+  });
+  process.stdout.write(`${results.join("\n")}\n`);
+});

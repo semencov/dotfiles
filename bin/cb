@@ -1,24 +1,16 @@
-#!/usr/bin/env bash
-#
-# Use this script to pipe in/out of the clipboard
-#
-# Usage:
-#   someapp | cb     # Pipe someapp's output into clipboard
-#   cb | someapp     # Pipe clipboard's content into someapp
-#
+#!/usr/bin/env bun
 
-if [[ "$(uname)" == 'Darwin' ]]; then
-  if [[ -p /dev/stdin ]]; then
-    tee | pbcopy
-  else
-    pbpaste
-  fi
-elif command -v xclip 1>/dev/null; then
-  if [[ -p /dev/stdin ]]; then
-    tr -d '\n' | xclip -i -selection clipboard
-  else
-    xclip -o -selection clipboard
-  fi
-else
-  print-error "Remember to install xclip"
-fi
+import { hasHelp } from "../src/utilities/arguments";
+import { readClipboard, writeClipboard } from "../src/utilities/clipboard";
+import { detectPlatform } from "../src/lib/platform";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: cb";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  const os = (await detectPlatform()).os;
+  if (process.stdin.isTTY) process.stdout.write(await readClipboard(os));
+  else await writeClipboard(await Bun.stdin.text(), os);
+});

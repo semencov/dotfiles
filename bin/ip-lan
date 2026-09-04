@@ -1,16 +1,13 @@
-#!/usr/bin/env zx
+#!/usr/bin/env bun
 
-import { $, echo } from 'zx';
+import { hasHelp } from "../src/utilities/arguments";
+import { localIp } from "../src/utilities/network";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-// Show LAN IP
-
-const $$ = $({ quiet: true });
-let ip;
-
-try {
-  ip = await $$`hostname -I`;
-} catch {
-  ip = await $$`ifconfig | grep 'inet ' | grep -v 127.0.0.1 | awk '{print $2}'`;
-}
-
-echo(ip.stdout.trim());
+const usage = "Usage: ip-lan";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  process.stdout.write(`${localIp()}\n`);
+});

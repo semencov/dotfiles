@@ -1,12 +1,20 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-#
-# Show HTTP headers for given URL
-#
-# Usage:
-#   headers <URL>
-#
-# https://github.com/rtomayko/dotfiles/blob/rtomayko/bin/headers
-#
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { runUtility, UtilityOperationalError } from "../src/utilities/runtime";
 
-curl --insecure -sv -H "User-Agent: Mozilla/5 Gecko" "$@" 2>&1 >/dev/null | grep -v "^\*" | grep -v "^}" | cut -c3-
+const usage = "Usage: headers <URL>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 1, usage);
+  if (!URL.canParse(args[0]!)) throw new UtilityOperationalError("Invalid URL");
+  const response = await fetch(args[0]!, {
+    method: "HEAD",
+    redirect: "follow",
+    headers: { "user-agent": "Mozilla/5.0 Gecko" },
+    signal: AbortSignal.timeout(15_000),
+  });
+  process.stdout.write(`HTTP ${response.status} ${response.statusText}\n`);
+  for (const [name, value] of response.headers) process.stdout.write(`${name}: ${value}\n`);
+});

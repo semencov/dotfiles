@@ -26,7 +26,7 @@
     { "name": "headers", "summary": "Show HTTP response headers", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "help", "summary": "List available dotfiles utility commands", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "ip-geo", "summary": "Show geolocation for an IP address", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
-    { "name": "ip-lan", "summary": "Print the local network IP address", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["hostname", "ipconfig"] },
+    { "name": "ip-lan", "summary": "Print the local network IP address", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "ip-query", "summary": "Query public information for an IP address", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "ip-wan", "summary": "Print the public IP address", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "lso", "summary": "List files with octal permissions", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },

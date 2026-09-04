@@ -1,8 +1,13 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-#
-# Show WAN IP
-#
+import { hasHelp } from "../src/utilities/arguments";
+import { fetchPublicIp } from "../src/utilities/network";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-set -e
-echo $(dig +short myip.opendns.com @resolver1.opendns.com)
+const usage = "Usage: ip-wan";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  process.stdout.write(`${(await fetchPublicIp(process.env.PUBLIC_IP_ENDPOINT)).ip}\n`);
+});

@@ -1,16 +1,26 @@
-#!/usr/bin/env bash
-#
-# Use this script to pipe in to the clbin.com
-#
-# Usage:
-#   <some output> | clbin     # Pipe someapp's output into clipboard
-#
+#!/usr/bin/env bun
 
-set -e
+import { hasHelp } from "../src/utilities/arguments";
+import { writeClipboard } from "../src/utilities/clipboard";
+import { detectPlatform } from "../src/lib/platform";
+import { runUtility, UtilityOperationalError, UtilityUsageError } from "../src/utilities/runtime";
 
-BOLD="$(tput setaf 0 2>/dev/null)$(tput bold 2>/dev/null || echo '\e[1;30m')"
-RESET="$(tput sgr0)"
-
-cat | curl -sF 'clbin=<-' 'https://clbin.com'
-echo "$url" | pbcopy 2>/dev/null
-echo "${BOLD}URL was copied to clipboard!$RESET"
+const usage = "Usage: clbin";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  if (process.stdin.isTTY) throw new UtilityUsageError("clbin requires piped standard input");
+  const form = new FormData();
+  form.set("clbin", new Blob([await Bun.stdin.text()]));
+  const response = await fetch("https://clbin.com", { method: "POST", body: form, signal: AbortSignal.timeout(15_000) });
+  if (!response.ok) throw new UtilityOperationalError(`clbin returned HTTP ${response.status}`);
+  const url = (await response.text()).trim();
+  if (!URL.canParse(url)) throw new UtilityOperationalError("clbin returned an invalid URL");
+  process.stdout.write(`${url}\n`);
+  try {
+    await writeClipboard(url, (await detectPlatform()).os);
+  } catch {
+    process.stderr.write("URL was not copied: clipboard tool unavailable\n");
+  }
+});
