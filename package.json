@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:bin": "bun test tests/utilities/bin-contract.test.ts tests/utilities/docs.test.ts",
+    "docs:commands": "bun src/utilities/docs.ts --write",
     "dotfiles": "bun bin/dotfiles",
     "test": "bun test",
     "typecheck": "tsc --noEmit -p tsconfig.json && bun src/utilities/typecheck-bin.ts"
