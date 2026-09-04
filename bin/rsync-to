@@ -1,17 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bun
 
-#
-# Upload current folder to remote using rsync
-#
-# Usage:
-#   rsync-to <remote>
-#
+import { $ } from "bun";
+import { hasHelp, parseOperands, requireOperandCount } from "../src/utilities/arguments";
+import { rsyncOperands } from "../src/utilities/rsync";
+import { childExit, requireTools, runUtility, UtilityCancelledError } from "../src/utilities/runtime";
+import { confirm } from "../src/utilities/terminal";
 
-sed -e
-
-if [[ "$(ls -ACF1 | wc -l | awk '{print $1}')" == "0" ]]; then
-    confirm "Current directory is empty. Are you sure you want to process? [y/N]" || exit 1
-fi
-
-rsync -rvazph --force --delete --progress $PWD $1
-
+const usage = "Usage: rsync-to [--force] <remote>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  requireOperandCount(operands, 1, usage);
+  if (!await confirm("Mirror the current directory to remote with deletion?", { force: options.includes("--force") })) throw new UtilityCancelledError();
+  await requireTools(["rsync"]);
+  const result = await $`rsync ${rsyncOperands("to", operands[0]!, process.cwd())}`.nothrow();
+  if (result.exitCode !== 0) childExit("rsync", result.exitCode);
+});

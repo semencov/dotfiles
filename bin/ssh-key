@@ -1,21 +1,18 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Print public SSH key to clipboard. Generate it if necessary
+import { homedir, hostname, userInfo } from "node:os";
+import { join } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { ensurePublicKey, validateSshIdentifier } from "../src/utilities/ssh";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-set -e
-
-identifier=$1
-
-if [ "$identifier" == "" ]; then
-  file="$HOME/.ssh/id_rsa"
-else
-  file="$HOME/.ssh/$identifier.id_rsa"
-fi
-
-file_pub="$file.pub"
-
-if [ ! -f "$file_pub" ]; then
-	ssh-keygen -f $file -t rsa -C "$USER@$HOSTNAME $(date +'%Y/%m/%d %H:%M:%S')"
-fi
-
-command cat "$file_pub"
+const usage = "Usage: ssh-key [identifier]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  const identifier = args[0] === undefined ? "id_ed25519" : `${validateSshIdentifier(args[0])}.id_ed25519`;
+  const key = join(homedir(), ".ssh", identifier);
+  const publicKey = await ensurePublicKey(key, `${userInfo().username}@${hostname()} ${new Date().toISOString()}`);
+  process.stdout.write(await Bun.file(publicKey).text());
+});

@@ -48,7 +48,7 @@
     { "name": "ssh-add-host", "summary": "Create and install an SSH host identity", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["ssh", "ssh-keygen"] },
     { "name": "ssh-key", "summary": "Print or generate an SSH public key", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["ssh-keygen"] },
     { "name": "starship-git-simple", "summary": "Render compact Git prompt state", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["git"] },
-    { "name": "teams-active", "summary": "Keep Microsoft Teams active", "platforms": ["macos"], "externalTools": ["caffeinate", "osascript"] },
+    { "name": "teams-active", "summary": "Keep Microsoft Teams active", "platforms": ["macos"], "externalTools": ["osascript"] },
     { "name": "update-namecheap", "summary": "Update a Namecheap dynamic DNS record", "platforms": ["macos", "ubuntu", "debian"], "externalTools": [] },
     { "name": "wg", "summary": "Replace text across ripgrep matches", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["rg"] },
     { "name": "yolo", "summary": "Generate and confirm a Git commit message", "platforms": ["macos", "ubuntu", "debian"], "externalTools": ["fx", "git"] },

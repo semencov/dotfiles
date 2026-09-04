@@ -1,0 +1,23 @@
+#!/usr/bin/env bun
+
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { requirePlatform } from "../src/utilities/platform";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: chromedriver [port]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1 || (args[0] !== undefined && (!/^\d+$/.test(args[0]) || Number(args[0]) > 65_535))) throw new UtilityUsageError(usage);
+  await requirePlatform(["macos"], async () => {
+    await requireTools(["chromedriver", "xattr"]);
+    const executable = (await $`which chromedriver`.quiet().text()).trim();
+    await $`xattr -d com.apple.quarantine ${executable}`.nothrow().quiet();
+    const version = await $`chromedriver --version`.quiet().text();
+    process.stdout.write(`Using ${version.trim()}\n`);
+    const port = args[0] ?? "4444";
+    const result = await $`chromedriver ${`--port=${port}`} --verbose ${"--allowed-ips="} ${"--url-base=wd/hub"} --force-prefers-reduced-motion`.nothrow();
+    if (result.exitCode !== 0) childExit("chromedriver", result.exitCode);
+  });
+});

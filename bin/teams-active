@@ -1,11 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env bun
 
-caffeinate -d &
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { requirePlatform } from "../src/utilities/platform";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-while true;
-do
-    osascript -e 'tell application "Microsoft Teams" to activate'
-    osascript -e 'tell application "System Events" to keystroke "2" using {command down}'
-    echo "Teams Status Refreshed"
-    sleep 300
-done
+const usage = "Usage: teams-active";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 0) throw new UtilityUsageError(usage);
+  await requirePlatform(["macos"], async () => {
+    await requireTools(["osascript"]);
+    let stopped = false;
+    let wake: (() => void) | undefined;
+    process.once("SIGINT", () => {
+      stopped = true;
+      wake?.();
+    });
+    while (!stopped) {
+      for (const script of [
+        "tell application \"Microsoft Teams\" to activate",
+        "tell application \"System Events\" to keystroke \"2\" using {command down}",
+      ]) {
+        const result = await $`osascript -e ${script}`.nothrow();
+        if (result.exitCode !== 0) childExit("osascript", result.exitCode);
+      }
+      process.stdout.write("Teams status refreshed\n");
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, 300_000);
+        wake = () => {
+          clearTimeout(timer);
+          resolve();
+        };
+      });
+    }
+  });
+});

@@ -1,74 +1,60 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Create an SSH key and uploads it to the given host
-# Based on https://gist.github.com/1761938
+import { $ } from "bun";
+import { homedir, userInfo } from "node:os";
+import { join } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { addSshHost, ensurePublicKey, validateSshHost, validateSshIdentifier } from "../src/utilities/ssh";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-unset username hostname port identifier key
-
-print_usage() {
-cat <<EOM
-Usage: $(basename ${0}) [-a alias] [-u username] [-p port] <host>
-
-Generates and uploads new RSA key to the specified remote SSH server
-and puts new record in ~/.ssh/config.
-
-Arguments:
-
-    host    ip or hostname to add and upload key to.
-
-
-Options:
-
-    -u      remote username (optional) e.g., root. If not provided, the current username is used.
-    -a      alias (optional).
-    -p      remote sshd port (optional). If not provided, 22 is used.
-
-Examples:
-    $(basename ${0}) example.com
-    $(basename ${0}) -u root -p 22 example.com
-    $(basename ${0}) -a example -p 22 example.com
-    $(basename ${0}) -a example -u someuser -p 22 example.com
-EOM
+const usage = "Usage: ssh-add-host [-a alias] [-u username] [-p port] <host>";
+function parse(args: readonly string[]) {
+  let identifier: string | undefined;
+  let username = userInfo().username;
+  let port = 22;
+  const operands: string[] = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index]!;
+    if (argument === "-a" || argument === "-u" || argument === "-p") {
+      const value = args[index + 1];
+      if (value === undefined) throw new UtilityUsageError(usage);
+      index += 1;
+      if (argument === "-a") identifier = validateSshIdentifier(value);
+      else if (argument === "-u") username = value;
+      else {
+        port = Number(value);
+        if (!Number.isInteger(port) || port < 1 || port > 65_535) throw new UtilityUsageError("Invalid SSH port");
+      }
+    } else if (argument.startsWith("-")) throw new UtilityUsageError(usage);
+    else operands.push(argument);
+  }
+  if (operands.length !== 1 || !/^[A-Za-z0-9._-]+$/.test(username)) throw new UtilityUsageError(usage);
+  const host = validateSshHost(operands[0]!);
+  return { host, identifier: identifier ?? validateSshIdentifier(host.replaceAll(".", "_")), username, port };
 }
 
-while getopts "u:a:p:" flag; do
-  case ${flag} in
-    u) username=${OPTARG} ;;
-    a) identifier=${OPTARG} ;;
-    p) port=${OPTARG} ;;
-    ?) print_usage; exit 1 ;;
-  esac
-done
-
-shift $(($OPTIND - 1))
-
-host=${1}
-
-if [[ -z $host ]]; then
-    print-error "No host specified!"
-    echo
-    print_usage
-    exit 1
-fi
-
-[ -z "${username}" ] && username="$USER"
-[ -z "${port}" ] && port="22"
-[ -z "${identifier}" ] && identifier="${host//./_}"
-
-key="~/.ssh/$identifier.id_rsa"
-
-print-header "Generating key $key..."
-ssh-key $identifier
-
-if ! grep -Fxiq "host $identifier $host" "$HOME/.ssh/config"; then
-	echo -e "Host $identifier $host\n\tHostName $host\n\tPort $port\n\tUser $username\n\tIdentityFile $key\n" >> ~/.ssh/config
-fi
-
-print-header "Uploading key to $host..."
-ssh $identifier 'umask 077; mkdir -p .ssh && cat >> ~/.ssh/authorized_keys' < ~/.ssh/$identifier.id_rsa.pub
-
-tput bold
-ssh -o PasswordAuthentication=no $identifier true && { tput setaf 2; echo "SSH key added."; } || { tput setaf 1; echo "Failure"; }
-tput sgr0
-
-_ssh_reload_autocomplete
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  await requireTools(["ssh", "ssh-keygen"]);
+  const parsed = parse(args);
+  const sshDirectory = join(homedir(), ".ssh");
+  const privateKey = join(sshDirectory, `${parsed.identifier}.id_ed25519`);
+  const publicKey = await ensurePublicKey(privateKey, `${userInfo().username}@${parsed.host}`);
+  await addSshHost(join(sshDirectory, "config"), {
+    ...parsed,
+    identityFile: `~/.ssh/${parsed.identifier}.id_ed25519`,
+  });
+  const publicKeyContents = await Bun.file(publicKey).text();
+  for (const operation of [
+    () => $`ssh ${parsed.identifier} mkdir -p .ssh`.nothrow(),
+    () => $`ssh ${parsed.identifier} chmod 700 .ssh`.nothrow(),
+    () => $`printf %s ${publicKeyContents} | ssh ${parsed.identifier} tee -a .ssh/authorized_keys`.nothrow().quiet(),
+    () => $`ssh ${parsed.identifier} chmod 600 .ssh/authorized_keys`.nothrow(),
+    () => $`ssh -o PasswordAuthentication=no ${parsed.identifier} true`.nothrow(),
+  ]) {
+    const result = await operation();
+    if (result.exitCode !== 0) childExit("ssh", result.exitCode);
+  }
+  process.stdout.write("SSH key added.\n");
+});

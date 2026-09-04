@@ -1,10 +1,20 @@
-#!/usr/bin/env zsh
-# Start a PHP server from a directory, optionally specifying the port
-# (Requires PHP 5.4.0+.)
+#!/usr/bin/env bun
 
-(( $+functions[phpserver] )) || function phpserver() {
-    local port="${1:-4000}"
-    local ip=$(ipconfig getifaddr en0)
-    sleep 2 && open "http://${ip}:${port}/" &
-    php -S "${ip}:${port}"
-}
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { localIp } from "../src/utilities/network";
+import { validatePort } from "../src/utilities/server";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: phpserver [port]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (args.length > 1) throw new UtilityUsageError(usage);
+  await requireTools(["php"]);
+  const port = validatePort(args[0], 4000);
+  const ip = localIp();
+  process.stdout.write(`Local: http://localhost:${port}/\nNetwork: http://${ip}:${port}/\n`);
+  const result = await $`php -S ${`${ip}:${port}`}`.nothrow();
+  if (result.exitCode !== 0) childExit("php", result.exitCode);
+});
