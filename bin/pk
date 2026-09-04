@@ -1,34 +1,16 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-#
-# Compress archives of various types
-#
-# Usage:
-#   pk <arch_type> <arch_filename>
-#
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { packArchive, type PackKind } from "../src/utilities/archive";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-if [ $1 ] ; then
-  if [ $2 ] ; then
-    target=$2
-  else
-    target=`realpath -e $(pwd)`
-  fi
-
-  name=`basename ${target##*/}`
-  XZ_OPT=-9
-
-  case $1 in
-    tbz)    tar cjvf $name.tar.bz2 $target          ;;
-    tgz)    tar czvf $name.tar.gz  $target          ;;
-    txz)    tar cJvf $name.tar.xz  $target          ;;
-    tar)    tar cpvf $name.tar  $target             ;;
-    bz2)    bzip $target                            ;;
-    gz)     gzip -c -9 -n $target > $name.gz        ;;
-    zip)    zip -r $name.zip $target                ;;
-    7z)     7z a $name.7z $terget                   ;;
-    *)      abort "'$1' cannot be packed via pk()"  ;;
-  esac
-else
-  print-error "Archive format not specified. Supported formats:"
-  echo "-- tbz, tgz, txz, tar, bz2, gz, zip, 7z"
-fi
+const usage = "Usage: pk <tbz|tgz|txz|tar|bz2|gz|zip|7z> [path]";
+const kinds = new Set<PackKind>(["tbz", "tgz", "txz", "tar", "bz2", "gz", "zip", "7z"]);
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, [1, 2], usage);
+  const kind = args[0] as PackKind;
+  if (!kinds.has(kind)) throw new UtilityUsageError(usage);
+  process.stdout.write(`${await packArchive(kind, args[1])}\n`);
+});

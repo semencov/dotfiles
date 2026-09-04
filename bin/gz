@@ -1,41 +1,24 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Compare original and gzipped file size
-#
-# Usage:
-#   gz <file>
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
+import { $ } from "bun";
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { formatBytes } from "../src/utilities/files";
+import { childExit, requireTools, runUtility } from "../src/utilities/runtime";
 
-# Common stuff
-RED="$(tput setaf 1)"
-CYAN="$(tput setaf 6)"
-UNDERLINE="$(tput sgr 0 1)"
-NOCOLOR="$(tput sgr0)"
-function error() { echo -e "$UNDERLINE$RED$1$NOCOLOR\n"; }
-
-function usage() {
-	echo "Usage:"
-	echo "  `basename $0` <file>"
-	echo
-}
-
-root="$(dirname $(dirname $0))"
-bin="$root/node_modules/.bin"
-
-# Empty arguments
-if [ -z "$1" ]; then
-	usage
-	exit 1
-fi
-
-origsize=$(wc -c < "$1")
-gzipsize=$(gzip -c "$1" | wc -c)
-brotlisize=$(brotli -cf "$1" | wc -c)
-gzipratio=$(echo "$gzipsize * 100/ $origsize" | bc -l)
-brotliratio=$(echo "$brotlisize * 100/ $origsize" | bc -l)
-printf "Original: $CYAN%s$NOCOLOR\n" "$($bin/pretty-bytes $origsize)"
-printf "Gzipped:  $CYAN%s$NOCOLOR (%2.2f%%)\n" "$($bin/pretty-bytes $gzipsize)" "$gzipratio"
-printf "Brotli:  $CYAN%s$NOCOLOR (%2.2f%%)\n" "$($bin/pretty-bytes $brotlisize)" "$brotliratio"
+const usage = "Usage: gz <file>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 1, usage);
+  await requireTools(["brotli", "gzip"]);
+  const path = args[0]!;
+  const original = Bun.file(path).size;
+  const gzip = await $`gzip -c ${path}`.nothrow().quiet();
+  if (gzip.exitCode !== 0) childExit("gzip", gzip.exitCode);
+  const brotli = await $`brotli -c ${path}`.nothrow().quiet();
+  if (brotli.exitCode !== 0) childExit("brotli", brotli.exitCode);
+  const ratio = (size: number) => original === 0 ? "0.00" : (size * 100 / original).toFixed(2);
+  process.stdout.write(`Original: ${formatBytes(original)}\n`);
+  process.stdout.write(`Gzipped: ${formatBytes(gzip.stdout.byteLength)} (${ratio(gzip.stdout.byteLength)}%)\n`);
+  process.stdout.write(`Brotli: ${formatBytes(brotli.stdout.byteLength)} (${ratio(brotli.stdout.byteLength)}%)\n`);
+});

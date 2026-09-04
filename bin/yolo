@@ -1,19 +1,19 @@
 #!/usr/bin/env bun
 
-import { $ } from 'bun';
+import { $ } from "bun";
 
 const styles = {
-  dim: (value) => `\x1b[2m${value}\x1b[0m`,
-  error: (value) => `\x1b[31;4m${value}\x1b[0m`,
+  dim: (value: string) => `\x1b[2m${value}\x1b[0m`,
+  error: (value: string) => `\x1b[31;4m${value}\x1b[0m`,
 };
 
-async function spinner(message, task) {
+async function spinner<T>(message: string, task: () => Promise<T>): Promise<T> {
   if (!process.stderr.isTTY) {
     console.error(styles.dim(message));
     return task();
   }
 
-  const frames = ['-', '\\', '|', '/'];
+  const frames = ["-", "\\", "|", "/"];
   let index = 0;
   const interval = setInterval(() => {
     process.stderr.write(`\r${styles.dim(`${frames[index++ % frames.length]} ${message}`)}`);
@@ -27,12 +27,12 @@ async function spinner(message, task) {
   }
 }
 
-function visibleLength(value) {
-  return value.replace(/\x1b\[[0-9;]*m/g, '').length;
+function visibleLength(value: string): number {
+  return value.replace(/\x1b\[[0-9;]*m/g, "").length;
 }
 
-async function editableQuestion(query, value) {
-  return new Promise((resolve) => {
+async function editableQuestion(query: string, value: string): Promise<string> {
+  return new Promise<string>((resolve) => {
     let answer = value;
     let cursor = value.length;
     const promptLength = visibleLength(query);
@@ -45,11 +45,11 @@ async function editableQuestion(query, value) {
     function cleanup() {
       process.stdin.setRawMode(false);
       process.stdin.pause();
-      process.stdin.off('data', onData);
+      process.stdin.off("data", onData);
     }
 
-    function onData(data) {
-      const input = data.toString('utf8');
+    function onData(data: Buffer) {
+      const input = data.toString("utf8");
 
       if (input === '\u0003') {
         cleanup();
@@ -114,13 +114,13 @@ async function editableQuestion(query, value) {
 
     process.stdin.setRawMode(true);
     process.stdin.resume();
-    process.stdin.on('data', onData);
+    process.stdin.on("data", onData);
     redraw();
   });
 }
 
 const diff = await $`git diff --cached`.text();
-const branch = await $`git branch --show-current`.quiet().text().catch(() => '');
+const branch = await $`git branch --show-current`.quiet().text().catch(() => "");
 const jiraKey = branch.match(/[A-Z]+-[0-9]+/)?.[0];
 
 if (!diff.trim()) {
@@ -130,7 +130,7 @@ if (!diff.trim()) {
 
 const stagedFiles = await $`git diff --cached --name-status`.text();
 
-console.log(styles.dim('Staged files:'));
+console.log(styles.dim("Staged files:"));
 console.log(stagedFiles.trim());
 console.log();
 
@@ -143,15 +143,17 @@ ${formatInstruction}
 Rules: imperative mood, capitalize first word, no period, under 256 chars.
 Output ONLY the message -- plain text, no quotes, no code fences, no explanation.`;
 
-const message = await spinner('Generating commit message...', () =>
-  $`fx ask "${prompt}" --no-save --json`.json(),
+const message: unknown = await spinner("Generating commit message...", () =>
+  $`fx ask ${prompt} --no-save --json`.json(),
 );
 
-const generatedMessage = message.output || `${jiraKey}: `;
-const commitMessage = (await editableQuestion(styles.dim('Commit message: '), generatedMessage)).trim();
+const generatedMessage = typeof message === "object" && message !== null && "output" in message && typeof message.output === "string"
+  ? message.output
+  : `${jiraKey ?? ""}: `;
+const commitMessage = (await editableQuestion(styles.dim("Commit message: "), generatedMessage)).trim();
 
 if (!commitMessage) {
-  console.error(styles.error('error: empty commit message'));
+  console.error(styles.error("error: empty commit message"));
   process.exit(1);
 }
 

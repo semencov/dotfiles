@@ -1,9 +1,16 @@
-#!/usr/bin/env zsh
-# Bulk file rename
+#!/usr/bin/env bun
 
-(($+functions[rename])) || function rename() {
-    for i in $1*; do
-        echo "$i → ${i/$1/$2}"
-        mv "$i" "${i/$1/$2}"
-    done
-}
+import { hasHelp, parseOperands, requireOperandCount } from "../src/utilities/arguments";
+import { applyRenamePlan, displayPath, renamePlan } from "../src/utilities/files";
+import { runUtility } from "../src/utilities/runtime";
+
+const usage = "Usage: rename [--force] <prefix> <replacement>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  requireOperandCount(operands, 2, usage);
+  const operations = await renamePlan(process.cwd(), operands[0]!, operands[1]!);
+  for (const operation of operations) process.stdout.write(`${displayPath(operation.from)} → ${displayPath(operation.to)}\n`);
+  if (options.includes("--force")) await applyRenamePlan(operations);
+});

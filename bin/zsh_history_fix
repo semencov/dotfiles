@@ -1,10 +1,26 @@
-#!/usr/bin/env zsh
-# George Ornbo (shapeshed) http://shapeshed.com
-# License - http://unlicense.org
-#
-# Fixes a corrupt .zsh_history file
+#!/usr/bin/env bun
 
-mv ~/.zsh_history ~/.zsh_history_bad
-strings ~/.zsh_history_bad > ~/.zsh_history
-fc -R ~/.zsh_history
-rm ~/.zsh_history_bad
+import { $ } from "bun";
+import { copyFile, unlink } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
+import { hasHelp, parseOperands } from "../src/utilities/arguments";
+import { atomicReplace } from "../src/utilities/files";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: zsh_history_fix --force";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  if (!options.includes("--force") || operands.length > 0) throw new UtilityUsageError(usage);
+  await requireTools(["strings"]);
+  const history = join(homedir(), ".zsh_history");
+  const backup = `${history}.bad`;
+  await copyFile(history, backup);
+  const result = await $`strings ${backup}`.nothrow().quiet();
+  if (result.exitCode !== 0) childExit("strings", result.exitCode);
+  await atomicReplace(history, result.stdout, 0o600);
+  await unlink(backup);
+  process.stdout.write("History repaired; restart Zsh to reload it.\n");
+});

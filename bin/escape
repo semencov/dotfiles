@@ -1,11 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bun
 
-#
-# Escape UTF-8 characters into their 3-byte format
-#
-# Usage:
-#   escape <text>
-#
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { escapeUtf8 } from "../src/utilities/encoding";
+import { runUtility } from "../src/utilities/runtime";
 
-printf "\\\x%s" $(printf "$@" | xxd -p -c1 -u)
-echo
+const usage = "Usage: escape <text>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, [1, Number.MAX_SAFE_INTEGER], usage);
+  process.stdout.write(`${escapeUtf8(args.join(" "))}\n`);
+});

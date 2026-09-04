@@ -6,7 +6,7 @@
   "scripts": {
     "dotfiles": "bun bin/dotfiles",
     "test": "bun test",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json && bun src/utilities/typecheck-bin.ts"
   },
   "engines": {
     "bun": ">=1.2"

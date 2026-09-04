@@ -1,0 +1,25 @@
+#!/usr/bin/env bun
+
+import { hasHelp } from "../src/utilities/arguments";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: passphrase [--words <count>]";
+const fallback = ["amber", "birch", "cobalt", "delta", "ember", "forest", "granite", "harbor", "indigo", "juniper"];
+
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  let count = 3;
+  if (args.length > 0) {
+    if (args.length !== 2 || args[0] !== "--words" || !/^\d+$/.test(args[1]!)) throw new UtilityUsageError(usage);
+    count = Number(args[1]);
+  }
+  if (count < 2 || count > 20) throw new UtilityUsageError("Word count must be between 2 and 20");
+  const dictionaryPath = process.env.PASSPHRASE_DICTIONARY ?? "/usr/share/dict/words";
+  const words = await Bun.file(dictionaryPath).exists()
+    ? (await Bun.file(dictionaryPath).text()).split(/\r?\n/).map((word) => word.toLowerCase()).filter((word) => /^[a-z]+$/.test(word))
+    : fallback;
+  if (words.length === 0) throw new Error("Passphrase dictionary is empty");
+  const selected = Array.from({ length: count }, () => words[crypto.getRandomValues(new Uint32Array(1))[0]! % words.length]!);
+  process.stdout.write(`${selected.join("-")}\n`);
+});

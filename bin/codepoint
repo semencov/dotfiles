@@ -1,11 +1,13 @@
-#!/bin/bash
+#!/usr/bin/env bun
 
-#
-# Get a character’s Unicode code point: £ → \x00A3
-#
-# Usage:
-#   codepont <char>
-#
+import { hasHelp, requireOperandCount } from "../src/utilities/arguments";
+import { unicodeCodePoint } from "../src/utilities/encoding";
+import { runUtility } from "../src/utilities/runtime";
 
-perl -e "use utf8; print sprintf('\x%04X', ord(\"$@\"))"
-echo
+const usage = "Usage: codepoint <character>";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  requireOperandCount(args, 1, usage);
+  process.stdout.write(`${unicodeCodePoint(args[0]!)}\n`);
+});

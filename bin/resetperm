@@ -1,6 +1,16 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bun
 
-(( $+functions[resetperm] )) || function resetperm() {
-    find . -not -name "." -type d -print0 | xargs -0 chmod 0755
-    find . -type f -print0 | xargs -0 chmod 0644
-}
+import { resolve } from "node:path";
+import { hasHelp, parseOperands } from "../src/utilities/arguments";
+import { assertSafePermissionRoot, resetPermissions } from "../src/utilities/files";
+import { runUtility, UtilityUsageError } from "../src/utilities/runtime";
+
+const usage = "Usage: resetperm --force [path]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const { options, operands } = parseOperands(args, ["--force"]);
+  if (!options.includes("--force") || operands.length > 1) throw new UtilityUsageError(usage);
+  const root = assertSafePermissionRoot(operands[0] ?? process.cwd(), resolve(import.meta.dir, ".."));
+  await resetPermissions(root);
+});

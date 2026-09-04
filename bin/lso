@@ -1,7 +1,23 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-#
-# List files with octal-style permissions
-#
+import { lstat, readdir } from "node:fs/promises";
+import { join } from "node:path";
+import { hasHelp } from "../src/utilities/arguments";
+import { runUtility } from "../src/utilities/runtime";
 
-ls -hal "$@" | awk '{k=0; for(i=0; i<=8; i++) k+=((substr($1, i+2, 1)~/[rwx]/)*2^(8-i)); if(k) printf("%0o ", k); print}'
+const usage = "Usage: lso [path ...]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  const requested = args.length === 0 ? [process.cwd()] : args;
+  for (const requestedPath of requested) {
+    const metadata = await lstat(requestedPath);
+    const paths = metadata.isDirectory()
+      ? (await readdir(requestedPath)).map((entry) => join(requestedPath, entry))
+      : [requestedPath];
+    for (const path of paths) {
+      const item = await lstat(path);
+      process.stdout.write(`${(item.mode & 0o7777).toString(8).padStart(4, "0")} ${item.size.toString().padStart(10)} ${path}\n`);
+    }
+  }
+});

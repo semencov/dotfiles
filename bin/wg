@@ -1,67 +1,33 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bun
 
-# Replace in files
-#
-# Usage: ../docs/wg.md
-#
-# Based on:
-# https://github.com/lydell/dotfiles/blob/master/bin/pre
-#
-# Author: Artem Sapegin, sapegin.me
-# License: MIT
-# https://github.com/sapegin/dotfiles
-#
+import { $ } from "bun";
+import { hasHelp } from "../src/utilities/arguments";
+import { childExit, requireTools, runUtility, UtilityUsageError } from "../src/utilities/runtime";
 
-# Common stuff
-RED="$(tput setaf 1)"
-UNDERLINE="$(tput sgr 0 1)"
-NOCOLOR="$(tput sgr0)"
-function error() { echo -e "$UNDERLINE$RED$1$NOCOLOR\n"; }
-
-command -v rg >/dev/null 2>&1 || { error "ripgrep not installed: brew install ripgrep"; exit 1; }
-
-seenReplace=''
-
-for arg in "$@"; do
-	if test "$arg" == '--replace' -o "$arg" == '-r'; then
-		seenReplace='true'
-		break
-	fi
-done
-
-if test -z "$seenReplace"; then
-	error 'You should run wg with --replace or -r argument'
-	exit 1
-fi
-
-currentFile=''
-didChange=''
-
-(
-	rg \
-		--context 999999 \
-		--with-filename \
-		--heading \
-		--null \
-		--color never \
-		--no-line-number \
-		--max-columns 0 \
-		"$@"
-	echo -e '\n\0'
-) |
-{
-	while IFS= read -r -d '' part; do
-		if test -n "$currentFile"; then
-			echo "$currentFile"
-			# Write file without last two lines
-			perl -ne 'push(@buf,$_);END{print @buf[0 ... $#buf-2]}' <<< "$part" > "$currentFile"
-			didChange='true'
-		fi
-		currentFile="$(tail -n 1 <<< "$part")"
-	done
-
-	if test -z "$didChange"; then
-		echo "No files were changed"
-		exit 1
-	fi
-}
+const usage = "Usage: wg <pattern> --replace|-r <replacement> [path ...]";
+await runUtility(async () => {
+  const args = Bun.argv.slice(2);
+  if (hasHelp(args)) return void process.stdout.write(`${usage}\n`);
+  if (!args.includes("--replace") && !args.includes("-r")) throw new UtilityUsageError(usage);
+  await requireTools(["rg"]);
+  const result = await $`rg --context 999999 --with-filename --heading --null --color never --no-line-number --max-columns 0 ${args}`.nothrow().quiet();
+  if (result.exitCode === 1) {
+    process.stdout.write("No files were changed\n");
+    return 1;
+  }
+  if (result.exitCode !== 0) childExit("rg", result.exitCode);
+  const parts = `${result.stdout.toString()}\n\0`.split("\0");
+  let currentFile: string | undefined;
+  let changed = 0;
+  for (const part of parts.slice(0, -1)) {
+    const lines = part.split("\n");
+    if (currentFile !== undefined) {
+      const contents = `${lines.slice(0, -2).join("\n")}\n`;
+      await Bun.write(currentFile, contents);
+      process.stdout.write(`${currentFile}\n`);
+      changed += 1;
+    }
+    currentFile = lines.at(-1) || undefined;
+  }
+  return changed > 0 ? 0 : 1;
+});
