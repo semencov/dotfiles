@@ -43,9 +43,9 @@
     d = diff
     s = status -sb
     cp = cherry-pick
-    skip = rebase --skip
-    abort = rebase --abort
-    cont = rebase --continue
+    skip = "!git rebase --skip"
+    abort = "!git rebase --abort"
+    cont = "!git rebase --continue"
     current = rev-parse --abbrev-ref HEAD
     last-msg = log -1 --pretty=%B
     l = log --pretty=format:'%Cred%h%Creset  %C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)%an%Creset' --abbrev-commit
