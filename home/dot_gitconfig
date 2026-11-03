@@ -56,7 +56,7 @@
     ph  = "!push"
     yolo = "!git commit -am \"$(curl -sL whatthecommit.com/index.txt)\""
     patch = "!git --no-pager diff --no-color"
-    master = "!git checkout master && pull"
+	master = "!git checkout master && if [ \"$(git config --get submodule.recurse)\" = false ]; then git fetch --prune --no-recurse-submodules && git pull --rebase --autostash --no-recurse-submodules; else pull; fi"
     orphan = "!git checkout --orphan $1 && git rm --cached -rdf . && git clean -fdx"
     new = "!br feature/$@"
     fix = "!br fix/$@"
